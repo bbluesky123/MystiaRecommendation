@@ -1,6 +1,7 @@
 bin/
 obj/
 .vs/
+Directory.Build.user.props
 *.user
 *.suo
 .DS_Store
