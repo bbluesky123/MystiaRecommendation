@@ -8,31 +8,26 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <GameDir>D:\steam\steamapps\common\Touhou Mystia Izakaya</GameDir>
-    <BepInExDir>$(GameDir)\BepInEx</BepInExDir>
-  </PropertyGroup>
-
   <!-- BepInEx 6 IL2CPP -->
   <ItemGroup>
     <Reference Include="BepInEx.Core">
-      <HintPath>$(BepInExDir)\core\BepInEx.Core.dll</HintPath>
+      <HintPath>$(BepInExDir)/core/BepInEx.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="BepInEx.Unity.IL2CPP">
-      <HintPath>$(BepInExDir)\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <HintPath>$(BepInExDir)/core/BepInEx.Unity.IL2CPP.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>$(BepInExDir)\core\Il2CppInterop.Runtime.dll</HintPath>
+      <HintPath>$(BepInExDir)/core/Il2CppInterop.Runtime.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Il2CppInterop.HarmonySupport">
-      <HintPath>$(BepInExDir)\core\Il2CppInterop.HarmonySupport.dll</HintPath>
+      <HintPath>$(BepInExDir)/core/Il2CppInterop.HarmonySupport.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>$(BepInExDir)\core\0Harmony.dll</HintPath>
+      <HintPath>$(BepInExDir)/core/0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -40,7 +35,7 @@
   <!-- IL2CPP mscorlib (必须!) -->
   <ItemGroup>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>$(BepInExDir)\interop\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/Il2Cppmscorlib.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -48,27 +43,27 @@
   <!-- UnityEngine interop -->
   <ItemGroup>
     <Reference Include="UnityEngine">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>$(BepInExDir)\interop\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/UnityEngine.UIElementsModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -76,7 +71,7 @@
   <!-- Assembly-CSharp -->
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>$(BepInExDir)\interop\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -89,19 +84,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data\*.json" />
-    <Content Include="Data\*.json">
+    <None Remove="Data/*.json" />
+    <Content Include="Data/*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
+  <Target Name="ValidateBepInExDirectory" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(BepInExDir)' == ''"
+           Text="BepInExDir is not configured. Create Directory.Build.user.props, set MYSTIA_BEPINEX_DIR, or pass -p:BepInExDir=/path/to/BepInEx." />
+    <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/core/BepInEx.Core.dll')"
+           Text="BepInEx core assemblies were not found under '$(BepInExDir)/core'. Check BepInExDir." />
+    <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/Assembly-CSharp.dll')"
+           Text="Game interop assemblies were not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
+  </Target>
+
   <Target Name="CopyToPlugins" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins\MystiaRecommendation" />
-    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(BepInExDir)\plugins\MystiaRecommendation\Data" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)/plugins/MystiaRecommendation" />
+    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(BepInExDir)/plugins/MystiaRecommendation/Data" SkipUnchangedFiles="true" />
   </Target>
 
   <ItemGroup>
-    <DataFiles Include="Data\*.json" />
+    <DataFiles Include="Data/*.json" />
   </ItemGroup>
 
 </Project>
