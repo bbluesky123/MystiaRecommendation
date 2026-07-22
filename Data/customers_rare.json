@@ -1,0 +1,3163 @@
+[
+  {
+    "id": 0,
+    "name": "莉格露",
+    "dlc": 0,
+    "places": [
+      "妖怪兽道",
+      "魔法森林",
+      "太阳花田"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "肉",
+      "甜",
+      "生",
+      "猎奇"
+    ],
+    "negativeTags": [
+      "素",
+      "清淡",
+      "凉爽"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "可加冰"
+    ],
+    "positiveTagMapping": {
+      "生": "生肉总比熟肉好吃"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [
+        {
+          "name": "灯符「荧光现象」",
+          "description": "顾客刷新时间减少30%，持续60秒。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "蠢符「夜虫龙卷」",
+          "description": "将店内的顾客统统驱赶。"
+        }
+      ]
+    }
+  },
+  {
+    "id": 1,
+    "name": "露米娅",
+    "dlc": 0,
+    "places": [
+      "妖怪兽道",
+      "魔法森林"
+    ],
+    "price": [
+      150,
+      350
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "肉",
+      "饱腹",
+      "生",
+      "招牌",
+      "猎奇",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "下酒",
+      "昂贵",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "苦",
+      "气泡"
+    ],
+    "positiveTagMapping": {
+      "猎奇": "奇怪的料理",
+      "招牌": "拿手好菜"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [
+        {
+          "name": "月符「月光射线」",
+          "description": "随机获得图鉴中记录的三种肉类食材（如果图鉴中记录的肉类食材只有两种，则获得两种）。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "暗符「境界线」",
+          "description": "在厨房放出黑雾，让你无法辨识哪些是厨具，哪些是食柜，黑雾持续20秒消失。"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "橙",
+    "dlc": 0,
+    "places": [
+      "妖怪兽道"
+    ],
+    "price": [
+      400,
+      600
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "肉",
+      "水产",
+      "重油",
+      "甜",
+      "烧烤",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "素",
+      "灼热",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "水果",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "招牌": "拿手好菜",
+      "烧烤": "把肉串起来"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [
+        {
+          "name": "仙符「凤凰卵」",
+          "description": "随机获得三种鱼类食材，偶尔会出现高级货。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "方符「奇门遁甲」",
+          "description": "减少顾客的出现率。"
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "稗田阿求",
+    "dlc": 0,
+    "places": [
+      "人间之里",
+      "命莲寺"
+    ],
+    "price": [
+      500,
+      800
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "高级",
+      "清淡",
+      "和风",
+      "甜",
+      "文化底蕴",
+      "汤羹",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "咸",
+      "灼热",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "可加热",
+      "清酒"
+    ],
+    "positiveTagMapping": {
+      "高级": "作为稗田家主"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [
+        {
+          "name": "撰书「这也全部是妖精干的吗」",
+          "description": "获得一张签名色纸。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "口授「黑心店家的黑心历史」",
+          "description": "店内气氛掉落到冰点，顾客也会降低心情。"
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "name": "上白泽慧音",
+    "dlc": 0,
+    "places": [
+      "人间之里",
+      "魔法森林",
+      "命莲寺"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 1.8,
+    "positiveTags": [
+      "素",
+      "家常",
+      "清淡",
+      "和风",
+      "中华",
+      "文化底蕴",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "咸",
+      "大份",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "烧酒",
+      "清酒",
+      "利口酒"
+    ],
+    "positiveTagMapping": {
+      "文化底蕴": "历史和文化相辅相成"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [
+        {
+          "name": "三种神器「剑」",
+          "description": "料理不会消耗任何材料，持续15秒。"
+        },
+        {
+          "name": "三种神器「玉」",
+          "description": "随机解锁一名未完全解锁全部喜好的稀有顾客的一条信息。"
+        },
+        {
+          "name": "三种神器「乡」",
+          "description": "吸引大量居民前来就餐。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "国符「秘笈头槌」",
+          "description": "眩晕20秒（上下左右乱打可以快速恢复）。"
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "name": "茨木华扇",
+    "dlc": 0,
+    "places": [
+      "人间之里",
+      "旧地狱",
+      "神灵庙"
+    ],
+    "price": [
+      400,
+      600
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "家常",
+      "下酒",
+      "和风",
+      "文化底蕴"
+    ],
+    "negativeTags": [
+      "生",
+      "辣",
+      "实惠"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "直饮",
+      "古典"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 6,
+    "name": "森近霖之助",
+    "dlc": 0,
+    "places": [
+      "妖怪兽道",
+      "人间之里"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "家常",
+      "饱腹",
+      "鲜",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "下酒",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "烧酒",
+      "啤酒"
+    ],
+    "positiveTagMapping": {
+      "饱腹": "不能吃不饱"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 7,
+    "name": "博丽灵梦",
+    "dlc": 0,
+    "places": [
+      "博丽神社",
+      "妖怪兽道",
+      "人间之里"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.1,
+    "positiveTags": [
+      "高级",
+      "饱腹",
+      "甜",
+      "不可思议",
+      "实惠",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "下酒",
+      "昂贵",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "低酒精",
+      "可加热"
+    ],
+    "positiveTagMapping": {
+      "不可思议": "配得上我的称号",
+      "实惠": "贵的买不起"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 8,
+    "name": "伊吹萃香",
+    "dlc": 0,
+    "places": [
+      "博丽神社",
+      "妖怪兽道",
+      "旧地狱"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.8,
+    "positiveTags": [
+      "肉",
+      "下酒",
+      "和风",
+      "力量涌现",
+      "小巧",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "直饮"
+    ],
+    "positiveTagMapping": {
+      "肉": "大口吃肉",
+      "下酒": "佐酒的小菜",
+      "小巧": "分散很多个小的自己"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 9,
+    "name": "比那名居天子",
+    "dlc": 0,
+    "places": [
+      "天界",
+      "神灵庙"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.05,
+    "positiveTags": [
+      "素",
+      "传说",
+      "清淡",
+      "甜",
+      "适合拍照",
+      "果味",
+      "昂贵",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "肉",
+      "家常",
+      "重油",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "鸡尾酒"
+    ],
+    "positiveTagMapping": {
+      "素": "荤腥的东西",
+      "清淡": "口味重的东西",
+      "适合拍照": "卖相不好的低贱品",
+      "昂贵": "我不缺钱"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 10,
+    "name": "雾雨魔理沙",
+    "dlc": 1,
+    "places": [
+      "魔法森林",
+      "人间之里"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.1,
+    "positiveTags": [
+      "传说",
+      "重油",
+      "和风",
+      "灼热",
+      "菌类",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "可加冰"
+    ],
+    "positiveTagMapping": {
+      "重油": "油炸食品",
+      "传说": "古老的东西"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 15,
+    "name": "红美铃",
+    "dlc": 0,
+    "places": [
+      "红魔馆"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "肉",
+      "饱腹",
+      "中华",
+      "力量涌现",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "西式",
+      "猎奇",
+      "果味",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "可加热",
+      "古典",
+      "提神"
+    ],
+    "positiveTagMapping": {
+      "中华": "祖国的味道"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 24,
+    "name": "藤原妹红",
+    "dlc": 0,
+    "places": [
+      "迷途竹林",
+      "人间之里"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "灼热",
+      "果味",
+      "烧烤",
+      "燃起来了",
+      "辣"
+    ],
+    "negativeTags": [
+      "高级",
+      "不可思议",
+      "昂贵"
+    ],
+    "beverageTags": [
+      "烧酒",
+      "辛",
+      "苦"
+    ],
+    "positiveTagMapping": {
+      "燃起来了": "复仇之火永扑不尽"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 25,
+    "name": "蓬莱山辉夜",
+    "dlc": 0,
+    "places": [
+      "迷途竹林"
+    ],
+    "price": [
+      500,
+      800
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "传说",
+      "和风",
+      "文化底蕴",
+      "不可思议",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "猎奇",
+      "招牌",
+      "大份",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "清酒",
+      "古典",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "文化底蕴": "不可磨灭的过去"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 27,
+    "name": "帕秋莉",
+    "dlc": 0,
+    "places": [
+      "红魔馆"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "高级",
+      "西式",
+      "甜",
+      "适合拍照",
+      "梦幻"
+    ],
+    "negativeTags": [
+      "咸",
+      "生",
+      "灼热",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "鸡尾酒",
+      "利口酒",
+      "气泡"
+    ],
+    "positiveTagMapping": {
+      "西式": "文化的差异",
+      "适合拍照": "品相好看"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 28,
+    "name": "琪露诺",
+    "dlc": 0,
+    "places": [
+      "魔法森林",
+      "妖怪之山"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "甜",
+      "适合拍照",
+      "凉爽",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "下酒",
+      "文化底蕴",
+      "昂贵",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "可加冰",
+      "水果",
+      "甘"
+    ],
+    "positiveTagMapping": {
+      "适合拍照": "丑拒",
+      "凉爽": "要吃冰的"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 29,
+    "name": "因幡帝",
+    "dlc": 0,
+    "places": [
+      "迷途竹林",
+      "人间之里"
+    ],
+    "price": [
+      200,
+      500
+    ],
+    "enduranceLimit": 1.25,
+    "positiveTags": [
+      "传说",
+      "甜",
+      "凉爽",
+      "小巧",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "山珍",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "水果",
+      "甘"
+    ],
+    "positiveTagMapping": {
+      "凉爽": "降温工作",
+      "小巧": "三分饱"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 30,
+    "name": "萌澄果",
+    "dlc": 0,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      100,
+      300
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "肉",
+      "水产",
+      "甜",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "灼热",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "可加冰",
+      "水果",
+      "甘",
+      "辛"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 31,
+    "name": "蹦蹦跳跳的三妖精",
+    "dlc": 0,
+    "places": [
+      "妖怪兽道",
+      "博丽神社"
+    ],
+    "price": [
+      100,
+      300
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "家常",
+      "甜",
+      "凉爽",
+      "菌类",
+      "小巧",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "生",
+      "灼热",
+      "猎奇",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "水果",
+      "甘",
+      "苦"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 36,
+    "name": "冴月麟",
+    "dlc": 0,
+    "places": [
+      "人间之里"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "水产",
+      "家常",
+      "中华",
+      "辣",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "下酒",
+      "生"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "甘",
+      "气泡"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 37,
+    "name": "立空汐",
+    "dlc": 0,
+    "places": [
+      "天界"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "肉",
+      "下酒",
+      "山珍",
+      "和风",
+      "力量涌现",
+      "昂贵",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "素",
+      "清淡",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "可加热"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 38,
+    "name": "时焉侑",
+    "dlc": 0,
+    "places": [
+      "命莲寺"
+    ],
+    "price": [
+      400,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "传说",
+      "下酒",
+      "西式",
+      "中华",
+      "文化底蕴",
+      "特产"
+    ],
+    "negativeTags": [
+      "水产",
+      "重油",
+      "饱腹"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加冰",
+      "鸡尾酒",
+      "西洋酒"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 39,
+    "name": "魂魄妖梦",
+    "dlc": 0,
+    "places": [
+      "冥界",
+      "妖怪兽道",
+      "人间之里"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "家常",
+      "清淡",
+      "鲜",
+      "力量涌现"
+    ],
+    "negativeTags": [
+      "重油",
+      "咸",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "可加热",
+      "水果"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 40,
+    "name": "西行寺幽幽子",
+    "dlc": 0,
+    "places": [
+      "冥界"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "肉",
+      "水产",
+      "高级",
+      "传说",
+      "饱腹",
+      "和风",
+      "中华",
+      "大份"
+    ],
+    "negativeTags": [
+      "素",
+      "清淡",
+      "小巧"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "鸡尾酒"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 41,
+    "name": "秦心",
+    "dlc": 0,
+    "places": [
+      "神灵庙"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "传说",
+      "和风",
+      "适合拍照",
+      "凉爽",
+      "梦幻",
+      "招牌",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "咸",
+      "灼热",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "烧酒",
+      "甘",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "和风": "古典歌舞剧",
+      "招牌": "点一样的",
+      "适合拍照": "我的舞姿",
+      "凉爽": "凉风"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1001,
+    "name": "犬走椛",
+    "dlc": 1,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "肉",
+      "重油",
+      "下酒",
+      "山珍",
+      "大份"
+    ],
+    "negativeTags": [
+      "素",
+      "清淡",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "高酒精",
+      "直饮"
+    ],
+    "positiveTagMapping": {
+      "重油": "不健康的饮食",
+      "大份": "不多吃点"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1002,
+    "name": "爱丽丝",
+    "dlc": 1,
+    "places": [
+      "魔法森林"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "家常",
+      "高级",
+      "西式",
+      "甜",
+      "文化底蕴"
+    ],
+    "negativeTags": [
+      "肉",
+      "重油",
+      "饱腹",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "西洋酒",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "高级": "低级趣味"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1003,
+    "name": "饕餮尤魔",
+    "dlc": 1,
+    "places": [
+      "旧地狱"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "肉",
+      "高级",
+      "传说",
+      "饱腹",
+      "鲜",
+      "生",
+      "力量涌现",
+      "不可思议",
+      "大份"
+    ],
+    "negativeTags": [],
+    "beverageTags": [
+      "高酒精",
+      "烧酒",
+      "直饮",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "饱腹": "无限的胃袋",
+      "鲜": "馊掉的东西",
+      "生": "血淋淋的食物",
+      "大份": "指头缝都塞不满"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1004,
+    "name": "矢田寺成美",
+    "dlc": 1,
+    "places": [
+      "命莲寺"
+    ],
+    "price": [
+      200,
+      500
+    ],
+    "enduranceLimit": 1.1,
+    "positiveTags": [
+      "清淡",
+      "山珍",
+      "和风",
+      "文化底蕴",
+      "特产"
+    ],
+    "negativeTags": [
+      "重油",
+      "饱腹"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "中酒精",
+      "可加冰",
+      "直饮",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "特产": "不同地方的美食"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1005,
+    "name": "东风谷早苗",
+    "dlc": 1,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "家常",
+      "和风",
+      "甜",
+      "适合拍照",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "生",
+      "灼热",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "低酒精",
+      "清酒",
+      "直饮",
+      "水果",
+      "甘",
+      "苦",
+      "气泡",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "和风": "大和风情",
+      "适合拍照": "手机"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2001,
+    "name": "水桥帕露西",
+    "dlc": 2,
+    "places": [
+      "地灵殿"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "肉",
+      "咸",
+      "鲜",
+      "果味",
+      "辣",
+      "酸",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "甜",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "可加热",
+      "直饮",
+      "辛",
+      "苦"
+    ],
+    "positiveTagMapping": {},
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2002,
+    "name": "星熊勇仪",
+    "dlc": 2,
+    "places": [
+      "旧地狱"
+    ],
+    "price": [
+      500,
+      800
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "传说",
+      "下酒",
+      "和风",
+      "力量涌现",
+      "燃起来了",
+      "招牌",
+      "大份",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "素",
+      "猎奇",
+      "小巧"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "清酒",
+      "啤酒",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "燃起来了": "血液沸腾起来",
+      "大份": "饱餐一顿"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2003,
+    "name": "古明地觉",
+    "dlc": 2,
+    "places": [
+      "地灵殿"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "家常",
+      "甜",
+      "力量涌现",
+      "小巧",
+      "梦幻",
+      "特产"
+    ],
+    "negativeTags": [
+      "肉",
+      "山珍",
+      "灼热",
+      "猎奇",
+      "大份"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "苦",
+      "气泡",
+      "提神"
+    ],
+    "positiveTagMapping": {
+      "小巧": "吃太饱不利于思考",
+      "特产": "缩短他乡与故乡的距离"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2004,
+    "name": "火焰猫燐",
+    "dlc": 2,
+    "places": [
+      "地灵殿"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "水产",
+      "海味",
+      "鲜",
+      "甜",
+      "猎奇",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "生",
+      "灼热"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "清酒",
+      "水果"
+    ],
+    "positiveTagMapping": {
+      "海味": "地底海底相通"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2005,
+    "name": "灵乌路空",
+    "dlc": 2,
+    "places": [
+      "地灵殿"
+    ],
+    "price": [
+      400,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "肉",
+      "重油",
+      "咸",
+      "灼热",
+      "力量涌现",
+      "辣"
+    ],
+    "negativeTags": [
+      "清淡",
+      "菌类"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加热",
+      "鸡尾酒"
+    ],
+    "positiveTagMapping": {
+      "重油": "火焰的燃烧",
+      "灼热": "比火焰炽热",
+      "辣": "火辣辣的感觉"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 2006,
+    "name": "古明地恋",
+    "dlc": 2,
+    "places": [
+      "地灵殿"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "咸",
+      "甜",
+      "生",
+      "猎奇",
+      "不可思议",
+      "梦幻",
+      "流行厌恶"
+    ],
+    "negativeTags": [],
+    "beverageTags": [
+      "高酒精",
+      "烧酒",
+      "苦",
+      "气泡"
+    ],
+    "positiveTagMapping": {
+      "不可思议": "永远猜不到我想要的是什么"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3001,
+    "name": "村纱水蜜",
+    "dlc": 3,
+    "places": [
+      "命莲寺"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "肉",
+      "高级",
+      "饱腹",
+      "咸",
+      "鲜",
+      "力量涌现",
+      "特产"
+    ],
+    "negativeTags": [
+      "素",
+      "猎奇",
+      "小巧",
+      "酸"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "西洋酒",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "鲜": "食物的保质期",
+      "特产": "食物的相逢"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3002,
+    "name": "封兽鵺",
+    "dlc": 3,
+    "places": [
+      "命莲寺"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "肉",
+      "鲜",
+      "生",
+      "适合拍照",
+      "猎奇",
+      "不可思议",
+      "特产",
+      "招牌",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "西式",
+      "酸",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "可加热",
+      "烧酒",
+      "直饮",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "鲜": "腐肉",
+      "适合拍照": "拍个不停"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3003,
+    "name": "物部布都",
+    "dlc": 3,
+    "places": [
+      "神灵庙"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "高级",
+      "传说",
+      "清淡",
+      "山珍",
+      "和风",
+      "燃起来了",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "西式",
+      "生",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加热",
+      "直饮",
+      "气泡"
+    ],
+    "positiveTagMapping": {
+      "和风": "吾之时代"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3004,
+    "name": "霍青娥",
+    "dlc": 3,
+    "places": [
+      "神灵庙"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "素",
+      "传说",
+      "中华",
+      "甜",
+      "不可思议",
+      "小巧",
+      "特产",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "饱腹"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "清酒",
+      "水果",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "素": "满嘴荤腥",
+      "中华": "我的家乡",
+      "小巧": "宵夜的份量",
+      "特产": "吃遍各地美食"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3005,
+    "name": "苏我屠自古",
+    "dlc": 3,
+    "places": [
+      "神灵庙"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.5,
+    "positiveTags": [
+      "家常",
+      "重油",
+      "饱腹",
+      "和风",
+      "力量涌现",
+      "烧烤",
+      "招牌"
+    ],
+    "negativeTags": [
+      "甜",
+      "凉爽"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "烧酒",
+      "啤酒",
+      "苦"
+    ],
+    "positiveTagMapping": {
+      "饱腹": "就用肚子来装",
+      "和风": "过去吃过的",
+      "烧烤": "被雷劈过一样"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 3009,
+    "name": "二岩猯藏",
+    "dlc": 3,
+    "places": [
+      "命莲寺"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 2.0,
+    "positiveTags": [
+      "肉",
+      "水产",
+      "家常",
+      "传说",
+      "下酒",
+      "和风",
+      "果味",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "灼热",
+      "辣"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加热",
+      "烧酒",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "和风": "佐渡老家"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4001,
+    "name": "梅蒂欣",
+    "dlc": 4,
+    "places": [
+      "魔法森林"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.1,
+    "positiveTags": [
+      "甜",
+      "适合拍照",
+      "凉爽",
+      "菌类",
+      "小巧",
+      "梦幻",
+      "毒",
+      "招牌"
+    ],
+    "negativeTags": [
+      "文化底蕴"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "水果",
+      "甘",
+      "苦"
+    ],
+    "positiveTagMapping": {
+      "甜": "毒最基础的味道",
+      "凉爽": "不能受热",
+      "菌类": "森林里疯长的",
+      "梦幻": "追求奇妙的体验",
+      "毒": "最上乘的调味品"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4002,
+    "name": "风见幽香",
+    "dlc": 4,
+    "places": [
+      "太阳花田"
+    ],
+    "price": [
+      500,
+      800
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "高级",
+      "传说",
+      "清淡",
+      "西式",
+      "不可思议",
+      "梦幻",
+      "特产",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "饱腹",
+      "和风",
+      "咸",
+      "灼热"
+    ],
+    "beverageTags": [
+      "鸡尾酒",
+      "西洋酒",
+      "利口酒",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "传说": "流传至今的过去",
+      "清淡": "不要油手碰花",
+      "西式": "绅士风度",
+      "不可思议": "冬紫罗兰",
+      "梦幻": "蓝色满天星"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4003,
+    "name": "鬼人正邪",
+    "dlc": 4,
+    "places": [
+      "辉针城"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.1,
+    "positiveTags": [
+      "重油",
+      "下酒",
+      "灼热",
+      "力量涌现",
+      "猎奇",
+      "不可思议",
+      "燃起来了",
+      "流行厌恶"
+    ],
+    "negativeTags": [
+      "高级",
+      "流行喜爱"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "烧酒",
+      "直饮",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "灼热": "滋滋冒气",
+      "不可思议": "不可能实现",
+      "燃起来了": "颠覆强者"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4004,
+    "name": "少名针妙丸",
+    "dlc": 4,
+    "places": [
+      "辉针城"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "传说",
+      "和风",
+      "甜",
+      "适合拍照",
+      "文化底蕴",
+      "小巧",
+      "燃起来了",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "西式",
+      "大份"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "可加热",
+      "气泡",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "传说": "充满勇气的故事",
+      "和风": "名神的后裔",
+      "适合拍照": "跟别人分享",
+      "小巧": "我的食量"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4005,
+    "name": "今泉影狼",
+    "dlc": 4,
+    "places": [
+      "迷途竹林"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "肉",
+      "家常",
+      "山珍",
+      "和风",
+      "适合拍照",
+      "凉爽",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "灼热"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加冰",
+      "清酒",
+      "直饮"
+    ],
+    "positiveTagMapping": {
+      "肉": "人家是狼",
+      "和风": "本州风格",
+      "凉爽": "从胃里降温"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 4008,
+    "name": "蕾米莉亚",
+    "dlc": 4,
+    "places": [
+      "红魔馆"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.05,
+    "positiveTags": [
+      "高级",
+      "传说",
+      "西式",
+      "甜",
+      "生",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "咸",
+      "辣",
+      "酸",
+      "实惠"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "西洋酒",
+      "水果",
+      "甘",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "西式": "异国风味"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5001,
+    "name": "绵月丰姬",
+    "dlc": 5,
+    "places": [
+      "月之都"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "素",
+      "高级",
+      "和风",
+      "甜",
+      "凉爽",
+      "文化底蕴",
+      "果味",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "山珍",
+      "咸",
+      "力量涌现"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "清酒",
+      "水果",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "素": "吃草帮助消化",
+      "和风": "喜欢上和歌了",
+      "凉爽": "好热",
+      "文化底蕴": "料理里的故事"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5002,
+    "name": "绵月依姬",
+    "dlc": 5,
+    "places": [
+      "月之都"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "高级",
+      "传说",
+      "清淡",
+      "中华",
+      "灼热",
+      "力量涌现",
+      "文化底蕴",
+      "小巧"
+    ],
+    "negativeTags": [
+      "山珍",
+      "菌类"
+    ],
+    "beverageTags": [
+      "可加热",
+      "烧酒",
+      "直饮",
+      "辛",
+      "提神"
+    ],
+    "positiveTagMapping": {
+      "高级": "月之民不食糟糠",
+      "传说": "令后人传诵的功绩",
+      "灼热": "不要让血液冷下来",
+      "小巧": "锻炼不宜吃太多"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5003,
+    "name": "爱莲",
+    "dlc": 5,
+    "places": [
+      "月之都"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "家常",
+      "饱腹",
+      "西式",
+      "甜",
+      "凉爽",
+      "梦幻",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "水产",
+      "重油",
+      "生"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "可加热",
+      "啤酒",
+      "甘",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "凉爽": "毕竟是猫舌头"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5004,
+    "name": "魅魔",
+    "dlc": 5,
+    "places": [
+      "博丽神社"
+    ],
+    "price": [
+      300,
+      700
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "水产",
+      "山珍",
+      "鲜",
+      "生",
+      "力量涌现",
+      "猎奇",
+      "菌类"
+    ],
+    "negativeTags": [
+      "高级",
+      "清淡"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "烧酒",
+      "西洋酒",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "鲜": "陈腐的东西不能入口",
+      "生": "最原始的味道",
+      "力量涌现": "激活身体和思维"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5005,
+    "name": "露易兹",
+    "dlc": 5,
+    "places": [
+      "月之都"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "水产",
+      "西式",
+      "甜",
+      "适合拍照",
+      "小巧",
+      "特产",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "饱腹"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加冰",
+      "鸡尾酒",
+      "啤酒",
+      "现代"
+    ],
+    "positiveTagMapping": {
+      "适合拍照": "适合发博客",
+      "小巧": "晚上不宜太饱",
+      "特产": "旅行的乐趣"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 5012,
+    "name": "八云紫",
+    "dlc": 5,
+    "places": [
+      "妖怪兽道",
+      "魔法森林"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 1.0,
+    "positiveTags": [
+      "家常",
+      "高级",
+      "传说",
+      "适合拍照",
+      "凉爽",
+      "猎奇",
+      "汤羹"
+    ],
+    "negativeTags": [
+      "饱腹",
+      "菌类"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "高酒精",
+      "烧酒",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "适合拍照": "食之品相"
+    },
+    "beverageTagMapping": {},
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 9001,
+    "name": "小恶魔",
+    "dlc": 9,
+    "places": [
+      "红魔馆"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "肉",
+      "传说",
+      "下酒",
+      "西式",
+      "甜",
+      "烧烤",
+      "辣"
+    ],
+    "negativeTags": [
+      "清淡"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加热",
+      "辛",
+      "提神"
+    ],
+    "positiveTagMapping": {
+      "传说": "最珍贵的料理",
+      "西式": "外国风味",
+      "小巧": "比雾之湖大一点"
+    },
+    "beverageTagMapping": {
+      "高酒精": "最烈的酒"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 9002,
+    "name": "芙兰朵露",
+    "dlc": 9,
+    "places": [
+      "红魔馆"
+    ],
+    "price": [
+      400,
+      700
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "生",
+      "适合拍照",
+      "灼热",
+      "猎奇",
+      "不可思议",
+      "辣",
+      "招牌"
+    ],
+    "negativeTags": [],
+    "beverageTags": [
+      "中酒精",
+      "高酒精",
+      "可加热",
+      "水果",
+      "辛"
+    ],
+    "positiveTagMapping": {
+      "生": "没有做熟的食物",
+      "招牌": "有趣的东西",
+      "适合拍照": "世界好美",
+      "猎奇": "可爱的玩偶",
+      "不可思议": "带着魔法的女仆长"
+    },
+    "beverageTagMapping": {
+      "中酒精": "没那么刺激",
+      "高酒精": "最烈的酒"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 9003,
+    "name": "八意永琳",
+    "dlc": 9,
+    "places": [
+      "迷途竹林"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "家常",
+      "传说",
+      "文化底蕴",
+      "梦幻",
+      "特产",
+      "毒",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "生"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "中酒精",
+      "可加冰",
+      "清酒",
+      "直饮",
+      "甘",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "文化底蕴": "文明的尺度",
+      "特产": "独特的惊喜"
+    },
+    "beverageTagMapping": {
+      "低酒精": "低浓度的酒",
+      "中酒精": "中等浓度的酒",
+      "清酒": "竹林里的麻雀",
+      "古典": "旧时光景"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 9004,
+    "name": "神绮",
+    "dlc": 9,
+    "places": [
+      "魔界"
+    ],
+    "price": [
+      500,
+      1000
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "家常",
+      "高级",
+      "传说",
+      "西式",
+      "甜",
+      "不可思议",
+      "梦幻"
+    ],
+    "negativeTags": [
+      "重油",
+      "生",
+      "猎奇",
+      "酸",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "直饮",
+      "水果",
+      "甘",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "清淡": "没有味道",
+      "凉爽": "清风流过的感觉",
+      "小巧": "比雾之湖大一点"
+    },
+    "beverageTagMapping": {
+      "古典": "以前的时光"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 10001,
+    "name": "秋穰子",
+    "dlc": 9,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      200,
+      400
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "家常",
+      "饱腹",
+      "甜",
+      "烧烤",
+      "实惠"
+    ],
+    "negativeTags": [
+      "重油",
+      "山珍",
+      "海味",
+      "酸"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "水果",
+      "甘"
+    ],
+    "positiveTagMapping": {
+      "实惠": "价格高昂"
+    },
+    "beverageTagMapping": {
+      "低酒精": "粮食酿造的米酒"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 10002,
+    "name": "八云蓝",
+    "dlc": 9,
+    "places": [
+      "妖怪兽道",
+      "魔法森林"
+    ],
+    "price": [
+      400,
+      800
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "高级",
+      "传说",
+      "重油",
+      "山珍",
+      "和风",
+      "力量涌现",
+      "不可思议",
+      "大份"
+    ],
+    "negativeTags": [
+      "水产",
+      "清淡",
+      "灼热",
+      "小巧"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "高酒精",
+      "可加热",
+      "清酒",
+      "辛",
+      "气泡",
+      "提神"
+    ],
+    "positiveTagMapping": {
+      "力量涌现": "真是累人",
+      "大份": "打包一份回去"
+    },
+    "beverageTagMapping": {
+      "中酒精": "头脑发昏",
+      "高酒精": "浓烈的酒",
+      "提神": "些许疲惫"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 11001,
+    "name": "舞",
+    "dlc": 9,
+    "places": [
+      "魔界"
+    ],
+    "price": [
+      300,
+      600
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "素",
+      "清淡",
+      "西式",
+      "凉爽",
+      "小巧",
+      "汤羹"
+    ],
+    "negativeTags": [
+      "肉",
+      "重油",
+      "饱腹",
+      "灼热",
+      "辣",
+      "大份"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "可加冰",
+      "直饮",
+      "水果",
+      "气泡",
+      "古典"
+    ],
+    "positiveTagMapping": {
+      "小巧": "三分饱"
+    },
+    "beverageTagMapping": {
+      "无酒精": "反应会下降",
+      "古典": "一点点怀念"
+    },
+    "spellCards": {
+      "positive": [],
+      "negative": []
+    }
+  },
+  {
+    "id": 1000,
+    "name": "河城荷取",
+    "dlc": 1,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      400,
+      500
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "水产",
+      "高级",
+      "下酒",
+      "咸",
+      "招牌",
+      "猎奇"
+    ],
+    "negativeTags": [
+      "素",
+      "山珍",
+      "文化底蕴"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "高酒精",
+      "清酒",
+      "直饮"
+    ],
+    "chat": [
+      "只有嗅觉敏锐的商人，才能将商业情报作用发挥到极致。",
+      "当你没有决定要成功时，你就已经决定要失败了。",
+      "船在港湾里很安全，但这不是造船的目的。",
+      "潜在顾客不在乎你。他们在乎自己，对与他们无关的东西他们不愿读也不愿听。",
+      "对实业家而言只有一条规则：以尽可能低的成本，做质量最好的产品，付尽可能高的工资。",
+      "是不是也应该让一些河童专门去专研厨艺呢…"
+    ],
+    "evaluation": {
+      "exbad": "这种程度是怎么让食堂风靡幻想乡的？这是广告欺诈吧！",
+      "bad": "胡乱加工不是正数的加法，而是负数的加法。",
+      "norm": "食品的加工是非常深奥的，你得多储备一些知识才行。",
+      "good": "邀请你到山里开店真是明断啊！",
+      "exgood": "我享受到的服务已经超过了交易本身，必须要给予答谢！",
+      "lackmoneyangry": "这定价与其说是做生意，不如说是抢劫！",
+      "lackmoneynormal": "虽然我最近赚了些钱，也经不住这样的高度消费！",
+      "repell": "这样做生意是不会长久的。",
+      "seenRepell": "老板娘，你还是不明白生意该怎么做。"
+    },
+    "spellCards": {
+      "positive": [
+        {
+          "name": "河童「延展手臂」",
+          "description": "伙伴可以通过“延展手臂”远程上菜上酒，持续120秒。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "水符「山洪暴发」",
+          "description": "随机冲走3-5名顾客。"
+        }
+      ]
+    },
+    "positiveTagMapping": {
+      "高级": "最上品的菜",
+      "招牌": "口碑最好的菜",
+      "猎奇": "河童的口味"
+    },
+    "beverageTagMapping": {}
+  },
+  {
+    "id": 2000,
+    "name": "黑谷山女",
+    "dlc": 2,
+    "places": [
+      "旧地狱",
+      "妖怪兽道",
+      "红魔馆",
+      "魔法森林",
+      "妖怪之山"
+    ],
+    "price": [
+      250,
+      400
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "鲜",
+      "甜",
+      "生",
+      "适合拍照",
+      "猎奇",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "重油",
+      "咸",
+      "灼热"
+    ],
+    "beverageTags": [
+      "低酒精",
+      "中酒精",
+      "啤酒",
+      "甘"
+    ],
+    "chat": [
+      "被地上厌恶的地底世界，是我们的天堂。",
+      "洞窟虽然是黑暗的，但是我的网很明亮哦。",
+      "最近街道那边好热闹呀，偶尔去玩玩吧。",
+      "只有抵住最黑的暗，才能收获最光的亮。"
+    ],
+    "evaluation": {
+      "exbad": "还不如蛛网里的猎物好吃。",
+      "bad": "我不是想打击你，但是味道确实不太好…",
+      "norm": "传说中的夜雀食堂应该不止这种程度…",
+      "good": "氛围和食物都是满分哦。",
+      "exgood": "能在黑暗的洞窟吃到这么美味的食物真是太棒了！",
+      "lackmoneyangry": "这家店比黑蜘蛛还要黑！",
+      "lackmoneynormal": "我还不太习惯地上的消费水平…",
+      "repell": "就算我们什么都没做也会遭到厌恶吗？",
+      "seenRepell": "瞧不起被厌恶者就别在这里开店了。"
+    },
+    "spellCards": {
+      "positive": [
+        {
+          "name": "「地下偶像狂欢夜」",
+          "description": "排队顾客会被偶像吸引，即使夜间营业结束也不会离去，持续30秒。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "细索「犍陀多绳索」",
+          "description": "移动速度下降80%，持续30秒。"
+        }
+      ]
+    },
+    "positiveTagMapping": {
+      "生": "太熟吃不惯",
+      "猎奇": "蜘蛛的口味"
+    },
+    "beverageTagMapping": {}
+  },
+  {
+    "id": 3000,
+    "name": "多多良小伞",
+    "dlc": 3,
+    "places": [
+      "命莲寺",
+      "辉针城"
+    ],
+    "price": [
+      150,
+      300
+    ],
+    "enduranceLimit": 1.2,
+    "positiveTags": [
+      "家常",
+      "饱腹",
+      "甜",
+      "适合拍照",
+      "力量涌现",
+      "猎奇",
+      "不可思议",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "灼热",
+      "汤羹",
+      "辣"
+    ],
+    "beverageTags": [
+      "中酒精",
+      "可加冰",
+      "水果",
+      "古典"
+    ],
+    "chat": [
+      "我又来了！吓~一跳了吗？",
+      "这里变得更热闹了！好开心啊——！",
+      "伺机寻找目标…好！一会儿就吓那个家伙吧！",
+      "今天又没有吓到人…"
+    ],
+    "evaluation": {
+      "exbad": "难吃到吓我一跳。",
+      "bad": "无法带来一点惊喜。",
+      "norm": "还不错，就是少了点惊喜。",
+      "good": "好吃到吓我一跳！",
+      "exgood": "惊——！好吃到吓人！",
+      "lackmoneyangry": "我没有钱哦！吓到了吧——？！",
+      "lackmoneynormal": "这些钱都是小孩子们给我的…",
+      "repell": "哭…我真是太没用了…",
+      "seenRepell": "我能理解这种被嫌弃的感觉。"
+    },
+    "spellCards": {
+      "positive": [
+        {
+          "name": "雨符「雨夜怪谈」",
+          "description": "带有“猎奇”标签的食物制作速度提高30%，且额外提供30%续单率，持续30秒。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "「超级巨幻影唐伞」",
+          "description": "吓跑排队中的普通顾客。"
+        }
+      ]
+    },
+    "positiveTagMapping": {
+      "饱腹": "肚子总是空空",
+      "适合拍照": "好看的食物",
+      "猎奇": "让人吓一跳"
+    },
+    "beverageTagMapping": {}
+  },
+  {
+    "id": 4000,
+    "name": "射命丸文",
+    "dlc": 4,
+    "places": [
+      "太阳花田",
+      "妖怪兽道",
+      "人间之里",
+      "博丽神社",
+      "红魔馆",
+      "迷途竹林",
+      "魔法森林",
+      "妖怪之山",
+      "旧地狱",
+      "地灵殿",
+      "命莲寺",
+      "神灵庙",
+      "辉针城",
+      "月之都",
+      "魔界"
+    ],
+    "price": [
+      500,
+      600
+    ],
+    "enduranceLimit": 1.3,
+    "positiveTags": [
+      "肉",
+      "家常",
+      "下酒",
+      "和风",
+      "招牌",
+      "适合拍照",
+      "流行喜爱"
+    ],
+    "negativeTags": [
+      "西式",
+      "流行厌恶"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加冰",
+      "烧酒",
+      "提神"
+    ],
+    "chat": [
+      "今天的素材也不太能用呢…",
+      "想要获得情报就要深入群众。",
+      "劳逸结合才是长久之道哟。",
+      "新闻和做菜一样，加点料更香。"
+    ],
+    "evaluation": {
+      "exbad": "烂到这种程度也足够上头条了！",
+      "bad": "喂喂，做成这样没关系吗…",
+      "norm": "作为新闻素材的话感觉无波无澜呢。",
+      "good": "这个菜有成为爆款的潜力呢。",
+      "exgood": "这个菜绝对能成为头条！",
+      "lackmoneyangry": "感谢我没有报导这种漫天要价的行为吧！",
+      "lackmoneynormal": "自费做了太多报纸，差点连夜宵也吃不起。",
+      "repell": "喂喂？！不怕我报导出去吗？",
+      "seenRepell": "把客人都赶走我还怎么打探情报？"
+    },
+    "spellCards": {
+      "positive": [
+        {
+          "name": "「八衢潮流风靡幻想」",
+          "description": "明天开始店铺变为“明星店”，三天后恢复正常。${LABEL_MAP.br}“明星店”：提高10%顾客预算和5%客流量，“${DYNAMIC_TAG_MAP.signature}”标签成为流行标签。如果店铺已是“明星店”或当晚已宣传，则此符卡转化为“「食堂风起厨神无双」”。"
+        },
+        {
+          "name": "「食堂风起厨神无双」",
+          "description": "成品带有“${DYNAMIC_TAG_MAP.signature}”标签的今日菜单上的料理将成为明星料理。制作明星料理时，如果料理时间小于5秒，则瞬间完成；在舆论的裹挟下，追捧“${DYNAMIC_TAG_MAP.popularPositive}”标签的顾客食用明星料理后额外提高30%续单率，返还当单酒水消耗的预算，并必定增加一次续单上限（增加续单上限效果每桌顾客只触发一次），持续30秒。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "「笔枪纸弹禁制之道」",
+          "description": "无法进行投掷上菜，持续30秒。同时在报纸上对黑心店铺进行抨击，使“明星店”加成明天起消失，并使伙伴【拉尔瓦】在场上播撒的催眠粉消失。"
+        }
+      ]
+    },
+    "positiveTagMapping": {
+      "下酒": "有酒无菜",
+      "适合拍照": "入我相机"
+    },
+    "beverageTagMapping": {}
+  },
+  {
+    "id": 5000,
+    "name": "铃仙",
+    "dlc": 5,
+    "places": [
+      "月之都"
+    ],
+    "price": [
+      200,
+      350
+    ],
+    "enduranceLimit": 1,
+    "positiveTags": [
+      "家常",
+      "山珍",
+      "海味",
+      "中华",
+      "甜",
+      "小巧",
+      "特产"
+    ],
+    "negativeTags": [
+      "不可思议",
+      "昂贵"
+    ],
+    "beverageTags": [
+      "高酒精",
+      "可加热",
+      "烧酒",
+      "啤酒",
+      "苦"
+    ],
+    "chat": [
+      "今天也好累啊…",
+      "忙碌的一天终于结束了！",
+      "现在是犒赏自己的时间！",
+      "肌肉好酸痛。"
+    ],
+    "evaluation": {
+      "exbad": "真是糟糕的一天…",
+      "bad": "今天也是就这样过去了吗…",
+      "norm": "谢谢，我恢复力气了。",
+      "good": "谢谢老板娘治愈了我这一天的疲惫！",
+      "exgood": "这就是我的光！！！",
+      "lackmoneyangry": "就算把我卖了我也付不起呀！",
+      "lackmoneynormal": "打工的钱快花完了…",
+      "repell": "这就是属于我的命运吧。",
+      "seenRepell": "这个世道到处都是不公的对待。"
+    },
+    "spellCards": {
+      "positive": [
+        {
+          "name": "「月免的篝火盛宴」",
+          "description": "召开一场盛大的篝火盛宴，场上每只存在的兔子生成一个随机食材或一瓶随机酒水，接下来30秒内出现新的兔子时会同样生成食材或酒水。生成食材的概率为80%，生成酒水的概率为20%。"
+        }
+      ],
+      "negative": [
+        {
+          "name": "「酒醉迷乱」",
+          "description": "铃仙向场上打出一颗狂气之弹，影响场上的顾客，持续30秒。受到狂气影响的顾客食用不带有“高酒精”标签的酒水必定给出最低评价。当场上有伙伴【铃仙】时，此效果仅持续15秒。"
+        }
+      ]
+    },
+    "positiveTagMapping": {
+      "山珍": "月之都如果有山",
+      "海味": "不那么死气沉沉",
+      "中华": "月兔也是仙子",
+      "小巧": "兔子的胃很小",
+      "特产": "无法抵达的地方"
+    },
+    "beverageTagMapping": {}
+  },
+  {
+    "id": 9000,
+    "name": "大妖精",
+    "dlc": 9,
+    "places": [
+      "红魔馆",
+      "妖怪之山",
+      "太阳花田"
+    ],
+    "price": [
+      300,
+      500
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "清淡",
+      "甜",
+      "凉爽",
+      "小巧",
+      "果味"
+    ],
+    "negativeTags": [
+      "灼热",
+      "猎奇"
+    ],
+    "beverageTags": [
+      "无酒精",
+      "低酒精",
+      "可加冰",
+      "直饮",
+      "甘",
+      "气泡"
+    ],
+    "chat": [
+      "湖边的果子应该马上就熟透了吧？",
+      "一会儿和妖精朋友们去哪里玩好呢…",
+      "慧音老师又留了好多作业…好在来之前就写完了。",
+      "要把无限的日子投入到更加无限的乐趣之中去啊。"
+    ],
+    "evaluation": {
+      "exbad": "如果只有这样的话…",
+      "bad": "呃，一会儿去找朋友要些果子垫垫肚子好了。",
+      "norm": "不过，老板娘你一定不止于此对吧。",
+      "good": "好吃耶，老板娘你的手艺真好！",
+      "exgood": "哇塞，下次我一定要带大家来一起分享！",
+      "lackmoneyangry": "喂！这完全就是黑店吧！！",
+      "lackmoneynormal": "抱歉…我身上只有这些了…",
+      "repell": "诶诶，老板娘，你干什么？",
+      "seenRepell": "还是去找朋友们要点儿果子吃吧…"
+    },
+    "spellCards": {},
+    "positiveTagMapping": {
+      "清淡": "没有味道",
+      "凉爽": "清风",
+      "小巧": "比雾之湖大一点"
+    },
+    "beverageTagMapping": {
+      "无酒精": "不喝酒",
+      "低酒精": "微微沾点酒精",
+      "可加冰": "凉凉的东西",
+      "甘": "森林里的果子"
+    }
+  },
+  {
+    "id": 10000,
+    "name": "秋静叶",
+    "dlc": 9,
+    "places": [
+      "妖怪之山"
+    ],
+    "price": [
+      100,
+      400
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "甜",
+      "凉爽",
+      "力量涌现",
+      "文化底蕴",
+      "实惠"
+    ],
+    "negativeTags": [
+      "重油",
+      "辣",
+      "酸"
+    ],
+    "beverageTags": [
+      "可加热",
+      "清酒",
+      "辛",
+      "苦"
+    ],
+    "chat": [
+      "制造落叶也是一件很累的工作呢。",
+      "什么时候我也能像妹妹那样子受欢迎呢。",
+      "飘零的落叶象征着未解的思绪…但是妹妹却用来烤红薯。"
+    ],
+    "evaluation": {
+      "exbad": "这就是，秋天的味道吗…",
+      "bad": "这味道…我真的不是在吃干枯的落叶吗…",
+      "norm": "普通的味道，仅限于能填饱肚子了。",
+      "good": "真希望在整个秋天都能吃到这道菜。",
+      "exgood": "如果能在秋天吃到这道菜，一切的悲伤都将不复存在吧。",
+      "lackmoneyangry": "我的钱可不是树上掉下的落叶！",
+      "lackmoneynormal": "我的钱变成秋天的落叶了…",
+      "repell": "要赶我走？难道我的存在会让店铺变得萧瑟吗？",
+      "seenRepell": "是我的存在使得大家变得忧愁了吗？那我还是去别的店家看看吧。"
+    },
+    "spellCards": {},
+    "positiveTagMapping": {
+      "力量涌现": "踹不动树",
+      "文化底蕴": "自古逢秋悲寂寥"
+    },
+    "beverageTagMapping": {
+      "可加热": "暖暖身子",
+      "清酒": "陈酿"
+    }
+  },
+  {
+    "id": 11000,
+    "name": "雪",
+    "dlc": 9,
+    "places": [
+      "人间之里",
+      "魔界"
+    ],
+    "price": [
+      100,
+      900
+    ],
+    "enduranceLimit": 1.4,
+    "positiveTags": [
+      "肉",
+      "饱腹",
+      "鲜",
+      "甜",
+      "灼热",
+      "果味",
+      "辣",
+      "大份"
+    ],
+    "negativeTags": [
+      "素",
+      "清淡",
+      "凉爽",
+      "小巧"
+    ],
+    "beverageTags": [
+      "可加热",
+      "直饮",
+      "水果",
+      "甘",
+      "气泡",
+      "现代"
+    ],
+    "chat": [
+      "神绮大人说了，没有卖完所有食材就不能和舞舞一起出去玩…",
+      "舞舞她虽然话比较少，但每当我遇到困难的时候都会来帮我呢。",
+      "虽然我学习的是火系魔法，但名字却叫雪呢。嘿嘿，是神绮大人给我取的名字哦！",
+      "肚子饿得咕咕叫了，好想吃神绮大人做的苹果派！",
+      "诶，经常吃霸王餐的小偷？误入幻想乡的外界人类？认错人了哦，我是魔界的魔法使雪哦！",
+      "摆摊的时候卖了50块钱的食材，不小心给了100块钱的找零，结果被舞舞骂了一顿…"
+    ],
+    "evaluation": {
+      "exbad": "唔姆…味道好奇怪的样子…明明是舞舞推荐的餐厅来着。",
+      "bad": "似乎和神绮大人不用魔法的时候制作的炒菜味道很像呢！晚饭后回去还是加餐吃点薯片吧。",
+      "norm": "这顿饭消耗掉了许多我囤积的食材呢！回去一定会被神绮大人夸奖的吧！",
+      "good": "真好吃，我一定要回去推荐舞舞也来尝一尝！一定不会忘记这件事的哦！",
+      "exgood": "实在是太好吃啦！以后我每一顿饭都要来这里吃！啊咧，食材还没卖完…？",
+      "lackmoneyangry": "不要！我已经没有金币给你了！",
+      "lackmoneynormal": "我的金币不断地被抢走，这样的日子还能过下去吗！",
+      "repell": "呜呜，老板娘，轮到我点单了吗？不要无视我啦！诶，这是要重新排队的意思吗？",
+      "seenRepell": "为什么其他顾客都要重新排队？好哦，那我也去重新排队吧！"
+    },
+    "spellCards": {},
+    "positiveTagMapping": {
+      "果味": "我爱吃的糕点",
+      "大份": "丰盛的大餐"
+    },
+    "beverageTagMapping": {
+      "直饮": "讲究这么多",
+      "气泡": "“唰”",
+      "现代": "现今的饮料"
+    }
+  }
+]

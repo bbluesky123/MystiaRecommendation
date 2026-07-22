@@ -1,0 +1,19 @@
+=== RESTORE ===
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+
+Return: 0
+
+=== BUILD ===
+MSBuild version 17.3.4+a400405ba for .NET
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  MystiaRecommendation -> D:\new\MystiaRecommendation\bin\Release\net6.0\MystiaRecommendation.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.14
+
+Return: 0

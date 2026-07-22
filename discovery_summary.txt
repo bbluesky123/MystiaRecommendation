@@ -1,0 +1,715 @@
+
+=== 'GuestsManager' (158 lines) ===
+  === 包含 'GuestsManager' 的类型 (1个) ===
+  类型: NightScene.GuestManagementUtility.GuestsManager
+  基类: DEYU.Singletons.MonoSingleton`1[[NightScene.GuestManagementUtility.GuestsManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  RogueLikeManager.get_GuestsManager() -> GuestsManager
+  DLC4_BossBattleManager.get__GuestsManager_k__BackingField() -> GuestsManager
+  DLC4_BossBattleManager.set__GuestsManager_k__BackingField(GuestsManager ) -> Void
+  DLC4_BossBattleManager.get_GuestsManager() -> GuestsManager
+  DLC4_BossBattleManager.set_GuestsManager(GuestsManager value) -> Void
+  DLC4_GuardController.get_GuestManager() -> GuestsManager
+  GuestsManager.get_GUEST_BASE_EXP() -> Int32
+  GuestsManager.set_GUEST_BASE_EXP(Int32 ) -> Void
+  GuestsManager.get_order() -> AudioClip
+  GuestsManager.set_order(AudioClip ) -> Void
+  GuestsManager.get_hateFoodTagIcon() -> GameObject
+  GuestsManager.set_hateFoodTagIcon(GameObject ) -> Void
+  GuestsManager.get_hateFoodTagAudio() -> AudioClip
+  GuestsManager.set_hateFoodTagAudio(AudioClip ) -> Void
+  GuestsManager.get_guestIconManager() -> GuestIconManager
+  GuestsManager.set_guestIconManager(GuestIconManager ) -> Void
+  GuestsManager.get_onForcePannelClosingWhenGuestRepellCallback() -> Nullable`1
+  GuestsManager.set_onForcePannelClosingWhenGuestRepellCallback(Nullable`1 ) -> Void
+  GuestsManager.get_onOrderAdd() -> Action`1
+  GuestsManager.set_onOrderAdd(Action`1 ) -> Void
+  GuestsManager.get_onOrderRemove() -> Action`1
+  GuestsManager.set_onOrderRemove(Action`1 ) -> Void
+  GuestsManager.get_AllPresentedGuestGroupController() -> HashSet`1
+  GuestsManager.set_AllPresentedGuestGroupController(HashSet`1 ) -> Void
+  GuestsManager.get_OnGuestSpawn() -> Action`1
+  GuestsManager.set_OnGuestSpawn(Action`1 ) -> Void
+  GuestsManager.get__OnPositiveSpellTriggered_k__BackingField() -> Action`1
+  ... and 128 more
+
+=== 'CookSystem' (22 lines) ===
+  === 包含 'CookSystem' 的类型 (1个) ===
+  类型: NightScene.CookingUtility.CookSystemManager
+  基类: DEYU.Singletons.MonoSingleton`1[[NightScene.CookingUtility.CookSystemManager, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  CookSystemManager.get_AllCookers() -> Dictionary`2
+  CookSystemManager.set_AllCookers(Dictionary`2 value) -> Void
+  CookSystemManager.get_AllCookerControllers() -> IEnumerable`1
+  CookSystemManager.add_OnCookerStartCookCallback(Action`2 value) -> Void
+  CookSystemManager.remove_OnCookerStartCookCallback(Action`2 value) -> Void
+  CookSystemManager.CallCookerStartCallback(Sellable sellable, Recipe recipe) -> Void
+  CookSystemManager.GetCooker(Sellable sellable, Cooker& cookerData) -> Boolean
+  CookSystemManager.RegisterCooker(Sellable sellable, Cooker cookerData) -> Void
+  CookSystemManager.ReleaseCooker(Sellable sellable) -> Void
+  CookSystemManager.GetRandomNormalGuestGroups() -> IEnumerable`1
+  CookSystemManager.CouldCookerOpen(Vector3Int targetPos) -> Boolean
+  CookSystemManager.RefreshCookerStatus() -> Void
+  CookSystemManager.GetCooker(Vector3Int cookerPosition) -> CookController
+  CookSystemManager.DumpAllCookers() -> IEnumerable`1
+  CookSystemManager.CallCooker(Vector3Int cookerPosition) -> Void
+  CookSystemManager.get__AllCookers_k__BackingField() -> Dictionary`2
+  CookSystemManager.set__AllCookers_k__BackingField(Dictionary`2 ) -> Void
+  CookSystemManager.get_OnCookerStartCookCallback() -> Action`2
+  CookSystemManager.set_OnCookerStartCookCallback(Action`2 ) -> Void
+
+=== 'RunTimePlayer' (74 lines) ===
+  === 包含 'RunTimePlayerData' 的类型 (2个) ===
+  类型: GameData.RunTime.Common.RunTimePlayerData
+  RunTimePlayerData.get__ShouldSpawnSpecialGuests_k__BackingField() -> Boolean
+  RunTimePlayerData.set__ShouldSpawnSpecialGuests_k__BackingField(Boolean ) -> Void
+  RunTimePlayerData.get__ShouldShowSpecialGuestsInDay_k__BackingField() -> Boolean
+  RunTimePlayerData.set__ShouldShowSpecialGuestsInDay_k__BackingField(Boolean ) -> Void
+  RunTimePlayerData.get__PopLikeFoodTags_k__BackingField() -> List`1
+  RunTimePlayerData.set__PopLikeFoodTags_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__PopLikeBevTags_k__BackingField() -> List`1
+  RunTimePlayerData.set__PopLikeBevTags_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__PopHateFoodTags_k__BackingField() -> List`1
+  RunTimePlayerData.set__PopHateFoodTags_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__PopHateBevTags_k__BackingField() -> List`1
+  RunTimePlayerData.set__PopHateBevTags_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__ControlledSpecialGuests_k__BackingField() -> List`1
+  RunTimePlayerData.set__ControlledSpecialGuests_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__InfiniteIngredients_k__BackingField() -> List`1
+  RunTimePlayerData.set__InfiniteIngredients_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__HaveChattedSGuestLabel_k__BackingField() -> List`1
+  RunTimePlayerData.set__HaveChattedSGuestLabel_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.get__LockedRecipeList_k__BackingField() -> List`1
+  RunTimePlayerData.set__LockedRecipeList_k__BackingField(List`1 ) -> Void
+  RunTimePlayerData.RecordChattedSGuestLabel(String specialGuestLabel) -> Void
+  RunTimePlayerData.HaveRecordedChattedSGuest(String specialGuestLabel) -> Boolean
+  RunTimePlayerData.GetLockedRecipesList() -> List`1
+  RunTimePlayerData.ModifyLockedRecipesList(Boolean isAdded, Il2CppStructArray`1 recipeId) -> Void
+  RunTimePlayerData.CheckRecipeIsLocked(Int32 recipeId) -> Boolean
+  RunTimePlayerData.GetPopFoodTags(PopType popType) -> Il2CppStructArray`1
+  RunTimePlayerData.GetPopBevTags(PopType popType) -> Il2CppStructArray`1
+  RunTimePlayerData.SetShouldSpawnSpecialGuests(Boolean canPerform) -> Void
+  ... and 44 more
+
+=== 'SpecialGuest' (769 lines) ===
+  === 包含 'SpecialGuest' 的类型 (19个) ===
+  类型: Story.ControlledSpecialGuest
+  类型: Story.SpecialGuestControlled
+  基类: DEYU.Singletons.Singleton`1[[Story.SpecialGuestControlled, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  Boolean ContainsDisappearSpecialGuests(Int32 specialGuestId)
+  Boolean TryConvertControllableSpecialGuest(SpecialGuest sourceSpecialGuest, SpecialGuest& destinationSpecialGuest)
+  ControlledSpecialGuest GenerateControllableSpecialGuest()
+  Boolean CheckSpecialGuestUsability(Int32 specialGuestId)
+  List`1 get_m_SpecialGuestsCache()
+  Void set_m_SpecialGuestsCache(List`1 )
+  List`1 get_m_ControlledSpecialGuests()
+  Void set_m_ControlledSpecialGuests(List`1 )
+  List`1 m_SpecialGuestsCache { get; set; }
+  List`1 m_ControlledSpecialGuests { get; set; }
+  类型: NightScene.GuestManagementUtility.SpecialGuestsController
+  SpecialGuest get_SpecialGuest()
+  Void set_SpecialGuest(SpecialGuest value)
+  SpecialGuest _SpecialGuest_k__BackingField { get; set; }
+  SpecialGuest SpecialGuest { get; set; }
+  类型: GameData.Core.Collections.NightSceneUtility.MappedSpecialGuest
+  SpecialGuest GenerateDummy()
+  类型: GameData.Core.Collections.NightSceneUtility.SpecialGuest
+  类型: GameData.Core.Collections.DaySceneUtility.Collections.KyoukoTutorialData_HowToSatisfySpecialGuest
+  类型: GameData.Core.Collections.DaySceneUtility.Collections.SpecialGuestPublicExtraDialogData
+  基类: GameData.Core.Collections.DaySceneUtility.Collections.SpecialGuestExtraDialogData
+  Il2CppStringArray get_TargetSpecialGuestLabel()
+  Il2CppStringArray get_targetSpecialGuestLabel()
+  Void set_targetSpecialGuestLabel(Il2CppStringArray )
+  Il2CppStringArray targetSpecialGuestLabel { get; set; }
+  Il2CppStringArray TargetSpecialGuestLabel { get;  }
+  ... and 739 more
+
+=== 'Recipe' (736 lines) ===
+  List`1 Method_Internal_Static_List_1_Recipe_IEnumerable_1_Recipe_0(IEnumerable`1 originList)
+  List`1 Method_Internal_Static_List_1_Recipe_IEnumerable_1_Recipe_0(IEnumerable`1 originList)
+  Void CallCookerStartCallback(Sellable sellable, Recipe recipe)
+  === 包含 'Recipe' 的类型 (26个) ===
+  类型: Night.RogueLike.DLC5_RogueLikeCardPersistentAddFreeIngredientFromRecipe
+  Int32 get_addFreeIngredientFromRecipeNum()
+  Void set_addFreeIngredientFromRecipeNum(Int32 )
+  Int32 addFreeIngredientFromRecipeNum { get; set; }
+  类型: Night.RogueLike.DLC5_RogueLikeCardPersistentAddRecipeGachaNum
+  类型: Night.RogueLike.DLC5_RogueLikeCardPersistentAddRecipeSelectNum
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikePurchaseRecipePanel
+  Void UpdateRecipeCartBG()
+  类型: DayScene.UI.RogueLike.DLC5_RogueLike_RecipeDescriber
+  Void Describe(Recipe detail, CancellationToken cancellationToken)
+  类型: NightScene.TimelineExtestion.NS_Override_Recipe_Behaviour
+  类型: NightScene.TimelineExtestion.NS_Override_Recipe
+  类型: GameData.Core.Collections.Recipe
+  Boolean Equals(Recipe other)
+  类型: GameData.Profile.RecipeProfile
+  类型: Common.UI.RecipeDescriber
+  Void add_OnToggleToRecipe(Action value)
+  Void remove_OnToggleToRecipe(Action value)
+  Void Describe(Recipe detail, CancellationToken cancellationToken)
+  Void Describe(Recipe detail)
+  Void ToggleVisualForRecipes()
+  Action get_OnToggleToRecipe()
+  Void set_OnToggleToRecipe(Action )
+  Action OnToggleToRecipe { get; set; }
+  类型: Common.UI.DailyRecipePrinter
+  List`1 m_AllRegisteredRecipeInstances { get; set; }
+  ... and 706 more
+
+=== 'Beverage' (363 lines) ===
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel4RequestBeverage()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel5RequestBeverage()
+  Il2CppReferenceArray`1 additiveCharacterKizunaLevel4RequestBeverage { get; set; }
+  List`1 get_m_AllRegisteredBeverageInstances()
+  Void set_m_AllRegisteredBeverageInstances(List`1 )
+  List`1 m_AllRegisteredBeverageInstances { get; set; }
+  List`1 m_AllRegisteredBeverageNullInstances { get; set; }
+  Action`2 get_OnBeverageCustomLoop()
+  Void set_OnBeverageCustomLoop(Action`2 )
+  Action get_OnRegisteredBeverageUpDown()
+  Void set_OnRegisteredBeverageUpDown(Action )
+  StaticHorizontalGridScrollListUILogicalGroupT`3 get_RegisteredBeverageGroup()
+  Void set_RegisteredBeverageGroup(StaticHorizontalGridScrollListUILogicalGroupT`3 value)
+  IReadOnlyList`1 get_RegisteredBeverageList()
+  Void add_BeverageSelected(Action`3 value)
+  Void remove_BeverageSelected(Action`3 value)
+  Void add_OnBeverageCustomLoop(Action`2 value)
+  Void remove_OnBeverageCustomLoop(Action`2 value)
+  GridLayoutGroup m_BeverageGrid { get; set; }
+  GameObject m_BeverageParent { get; set; }
+  AdpProgressIndicatorComponent m_BeverageScroller { get; set; }
+  List`1 m_BeverageList { get; set; }
+  RecipePrinterType Beverage
+  === 包含 'Beverage' 的类型 (2个) ===
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikePurchasePanel+IngredientAndBeverageOpenContext
+  类型: GameData.RunTime.Common.RunTimeAlbum+_GetBeverageWithRecord_d__103
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikePurchasePanel+IngredientAndBeverageOpenContext
+  Boolean get_IsBeverage()
+  Boolean IsBeverage { get;  }
+  Boolean m_IsBeverage
+  ... and 333 more
+
+=== 'Ingredient' (426 lines) ===
+  类型: Night.RogueLike.DLC5_RogueLikeCardPersistentAddFreeIngredientFromRecipe
+  Int32 get_addFreeIngredientFromRecipeNum()
+  Void set_addFreeIngredientFromRecipeNum(Int32 )
+  Int32 addFreeIngredientFromRecipeNum { get; set; }
+  Il2CppStructArray`1 get_Ingredients()
+  Il2CppStructArray`1 Ingredients { get;  }
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikePurchasePanel+IngredientAndBeverageOpenContext
+  === 包含 'Ingredient' 的类型 (17个) ===
+  类型: Night.RogueLike.DLC5_RogueLikeCardPersistentAddFreeIngredientFromRecipe
+  Int32 get_addFreeIngredientFromRecipeNum()
+  Void set_addFreeIngredientFromRecipeNum(Int32 )
+  Int32 addFreeIngredientFromRecipeNum { get; set; }
+  类型: GameData.Core.Collections.Ingredient
+  Ingredient Duplicate()
+  类型: GameData.Profile.IngredientProfile
+  类型: Common.UI.IngredientDescriber
+  Void add_OnToggleToIngredient(Action value)
+  Void remove_OnToggleToIngredient(Action value)
+  Void Describe(Ingredient detail, CancellationToken cancellationToken)
+  Void Describe(Ingredient detail)
+  Void ToggleVisualForIngredient()
+  Action get_OnToggleToIngredient()
+  Void set_OnToggleToIngredient(Action )
+  Action OnToggleToIngredient { get; set; }
+  类型: Common.UI.InfiniteSelection.DLC5_InfiniteIngredientPanel
+  基类: DEYU.AdpUISystem.PanelCollection.UIPanelParam`2[[Common.UI.InfiniteSelection.DLC5_InfiniteIngredientPanel+OpenContext, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null],[Il2CppSystem.Nullable`1[[System.Int32, System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Il2Cppmscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  类型: DayScene.UI.UIManager+_OpenInfiniteIngredientsPanelAsync_d__94
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikeCardPhoto+IngredientMapping
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikePurchasePanel+IngredientAndBeverageOpenContext
+  类型: GameData.RunTime.Common.RunTimeAlbum+_GetIngredientWithRecord_d__101
+  ... and 396 more
+
+=== 'Cooker' (639 lines) ===
+  Dictionary`2 get_AllCookers()
+  Void set_AllCookers(Dictionary`2 value)
+  IEnumerable`1 get_AllCookerControllers()
+  Void add_OnCookerStartCookCallback(Action`2 value)
+  Void remove_OnCookerStartCookCallback(Action`2 value)
+  Void CallCookerStartCallback(Sellable sellable, Recipe recipe)
+  Boolean GetCooker(Sellable sellable, Cooker& cookerData)
+  Void RegisterCooker(Sellable sellable, Cooker cookerData)
+  Void ReleaseCooker(Sellable sellable)
+  Boolean CouldCookerOpen(Vector3Int targetPos)
+  Void RefreshCookerStatus()
+  CookController GetCooker(Vector3Int cookerPosition)
+  IEnumerable`1 DumpAllCookers()
+  Void CallCooker(Vector3Int cookerPosition)
+  Dictionary`2 _AllCookers_k__BackingField { get; set; }
+  Action`2 OnCookerStartCookCallback { get; set; }
+  Dictionary`2 AllCookers { get; set; }
+  IEnumerable`1 AllCookerControllers { get;  }
+  CookerType get_CookerType()
+  CookerType get_cookerType()
+  Void set_cookerType(CookerType )
+  CookerType cookerType { get; set; }
+  CookerType CookerType { get;  }
+  HashSet`1 m_RegisteredCookerTypes { get; set; }
+  类型: Common.UI.Filter.Impl.FilterOptions+RecipeByCookerFactory
+  基类: Common.UI.Filter.ByValueContainsConfigFactory`2[[GameData.Core.Collections.Cooker+CookerType, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null],[GameData.Core.Collections.Recipe, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  String GetSelectionTextTyped(CookerType value)
+  IReadOnlyCollection`1 get_m_CookerTypes()
+  Void set_m_CookerTypes(IReadOnlyCollection`1 )
+  IReadOnlyCollection`1 m_CookerTypes { get; set; }
+  ... and 609 more
+
+=== 'Spell' (821 lines) ===
+  Action`2 get_OnPostLeaveSpellCardCallback()
+  Void set_OnPostLeaveSpellCardCallback(Action`2 value)
+  CanUseSpellCardDelegate get_CheckCanUseSpellCardCallback()
+  Void set_CheckCanUseSpellCardCallback(CanUseSpellCardDelegate value)
+  SpellExecutionContext GetSpellExecutionContext(Action onFinish, Boolean shouldRecordSpellNum)
+  Action`2 _OnPostLeaveSpellCardCallback_k__BackingField { get; set; }
+  CanUseSpellCardDelegate _CheckCanUseSpellCardCallback_k__BackingField { get; set; }
+  Action`2 OnPostLeaveSpellCardCallback { get; set; }
+  CanUseSpellCardDelegate CheckCanUseSpellCardCallback { get; set; }
+  Void DescribeSpellCard(SpecialGuest detail)
+  Action`2 get_OnPostLeaveSpellCardCallback()
+  Void set_OnPostLeaveSpellCardCallback(Action`2 value)
+  CanUseSpellCardDelegate get_CheckCanUseSpellCardCallback()
+  Void set_CheckCanUseSpellCardCallback(CanUseSpellCardDelegate value)
+  SpellExecutionContext GetSpellExecutionContext(Action onFinish, Boolean shouldRecordSpellNum)
+  Action`2 _OnPostLeaveSpellCardCallback_k__BackingField { get; set; }
+  CanUseSpellCardDelegate _CheckCanUseSpellCardCallback_k__BackingField { get; set; }
+  Action`2 OnPostLeaveSpellCardCallback { get; set; }
+  CanUseSpellCardDelegate CheckCanUseSpellCardCallback { get; set; }
+  === 包含 'SpellCard' 的类型 (10个) ===
+  类型: Night.BossBattle.DLC4_BossBattle.PatchouliMagicSpellCardIndex
+  PatchouliMagicSpellCardIndex Metal
+  PatchouliMagicSpellCardIndex Wood
+  PatchouliMagicSpellCardIndex Water
+  PatchouliMagicSpellCardIndex Fire
+  PatchouliMagicSpellCardIndex Earth
+  PatchouliMagicSpellCardIndex Sun
+  PatchouliMagicSpellCardIndex Moon
+  类型: GameData.Core.Collections.DaySceneUtility.Collections.KyoukoTutorialData_SpellCard
+  类型: DayScene.UI.RogueLike.DLC5_RogueLikeEliteChallenge.DLC5_RogueLikeEliteChallenge_Flandre+_EliteBossSpellCardDeclaration_d__9
+  ... and 791 more
+
+=== 'Tag' (652 lines) ===
+  Il2CppStructArray`1 get_EvaluateLikeFoodTags()
+  Il2CppStructArray`1 get_EvaluateHateFoodTags()
+  Boolean FillterTags(Int32 tagId, Func`2 onGetPopSystemDataCallback, Il2CppStructArray`1 popTags)
+  Il2CppStructArray`1 EvaluateLikeFoodTags { get;  }
+  Il2CppStructArray`1 hateFoodTag { get; set; }
+  Il2CppReferenceArray`1 likeFoodTag { get; set; }
+  Il2CppReferenceArray`1 likeBevTag { get; set; }
+  GameObject get_foodTagParent()
+  Void set_foodTagParent(GameObject )
+  GameObject get_banTagParent()
+  Void set_banTagParent(GameObject )
+  GameObject get_bevTagParent()
+  GameObject foodTagParent { get; set; }
+  GameObject banTagParent { get; set; }
+  GameObject bevTagParent { get; set; }
+  RectTransform foodTagField { get; set; }
+  RectTransform bevTagField { get; set; }
+  List`1 get_RevealedFoodTags()
+  List`1 get_RevealedHateFoodTags()
+  List`1 get_RevealedBevTags()
+  List`1 get_revealedBevTags()
+  Void set_revealedBevTags(List`1 )
+  List`1 get_revealedFoodTags()
+  Void set_revealedFoodTags(List`1 )
+  List`1 get_revealedHateFoodTags()
+  Void set_revealedHateFoodTags(List`1 )
+  List`1 revealedBevTags { get; set; }
+  List`1 revealedFoodTags { get; set; }
+  List`1 revealedHateFoodTags { get; set; }
+  List`1 RevealedFoodTags { get;  }
+  ... and 622 more
+
+=== 'Rating' (4 lines) ===
+  DataBaseAchievement.OnWithIngredientsAndHighestRating() -> Void
+  DataBaseAchievement.OnWithIngredientsAndHighestRatingAndTriggerRewardSpell() -> Void
+  __c__DisplayClass180_0.get_obtainedExGoodRatingWithModifiers() -> Boolean
+  __c__DisplayClass180_0.set_obtainedExGoodRatingWithModifiers(Boolean ) -> Void
+
+=== 'Order' (558 lines) ===
+  OverrideOrderTextDelegate get_OrderFoodTextOverrideCallback()
+  Void set_OrderFoodTextOverrideCallback(OverrideOrderTextDelegate value)
+  OverrideOrderTextDelegate get_OrderBevTextOverrideCallback()
+  Void set_OrderBevTextOverrideCallback(OverrideOrderTextDelegate value)
+  OrderBase PostGenerateOrder(Boolean isFreeOrder, String& orderGenerationMessage)
+  String GetOrderFoodText(SpecialOrder specialOrder)
+  String GetOrderBevText(SpecialOrder specialOrder)
+  OverrideOrderTextDelegate _OrderFoodTextOverrideCallback_k__BackingField { get; set; }
+  OverrideOrderTextDelegate _OrderBevTextOverrideCallback_k__BackingField { get; set; }
+  OrderBase PostGenerateOrder(Boolean isFreeOrder, String& orderGenerationMessage)
+  OrderBase PostGenerateOrder(Boolean isFreeOrder, String& orderGenerationMessage)
+  OverrideOrderTextDelegate get_OrderFoodTextOverrideCallback()
+  Void set_OrderFoodTextOverrideCallback(OverrideOrderTextDelegate value)
+  OverrideOrderTextDelegate get_OrderBevTextOverrideCallback()
+  Void set_OrderBevTextOverrideCallback(OverrideOrderTextDelegate value)
+  OrderBase PostGenerateOrder(Boolean isFreeOrder, String& orderGenerationMessage)
+  String GetOrderFoodText(SpecialOrder specialOrder)
+  String GetOrderBevText(SpecialOrder specialOrder)
+  OverrideOrderTextDelegate _OrderFoodTextOverrideCallback_k__BackingField { get; set; }
+  OverrideOrderTextDelegate _OrderBevTextOverrideCallback_k__BackingField { get; set; }
+  TOrderValue GetValue(Sellable food)
+  TOrderValue GetFocusing(Recipe ordering)
+  类型: Common.UI.Filter.Impl.FilterOptions+IngredientByAcquireOrderFactory
+  基类: Common.UI.Filter.Impl.FilterOptions+TradableByAcquireOrderFactory`1[[GameData.Core.Collections.Ingredient, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+  List`1 GetAcquireOrderList()
+  List`1 get_m_AcquireOrderCache()
+  Void set_m_AcquireOrderCache(List`1 )
+  List`1 m_AcquireOrderCache { get; set; }
+  Single get_AdditiveNextOrderProb()
+  Single GetExtraAdditiveNextOrderProb(Sellable sellable)
+  ... and 528 more
+
+=== 'Inventory' (26 lines) ===
+  Void RefreshInventoryUI()
+  Single get_AddToInventoryDelay()
+  Single get_ExtractFromInventoryDelay()
+  Void OnInventoryUpdate(PartnerBase partnerBase, EventManager eventManager, PartnerManager partnerManager)
+  Single addToInventoryDelay { get; set; }
+  Single extractFromInventoryDelay { get; set; }
+  Single AddToInventoryDelay { get;  }
+  Single ExtractFromInventoryDelay { get;  }
+  Void OnInventoryUpdate(PartnerBase partnerBase, EventManager eventManager, PartnerManager partnerManager)
+  === 包含 'Inventory' 的类型 (5个) ===
+  类型: NightScene.EventUtility.EventManager+InventoryIOType
+  InventoryIOType Ingredient
+  InventoryIOType Beverage
+  InventoryIOType Food
+  类型: NightScene.EventUtility.EventManager+InventoryPriceSortType
+  InventoryPriceSortType Ascending
+  InventoryPriceSortType Descending
+  InventoryPriceSortType Null
+  类型: GameData.Profile.PartnerBase+InventoryType
+  InventoryType Food
+  InventoryType Beverage
+  类型: GameData.Profile.PartnerBossBehaviour+_EmployeeExtractFromInventoryCoroutine_d__50
+  类型: GameData.Profile.PartnerWaitressBehaviour+_EmployeeExtractFromInventoryCoroutine_d__30
+  PartnerWaitressBehaviour.HasInventorySufficientForTargetOrder(OrderBase baseTargetOrder) -> Boolean
+  __c__DisplayClass19_0._HasInventorySufficientForTargetOrder_b__0(KeyValuePair`2 x) -> Boolean
+  __c__DisplayClass19_0._HasInventorySufficientForTargetOrder_b__1(Sellable x) -> Boolean
+
+=== 'Popular' (6 lines) ===
+  DLC5_RogueLikePurchasePanel.RefreshPopularTag() -> Void
+  DLC5_RogueLikePurchasePanel.RefreshPopularTagView() -> Void
+  RogueLikeRunTimeData.GeneratePopularTag() -> Void
+  __c__DisplayClass98_0._GeneratePopularTag_b__0(Int32 x) -> Boolean
+  __c__DisplayClass98_0.get_oldPopularTag() -> Il2CppStructArray`1
+  __c__DisplayClass98_0.set_oldPopularTag(Il2CppStructArray`1 ) -> Void
+
+=== 'Bond' (8 lines) ===
+  Int32 get_CurrentBondExp()
+  Void set_CurrentBondExp(Int32 value)
+  Int32 get_CurrentBondLevel()
+  Void set_CurrentBondLevel(Int32 value)
+  Int32 _CurrentBondExp_k__BackingField { get; set; }
+  Int32 _CurrentBondLevel_k__BackingField { get; set; }
+  Int32 CurrentBondExp { get; set; }
+  Int32 CurrentBondLevel { get; set; }
+
+=== 'Kizuna' (86 lines) ===
+  Il2CppReferenceArray`1 get_characterKizunaLevel1Welcome()
+  Void set_characterKizunaLevel1Welcome(Il2CppReferenceArray`1 )
+  Il2CppReferenceArray`1 get_characterKizunaLevel2Welcome()
+  Void set_characterKizunaLevel2Welcome(Il2CppReferenceArray`1 )
+  Il2CppReferenceArray`1 get_characterKizunaLevel3Welcome()
+  Void set_characterKizunaLevel3Welcome(Il2CppReferenceArray`1 )
+  Il2CppReferenceArray`1 get_characterKizunaLevel4Welcome()
+  Void set_characterKizunaLevel4Welcome(Il2CppReferenceArray`1 )
+  Il2CppReferenceArray`1 get_characterKizunaLevel5Welcome()
+  Void set_characterKizunaLevel5Welcome(Il2CppReferenceArray`1 )
+  Il2CppStringArray get_characterKizunaLevel1ChatData()
+  Void set_characterKizunaLevel1ChatData(Il2CppStringArray )
+  Il2CppStringArray get_characterKizunaLevel2ChatData()
+  Void set_characterKizunaLevel2ChatData(Il2CppStringArray )
+  Il2CppStringArray get_characterKizunaLevel3ChatData()
+  Void set_characterKizunaLevel3ChatData(Il2CppStringArray )
+  Il2CppStringArray get_characterKizunaLevel4ChatData()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel1Welcome()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel2Welcome()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel3Welcome()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel4Welcome()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel5Welcome()
+  Il2CppStringArray get_AdditiveCharacterKizunaLevel1ChatData()
+  Il2CppStringArray get_AdditiveCharacterKizunaLevel2ChatData()
+  Il2CppStringArray get_AdditiveCharacterKizunaLevel3ChatData()
+  Il2CppStringArray get_AdditiveCharacterKizunaLevel4ChatData()
+  Il2CppStringArray get_AdditiveCharacterKizunaLevel5ChatData()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel2InviteSucceed()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel2InviteFailed()
+  Il2CppReferenceArray`1 get_AdditiveCharacterKizunaLevel3InviteSucceed()
+  ... and 56 more
+
+
+=== 游戏相关方法 (前500行) ===
+与稀客/料理/酒水/食材/厨具相关的方法 ===
+  CreatorBoxData.get_SpecGuestSettingStream() -> IReadOnlyList`1
+  ObjectCacheManager.CreateOrderingElement() -> OrderingElement
+  ObjectCacheManager.CreateGhostOrderingElement() -> Transform
+  ObjectCacheManager.GetOrderingElement(Action`1& pushCallback) -> OrderingElement
+  ObjectCacheManager.GetGhostOrderingElement(Action`1& pushCallback) -> Transform
+  ObjectCacheManager.get_orderingElementParent() -> CachedObject
+  ObjectCacheManager.set_orderingElementParent(CachedObject ) -> Void
+  ObjectCacheManager.get_ghostOrderingElementParent() -> CachedObject
+  ObjectCacheManager.set_ghostOrderingElementParent(CachedObject ) -> Void
+  ObjectCacheManager.get_allOrderElementObjects() -> Stack`1
+  ObjectCacheManager.set_allOrderElementObjects(Stack`1 ) -> Void
+  ObjectCacheManager.get_allGhostOrderElementObjects() -> Stack`1
+  ObjectCacheManager.set_allGhostOrderElementObjects(Stack`1 ) -> Void
+  MusicGameMainDancingCharacterElement.get_guestId() -> String
+  MusicGameMainDancingCharacterElement.set_guestId(String ) -> Void
+  CheerGuestSpawnMode.get_CheerGuestImage() -> AssetReference
+  CheerGuestSpawnMode.get_cheerGuestImage() -> AssetReference
+  CheerGuestSpawnMode.set_cheerGuestImage(AssetReference ) -> Void
+  MusicGameMainPannel.get_haveSpawnedGuestNum() -> Int32
+  MusicGameMainPannel.set_haveSpawnedGuestNum(Int32 ) -> Void
+  MusicGameMainPannel.get_cheerGuestTransform() -> Transform
+  MusicGameMainPannel.set_cheerGuestTransform(Transform ) -> Void
+  MusicGameMainPannel.get_cheerGuestImage() -> Il2CppReferenceArray`1
+  MusicGameMainPannel.set_cheerGuestImage(Il2CppReferenceArray`1 ) -> Void
+  MusicGameMainPannel.get_cheeringGuests() -> List`1
+  MusicGameMainPannel.set_cheeringGuests(List`1 ) -> Void
+  MusicGameConfigPannel.get_m_MusicVolumePercentageText() -> TMP_Text
+  MusicGameConfigPannel.set_m_MusicVolumePercentageText(TMP_Text ) -> Void
+  MusicGameConfigPannel.get_m_ButtonVolumePercentageText() -> TMP_Text
+  MusicGameConfigPannel.set_m_ButtonVolumePercentageText(TMP_Text ) -> Void
+  MusicGameConfigPannel.get_m_MusicalNoteSpeedPercentageText() -> TMP_Text
+  MusicGameConfigPannel.set_m_MusicalNoteSpeedPercentageText(TMP_Text ) -> Void
+  MusicSelectorReconfirmPannel.get_m_MusicalNoteSpeedPercentageText() -> TMP_Text
+  MusicSelectorReconfirmPannel.set_m_MusicalNoteSpeedPercentageText(TMP_Text ) -> Void
+  MusicSelectorReconfirmPannel.get_m_MusicVolumePercentageText() -> TMP_Text
+  MusicSelectorReconfirmPannel.set_m_MusicVolumePercentageText(TMP_Text ) -> Void
+  MusicSelectorReconfirmPannel.get_m_ButtonVolumePercentageText() -> TMP_Text
+  MusicSelectorReconfirmPannel.set_m_ButtonVolumePercentageText(TMP_Text ) -> Void
+  DLC3_MusicGameMainPannel.get_haveSpawnedGuestNum() -> Int32
+  DLC3_MusicGameMainPannel.set_haveSpawnedGuestNum(Int32 ) -> Void
+  SpecialGuestControlled.GetMizuchiControlledGuest() -> Il2CppStructArray`1
+  SpecialGuestControlled.ContainsDisappearSpecialGuests(Int32 specialGuestId) -> Boolean
+  SpecialGuestControlled.TryConvertControllableSpecialGuest(SpecialGuest sourceSpecialGuest, SpecialGuest& destinationSpecialGuest) -> Boolean
+  SpecialGuestControlled.GenerateControllableSpecialGuest() -> ControlledSpecialGuest
+  SpecialGuestControlled.CheckSpecialGuestUsability(Int32 specialGuestId) -> Boolean
+  SpecialGuestControlled.get_m_SpecialGuestsCache() -> List`1
+  SpecialGuestControlled.set_m_SpecialGuestsCache(List`1 ) -> Void
+  SpecialGuestControlled.get_m_ControlledSpecialGuests() -> List`1
+  SpecialGuestControlled.set_m_ControlledSpecialGuests(List`1 ) -> Void
+  SceneManager.get_unlockedLevel5Guests() -> Il2CppStringArray
+  SceneManager.set_unlockedLevel5Guests(Il2CppStringArray ) -> Void
+  ResultSceneStatusPannel.get_bussinessBeverageConsumes() -> RectTransform
+  ResultSceneStatusPannel.set_bussinessBeverageConsumes(RectTransform ) -> Void
+  ResultSceneStatusPannel.get_missionIngredientConsumes() -> RectTransform
+  ResultSceneStatusPannel.set_missionIngredientConsumes(RectTransform ) -> Void
+  ResultSceneStatusPannel.get_missionBeverageConsumes() -> RectTransform
+  ResultSceneStatusPannel.set_missionBeverageConsumes(RectTransform ) -> Void
+  ResultSceneStatusPannel.get_normalGuestReception() -> TextMeshProUGUI
+  ResultSceneStatusPannel.set_normalGuestReception(TextMeshProUGUI ) -> Void
+  ResultSceneStatusPannel.get_specialGuestReception() -> TextMeshProUGUI
+  ResultSceneStatusPannel.set_specialGuestReception(TextMeshProUGUI ) -> Void
+  IzakayaConfigPannel.set_m_RequiredIngredients(Il2CppReferenceArray`1 ) -> Void
+  IzakayaConfigPannel.get_m_BeveragesFilter() -> List`1
+  IzakayaConfigPannel.set_m_BeveragesFilter(List`1 ) -> Void
+  IzakayaConfigPannel.get_m_CookersFilter() -> List`1
+  IzakayaConfigPannel.set_m_CookersFilter(List`1 ) -> Void
+  IzakayaConfigPannel.get_m_FalseCookerRecipe() -> Dictionary`2
+  IzakayaConfigPannel.set_m_FalseCookerRecipe(Dictionary`2 ) -> Void
+  IzakayaConfigPannel.get_m_LackIngredientsRecipe() -> List`1
+  IzakayaConfigPannel.set_m_LackIngredientsRecipe(List`1 ) -> Void
+  IzakayaConfigPannel.get_m_RecipeFilter() -> List`1
+  IzakayaConfigPannel.set_m_RecipeFilter(List`1 ) -> Void
+  IzakayaConfigPannel.get_m_BeverageGroup() -> SellableGroup`1
+  IzakayaConfigPannel.set_m_BeverageGroup(SellableGroup`1 ) -> Void
+  IzakayaConfigPannel.get_m_CookerGroup() -> CookerGroup
+  IzakayaConfigPannel.set_m_CookerGroup(CookerGroup ) -> Void
+  IzakayaConfigPannel.get_m_InStorageCookerGroup() -> CanvasGroup
+  IzakayaConfigPannel.set_m_InStorageCookerGroup(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_InStorageRecipeGroup() -> CanvasGroup
+  IzakayaConfigPannel.set_m_InStorageRecipeGroup(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_RecipeGroup() -> SellableGroup`1
+  IzakayaConfigPannel.set_m_RecipeGroup(SellableGroup`1 ) -> Void
+  IzakayaConfigPannel.get_RECIPE_PADDING_BOTTOM() -> Int32
+  IzakayaConfigPannel.set_RECIPE_PADDING_BOTTOM(Int32 ) -> Void
+  IzakayaConfigPannel.get_m_DailyRecipePrinter() -> DailyRecipePrinterNew
+  IzakayaConfigPannel.set_m_DailyRecipePrinter(DailyRecipePrinterNew ) -> Void
+  IzakayaConfigPannel.get_m_RegisteredCookerParent() -> GameObject
+  IzakayaConfigPannel.set_m_RegisteredCookerParent(GameObject ) -> Void
+  IzakayaConfigPannel.get_m_InStorageRecipeField() -> GridLayoutGroup
+  IzakayaConfigPannel.set_m_InStorageRecipeField(GridLayoutGroup ) -> Void
+  IzakayaConfigPannel.get_m_InStorageCookerField() -> GridLayoutGroup
+  IzakayaConfigPannel.set_m_InStorageCookerField(GridLayoutGroup ) -> Void
+  IzakayaConfigPannel.get_m_RegisteredCookerField() -> GridLayoutGroup
+  IzakayaConfigPannel.set_m_RegisteredCookerField(GridLayoutGroup ) -> Void
+  IzakayaConfigPannel.get_m_RecipeHighlighter() -> CanvasGroup
+  IzakayaConfigPannel.set_m_RecipeHighlighter(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_BeverageHighlighter() -> CanvasGroup
+  IzakayaConfigPannel.set_m_BeverageHighlighter(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_CookerHighlighter() -> CanvasGroup
+  IzakayaConfigPannel.set_m_CookerHighlighter(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_RequiredCooker() -> Image
+  IzakayaConfigPannel.set_m_RequiredCooker(Image ) -> Void
+  IzakayaConfigPannel.get_m_RequiredCookerCanvasGroup() -> CanvasGroup
+  IzakayaConfigPannel.set_m_RequiredCookerCanvasGroup(CanvasGroup ) -> Void
+  IzakayaConfigPannel.get_m_RequiredCookerGameObject() -> GameObject
+  IzakayaConfigPannel.set_m_RequiredCookerGameObject(GameObject ) -> Void
+  IzakayaConfigPannel.get_m_RequiredIngredients() -> Il2CppReferenceArray`1
+  IzakayaPresetPannel.get_RecipeField() -> RectTransform
+  IzakayaPresetPannel.set_RecipeField(RectTransform ) -> Void
+  IzakayaPresetPannel.get_BeverageField() -> RectTransform
+  IzakayaPresetPannel.set_BeverageField(RectTransform ) -> Void
+  IzakayaPresetPannel.get_CookerField() -> RectTransform
+  IzakayaPresetPannel.set_CookerField(RectTransform ) -> Void
+  IzakayaPresetPannel.get_m_AllBeverageInstances() -> List`1
+  IzakayaPresetPannel.set_m_AllBeverageInstances(List`1 ) -> Void
+  IzakayaPresetPannel.get_m_AllCookerInstances() -> List`1
+  IzakayaPresetPannel.set_m_AllCookerInstances(List`1 ) -> Void
+  IzakayaPresetPannel.get_m_AllRecipeInstances() -> List`1
+  IzakayaPresetPannel.set_m_AllRecipeInstances(List`1 ) -> Void
+  NightSceneDebugConsole.Guests() -> Void
+  NightSceneDebugConsole.get_isGuestSetShown() -> Boolean
+  NightSceneDebugConsole.set_isGuestSetShown(Boolean ) -> Void
+  NightSceneDebugConsole.get_selectedSpecialGuestIndex() -> Int32
+  NightSceneDebugConsole.set_selectedSpecialGuestIndex(Int32 ) -> Void
+  NightSceneDebugConsole.get_selectedNormalGuestIndex() -> Int32
+  NightSceneDebugConsole.set_selectedNormalGuestIndex(Int32 ) -> Void
+  NightSceneDebugConsole.get_isSelectedSpecialGuestExpanded() -> Boolean
+  NightSceneDebugConsole.set_isSelectedSpecialGuestExpanded(Boolean ) -> Void
+  NightSceneDebugConsole.get_isSelectedNormalGuestExpanded() -> Boolean
+  NightSceneDebugConsole.set_isSelectedNormalGuestExpanded(Boolean ) -> Void
+  NightSceneDebugConsole.get_currentInDeskGuestPannelScrollViewPosition() -> Vector2
+  NightSceneDebugConsole.set_currentInDeskGuestPannelScrollViewPosition(Vector2 ) -> Void
+  NightSceneDebugConsole.get_currentQueuedGuestPannelScrollViewPosition() -> Vector2
+  NightSceneDebugConsole.set_currentQueuedGuestPannelScrollViewPosition(Vector2 ) -> Void
+  DaySceneDebugConsole.get_specialGuestSelections() -> Dictionary`2
+  DaySceneDebugConsole.set_specialGuestSelections(Dictionary`2 ) -> Void
+  DaySceneDebugImpl.AddReimuPossitiveSpellToWorkScene() -> Void
+  DaySceneDebugImpl.UnlockSpecialGuestsAndMaps() -> Void
+  DaySceneDebugImpl.ClearAllIngredients() -> Void
+  DaySceneDebugImpl.ClearAllBeverages() -> Void
+  NightSceneDebugImpl.SupplementaryBeverages() -> Void
+  NightSceneDebugImpl.SupplementaryIngredients() -> Void
+  NightSceneDebugImpl.ClearSpecialGuestAlbum() -> Void
+  NightSceneDebugImpl.SpawnNormalGuest() -> Void
+  NightSceneDebugImpl.SpawnSpecialGuest() -> Void
+  NightSceneDebugImpl.SpawnNormalGuest(Int32 normalGuestId) -> Void
+  NightSceneDebugImpl.SpawnSpecialGuest(Int32 specialGuestId) -> Void
+  NightSceneDebugImpl.RepellGuestAndPay() -> Void
+  NightSceneDebugImpl.RepellGuestAndPay(Int32 deskCode) -> Void
+  NightSceneDebugImpl.RepellGuestAndPayByMoodValue(Int32 deskCode) -> Void
+  NightSceneDebugImpl.GetSpecialGuestsController(Int32 deskCode) -> SpecialGuestsController
+  NightSceneDebugImpl.GetAllNormalGuestsMapping() -> Dictionary`2
+  NightSceneDebugImpl.GetAllSpecialGuestsMapping() -> Dictionary`2
+  NightSceneDebugImpl.LockDailyRecipes(Int32 amount, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.CookTimeAndOrderRateEditByTag(Int32 foodTag, Single cookTimeMultiplier, Single additiveContinueProbability, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.CookTimeAndOrderRateEditByCookerType(Single multiplier, Single additiveContinueProbability, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.SetGuestNotLeaveWhenIzakayaClose(Int32 durationSeconds, BuffType buffType) -> Void
+  NightSceneDebugImpl.GuestMoodExtraAddEdit(Int32 mood, Int32 durationSeconds, BuffType buffType) -> Void
+  NightSceneDebugImpl.OrderCycleRateEdit(Single multiplier, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.GuestPatientEdit_Youmu(Single value, Single timeInterval, Single multiplier, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.GuestInstantEvaluate(Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.GuestInstantEvaluate_Yuyuko() -> Void
+  NightSceneDebugImpl.GuestPatientFreeze(Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.SpawnNormalGuests(Int32 amount, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.SpawnTargetNormalGuests(Int32 amount, Int32 durationSeconds, Int32 normalGuestId) -> Void
+  NightSceneDebugImpl.MakeGuestsPayTipsNormal(Int32 minAmount, Int32 maxAmount, Int32 timeInterval) -> Void
+  NightSceneDebugImpl.MakeGuestsPayTipsKasen(Int32 minAmount, Int32 maxAmount, Int32 minTimeInterval, Int32 maxTimeInterval, Int32 durationSeconds) -> Void
+  NightSceneDebugImpl.UnambitiousGuests(Int32 durationSeconds) -> Void
+  IncomeControllerMizuchi.get_m_TanBuffLockIngredientsCanvasGroup() -> CanvasGroup
+  IncomeControllerMizuchi.set_m_TanBuffLockIngredientsCanvasGroup(CanvasGroup ) -> Void
+  OrderController.HasValidOrder() -> Boolean
+  OrderController.AddOrder(OrderBase orderBase) -> Void
+  OrderController.RemoveOrder(Predicate`1 selector, String debugMessage) -> Void
+  OrderController.TryFocusToOrder(Predicate`1 selector, String debugMessage) -> Void
+  OrderController.SetPartnerOrderData(Int32 deskCode, Nullable`1 partnerType, SellableType sellableType, String debugMessage) -> Void
+  OrderController.GetShowInUIOrders() -> IEnumerable`1
+  OrderController.TryUpdateToCurrentOrder() -> Void
+  OrderController.IsOrderOpen(OrderingElement element) -> Boolean
+  OrderController.IsOrderOpen(OrderBase order) -> Boolean
+  OrderController.get_OrderField() -> RectTransform
+  OrderController.HasOrderImpl() -> Boolean
+  OrderController.HasValidOrderImpl() -> Boolean
+  OrderController.AddOrderImpl(OrderBase orderBase) -> Void
+  OrderController.RemoveOrderImpl(Predicate`1 selector, String debugMessage) -> Void
+  OrderController.TryFocusToOrderImpl(Predicate`1 selector, String debugMessage) -> Void
+  OrderController.TryUpdateToCurrentOrderImpl() -> Void
+  OrderController.SetPartnerOrderDataImpl(Int32 deskCode, Nullable`1 partnerType, SellableType sellableType, String debugMessage) -> Void
+  OrderController.GetShowInUIOrdersImpl() -> IEnumerable`1
+  OrderController.CreateOrderingElement(OrderBase orderBase) -> OrderingElement
+  OrderController.PrintOrderContent() -> String
+  OrderController.get_m_Orders() -> List`1
+  OrderController.set_m_Orders(List`1 ) -> Void
+  OrderController.get_m_OrderField() -> RectTransform
+  OrderController.set_m_OrderField(RectTransform ) -> Void
+  OrderController.get_m_CookerSprite() -> Sprite
+  OrderController.set_m_CookerSprite(Sprite ) -> Void
+  CookAnimatorTest.get_m_CookerProfile() -> CookerProfile
+  CookAnimatorTest.set_m_CookerProfile(CookerProfile ) -> Void
+  CookAnimatorTest.get_m_CookerIndex() -> Int32
+  CookAnimatorTest.set_m_CookerIndex(Int32 ) -> Void
+  RogueLikeManager.get_GuestsManager() -> GuestsManager
+  DLC5_RogueLikeCardPersistentAddFreeIngredientFromRecipe.get_addFreeIngredientFromRecipeNum() -> Int32
+  DLC5_RogueLikeCardPersistentAddFreeIngredientFromRecipe.set_addFreeIngredientFromRecipeNum(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentAddOrderRate.get_extraOrderRate() -> Single
+  DLC5_RogueLikeCardPersistentAddOrderRate.set_extraOrderRate(Single ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_BeverageLevelLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_BeverageLevelLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_BeverageNumOverLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_BeverageNumOverLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_BeverageNumBelowLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_BeverageNumBelowLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_IngredientLevelLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_IngredientLevelLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_IngredientNumOverLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_IngredientNumOverLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentHellTrail.get_m_IngredientNumBelowLine() -> Int32
+  DLC5_RogueLikeCardPersistentHellTrail.set_m_IngredientNumBelowLine(Int32 ) -> Void
+  DLC5_RogueLikeCardPersistentTargetTagCriticalPay.get_targetTag() -> Int32
+  DLC5_RogueLikeCardPersistentTargetTagCriticalPay.set_targetTag(Int32 ) -> Void
+  GuestGuardMapping.get_youseiOrderBevId() -> Int32
+  GuestGuardMapping.set_youseiOrderBevId(Int32 ) -> Void
+  SpellFire.get_damagePercentage() -> Single
+  SpellFire.set_damagePercentage(Single ) -> Void
+  DLC4_BossBattleManager.get__GuestsManager_k__BackingField() -> GuestsManager
+  DLC4_BossBattleManager.set__GuestsManager_k__BackingField(GuestsManager ) -> Void
+  DLC4_BossBattleManager.get_SHOP_GUESTTABLE() -> Int32
+  DLC4_BossBattleManager.set_SHOP_GUESTTABLE(Int32 ) -> Void
+  DLC4_BossBattleManager.get_PATCHOULI_GUEST_TABLE() -> Int32
+  DLC4_BossBattleManager.set_PATCHOULI_GUEST_TABLE(Int32 ) -> Void
+  DLC4_BossBattleManager.get_PATCHOULI_GUEST_ID() -> Int32
+  DLC4_BossBattleManager.set_PATCHOULI_GUEST_ID(Int32 ) -> Void
+  DLC4_BossBattleManager.GetGuestTable(Int32 deskCode) -> Vector3Int
+  DLC4_BossBattleManager.GenerateOrder(GuestGroupController guest, String& orderGenerationMessage) -> OrderBase
+  DLC4_BossBattleManager.PatchouliSpellCardStartCoolDown(Boolean showEndVFX) -> Void
+  DLC4_BossBattleManager.UsePatchouliSpell(PatchouliMagicSpellCardIndex spellCardIndex) -> IEnumerator
+  DLC4_BossBattleManager.GetPatchouliSpellReplacedMethodBuff(PatchouliMagicSpellCardIndex spellCardIndex, String oldText, Int32 currentTime) -> String
+  DLC4_BossBattleManager.GetPatchouliSpellReplacedMethodDescription(PatchouliMagicSpellCardIndex spellCardIndex, String oldText) -> String
+  DLC4_BossBattleManager.Method_Private_Void_PatchouliSpellBase_PDM_0(PatchouliSpellBase model) -> Void
+  DLC4_BossBattleManager.get_AllHeroGuests() -> Dictionary`2
+  DLC4_BossBattleManager.set_AllHeroGuests(Dictionary`2 ) -> Void
+  DLC4_BossBattleManager.get_couldUsedPatchouliMagicSpellCards() -> HashSet`1
+  DLC4_BossBattleManager.set_couldUsedPatchouliMagicSpellCards(HashSet`1 ) -> Void
+  DLC4_BossBattleManager.get_currentPatchouliMagicSpellCards() -> HashSet`1
+  DLC4_BossBattleManager.set_currentPatchouliMagicSpellCards(HashSet`1 ) -> Void
+  DLC4_BossBattleManager.get_patchouliSpellCardTextMethods() -> Dictionary`2
+  DLC4_BossBattleManager.set_patchouliSpellCardTextMethods(Dictionary`2 ) -> Void
+  DLC4_BossBattleManager.SetOrder(Int32 deskCode) -> Void
+  DLC4_BossBattleManager.get_GuestsManager() -> GuestsManager
+  DLC4_BossBattleManager.set_GuestsManager(GuestsManager value) -> Void
+  DLC4_FlandreEnemyCharacterController.get__TargetGuestFortification_k__BackingField() -> DLC4_GuardController
+  DLC4_FlandreEnemyCharacterController.set__TargetGuestFortification_k__BackingField(DLC4_GuardController ) -> Void
+  DLC4_FlandreEnemyCharacterController.get_TargetGuestFortification() -> DLC4_GuardController
+  DLC4_FlandreEnemyCharacterController.set_TargetGuestFortification(DLC4_GuardController value) -> Void
+  DLC4_GuardController.get_GuestManager() -> GuestsManager
+  DLC4_GuardKagerou.get_MEAT_TAG() -> Int32
+  DLC4_GuardKagerou.set_MEAT_TAG(Int32 ) -> Void
+  DLC4_GuardShinmyoumaru.get_AURABURSTING_TAG() -> Int32
+  DLC4_GuardShinmyoumaru.set_AURABURSTING_TAG(Int32 ) -> Void
+  DLC4_GuardShinmyoumaru.get_m_YuushaBuffAtLeastCostPPercentage() -> Single
+  DLC4_GuardShinmyoumaru.set_m_YuushaBuffAtLeastCostPPercentage(Single ) -> Void
+  DLC4_BossBattlePatchouliSpellPanel.ShouldEnableSpellElement(PatchouliMagicSpellCardIndex arg) -> Boolean
+  DLC4_ChallengeCardSelectorPanel.DescribeGuest(RectTransform rectTransform, GuestGuardMapping& mapping) -> Void
+  PartyStageMap.get_m_CharacterStageDataDispose() -> Action
+  PartyStageMap.set_m_CharacterStageDataDispose(Action ) -> Void
+  UIManager.get_m_InfiniteIngredientsPanel() -> AssetReferenceT`1
+  UIManager.set_m_InfiniteIngredientsPanel(AssetReferenceT`1 ) -> Void
+  UIManager.OpenInfiniteIngredientsPanelAsync(ActiveCount activeCount) -> UniTask
+  DaySceneChatSelectionPannel.RequestIngredient(String characterLabel, Int32 currentKizunaLevel, Action`1 onWillExecuteDayEndEventCallback) -> Void
+  DaySceneChatSelectionPannel.RequestBeverages(String characterLabel, Int32 currentKizunaLevel, Action`1 onWillExecuteDayEndEventCallback) -> Void
+  DaySceneChatSelectionPannel.InviteSpecGuest(SpecialGuest specialGuest, Int32 kizunaLevel, DialogPackage& selectedDialogue) -> Boolean
+  DaySceneChatSelectionPannel.CommitSpecGuest(SpecialGuest specialGuest, String commisionLabel) -> Void
+  DaySceneChatSelectionPannel.get_SOFT_DRINK_T

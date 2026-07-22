@@ -1,0 +1,25 @@
+Total bundles: 7934
+Largest bundles:
+  core_01d3011ba951ca84599ea62eba134fe3.bundle: 248665KB (242.8MB)
+  system_fontdata_assets_all.bundle: 150547KB (147.0MB)
+  core_d53aa85e17b5c4a0894bc1641f1d4305.bundle: 33288KB (32.5MB)
+  core_b4e6be3a33fb6546c4f7daf23d469ba9.bundle: 24068KB (23.5MB)
+  dlc3_b696f7b8a62f97566aa3fe5e5bf0f989.bundle: 23830KB (23.3MB)
+  core_c43c6ff107105bad06302d893ab4756b.bundle: 22682KB (22.2MB)
+  core_582cc47bf3acb704415474a7d36ab051.bundle: 22019KB (21.5MB)
+  core_25ce74f94bb183cfe6122bd3fd7525dc.bundle: 20308KB (19.8MB)
+  core_a073ba9761ba53b8e1ca09ebd1c152a9.bundle: 20291KB (19.8MB)
+  dlc2_f35008ba4e1b0b18a88538b26b808086.bundle: 16959KB (16.6MB)
+  dlc4_4d8e20143b2bb89a92a4272f7adcef40.bundle: 16270KB (15.9MB)
+  dlc4_35b3ee530b6b85843ff507c4bc832ce9.bundle: 14157KB (13.8MB)
+  core_ea7e85f05a4c049b2608614e611da23a.bundle: 13995KB (13.7MB)
+  dlc1_1250f3c2267a617896829f00126cdf67.bundle: 13083KB (12.8MB)
+  dlc1_917c421634d4912133fe840e76377fac.bundle: 12977KB (12.7MB)
+  core_11315abd04cc48a6466968afe7799178.bundle: 11302KB (11.0MB)
+  core_78bc0b14402eed910bf097d4c3aaa297.bundle: 10289KB (10.0MB)
+  dlcshared_2d4ad76e26dd816827d8bfffac8ad20c.bundle: 9964KB (9.7MB)
+  dlcshared_12b79fcaee3b6384142bf5c9dbd0fc18.bundle: 9553KB (9.3MB)
+  core_6fe4d75f8c7c0c7728854eddd5815256.bundle: 9382KB (9.2MB)
+
+
+Found 0 bundles with customer data in large bundles

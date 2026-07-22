@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>稀客推荐UI原型 - 可拖拽+折叠</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  /* 模拟游戏背景画面 */
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><rect fill="%2318182e"/><circle cx="200" cy="150" r="80" fill="%23222"/><circle cx="600" cy="120" r="60" fill="%23222"/><text x="400" y="300" text-anchor="middle" fill="%23333" font-size="24" font-family="sans-serif">（模拟游戏画面）</text></svg>');
+  background-size: cover;
+  font-family: 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  overflow: auto;
+  min-height: 100vh;
+  user-select: none;
+}
+.card {
+  position: absolute;
+  width: 310px;
+  background: rgba(8,8,26,0.50);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  color: #ccc;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: box-shadow 0.15s;
+  cursor: default;
+}
+.card.dragging {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  z-index: 999 !important;
+  opacity: 0.92;
+}
+.card-header {
+  padding: 6px 10px;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid rgba(50,50,80,0.4);
+}
+.card-header:active { cursor: grabbing; }
+.drag-handle {
+  color: rgba(180,180,200,0.6);
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 2px;
+  cursor: grab;
+}
+.desk-badge {
+  background: rgba(30,140,220,0.3);
+  color: #4dc9f6;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 11px;
+}
+.customer-name {
+  color: #ffd700;
+  font-weight: bold;
+  flex: 1;
+}
+.section { border-top: 1px solid rgba(255,255,255,0.04); }
+.section-header {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #999;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.section-header:hover { color: #ddd; background: rgba(255,255,255,0.03); }
+.section-header .arrow {
+  font-size: 10px;
+  transition: transform 0.15s;
+  width: 12px;
+  display: inline-block;
+}
+.section-header .arrow.collapsed { transform: rotate(-90deg); }
+.section-content { padding: 4px 10px 6px; }
+.section-content.hidden { display: none; }
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+.tag {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.tag-pos { background: rgba(0,200,80,0.15); color: #4cff8c; }
+.tag-neg { background: rgba(240,60,60,0.15); color: #ff5555; }
+.tag-bev { background: rgba(180,140,255,0.15); color: #b48cff; }
+.tag-req { background: rgba(30,200,255,0.15); color: #33ddff; font-weight: bold; }
+
+.rec-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 2px 0;
+}
+.rating { padding: 1px 6px; border-radius: 3px; font-weight: bold; font-size: 12px; }
+.rating-perfect { background: rgba(255,215,0,0.2); color: #ffd700; }
+.rating-good { background: rgba(0,220,100,0.2); color: #4cff8c; }
+.recipe-name { color: #ffeebb; font-weight: bold; }
+.beverage-name { color: #ffcc66; font-weight: bold; }
+.score-badge { font-size: 11px; font-weight: bold; }
+.score-pos { color: #4cff8c; }
+.score-zero { color: #777; }
+.price { color: #ddd; font-size: 11px; margin-left: auto; font-weight: bold; }
+.detail { color: #aaa; font-size: 11px; padding: 1px 0; }
+.ingredients { color: #ddeeff; font-size: 11px; padding: 1px 0; font-weight: bold; }
+
+/* 浮动背景提示 */
+.bg-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  color: rgba(255,255,255,0.12);
+  font-size: 28px;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- 模拟游戏背景 -->
+<div class="bg-hint">🌸 透过卡片可见的游戏画面 🌸</div>
+
+<div id="cards"></div>
+
+<script>
+// ===== 模拟数据（与插件输出一致的推荐结果） =====
+const cardData = [
+  {
+    desk: 1, name: "时焉侑",
+    reqFood: "下酒", reqBev: "西洋酒",
+    posTags: ["家常","汤羹","和风","鲜","甘","辛","中华"],
+    negTags: ["大份","猎奇"],
+    bevTags: ["中酒精","高酒精"],
+    recs: [
+      {
+        name: "海鲜味噌汤", rating: "优秀", recScore: 4,
+        bev: "果味High Ball", bevScore: 1,
+        price: 20, cooker: "煮锅",
+        recTags: ["素","家常","汤羹","下酒"],
+        bevTags: ["低酒精","可加冰","鸡尾酒","西洋酒","水果","甘","苦"],
+        ings: ["海苔","+萝卜"]
+      },
+      {
+        name: "毛玉熔岩豆腐", rating: "优秀", recScore: 4,
+        bev: "教父", bevScore: 2,
+        price: 265, cooker: "夜雀煮锅",
+        recTags: ["素","中华","鲜","适合拍照","不可思议"],
+        bevTags: ["高酒精","可加冰","鸡尾酒","西洋酒","苦","古典"],
+        ings: ["豆腐","辣椒","牛肉","洋葱"]
+      }
+    ]
+  },
+  {
+    desk: 2, name: "萌澄果",
+    reqFood: "甜", reqBev: "可加冰",
+    posTags: ["甜","水果","甘","西式","适合拍照"],
+    negTags: ["苦","猎奇"],
+    bevTags: ["低酒精","水果"],
+    recs: [
+      {
+        name: "力量汤", rating: "优秀", recScore: 4,
+        bev: "教父", bevScore: 2,
+        price: 214, cooker: "煮锅",
+        recTags: ["素","山珍","灼热","力量涌现","汤羹","甜"],
+        bevTags: ["高酒精","可加冰","鸡尾酒","西洋酒","苦","古典"],
+        ings: ["海苔","野猪肉","+蜂蜜","+八目鳗","+幻昙华"]
+      },
+      {
+        name: "海鲜味噌汤", rating: "优秀", recScore: 4,
+        bev: "果味High Ball", bevScore: 2,
+        price: 20, cooker: "煮锅",
+        recTags: ["素","家常","汤羹","甜"],
+        bevTags: ["低酒精","可加冰","鸡尾酒","西洋酒","水果","甘","苦"],
+        ings: ["海苔","+蜂蜜"]
+      }
+    ]
+  }
+];
+
+let zIndex = 10;
+
+function buildCards() {
+  const container = document.getElementById('cards');
+
+  cardData.forEach((d, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.left = (20 + idx * 330) + 'px';
+    card.style.top = '20px';
+    card.style.zIndex = zIndex++;
+
+    let html = '';
+
+    // ===== 标题行（可拖拽） =====
+    html += `<div class="card-header" data-drag="true">`;
+    html += `<span class="drag-handle">⠿</span>`;
+    html += `<span class="desk-badge">#${d.desk + 1}</span>`;
+    html += `<span class="customer-name">★ ${d.name}</span>`;
+    html += `</div>`;
+
+    // ===== 概述区 =====
+    html += `<div class="section">`;
+    html += `<div class="section-header" data-toggle="overview">`;
+    html += `<span class="arrow">▼</span> 稀客需求`;
+    html += `</div>`;
+    html += `<div class="section-content" data-panel="overview">`;
+    // 标签行
+    html += `<div class="tag-row">`;
+    d.posTags.forEach(t => { html += `<span class="tag tag-pos">+${t}</span>`; });
+    d.negTags.forEach(t => { html += `<span class="tag tag-neg">-${t}</span>`; });
+    d.bevTags.forEach(t => { html += `<span class="tag tag-bev">${t}</span>`; });
+    html += `</div><div class="tag-row">`;
+    html += `<span class="tag tag-req">食:${d.reqFood}</span>`;
+    html += `<span class="tag tag-req">饮:${d.reqBev}</span>`;
+    html += `</div>`;
+    html += `</div></div>`;
+
+    // ===== 方案区 =====
+    d.recs.forEach((r, ri) => {
+      const scoreStyle = cls => cls > 0 ? 'score-pos' : 'score-zero';
+      html += `<div class="section">`;
+      html += `<div class="section-header" data-toggle="rec${ri}">`;
+      html += `<span class="arrow">▼</span> `;
+      html += `<span class="rating ${r.rating === '完美' ? 'rating-perfect' : 'rating-good'}">${r.rating}</span> `;
+      html += `<span class="recipe-name">${r.name}</span> <span class="score-badge ${scoreStyle(r.recScore)}">${r.recScore > 0 ? '+' : ''}${r.recScore}</span> `;
+      html += `+ <span class="beverage-name">${r.bev}</span> <span class="score-badge ${scoreStyle(r.bevScore)}">${r.bevScore > 0 ? '+' : ''}${r.bevScore}</span> `;
+      html += `<span class="price">💰${r.price}</span>`;
+      html += `</div>`;
+      html += `<div class="section-content" data-panel="rec${ri}">`;
+      html += `<div class="detail">🏷️ ${r.recTags.join(' ')}</div>`;
+      html += `<div class="detail">饮: ${r.bevTags.join(' ')}</div>`;
+      html += `<div class="ingredients">🥢 ${r.ings.join(', ')} &nbsp; 🔧${r.cooker}</div>`;
+      html += `</div></div>`;
+    });
+
+    card.innerHTML = html;
+    container.appendChild(card);
+
+    // === 交互 ===
+    makeDraggable(card);
+    makeCollapsible(card);
+  });
+}
+
+function makeDraggable(card) {
+  const header = card.querySelector('.card-header');
+  let dragging = false, startX, startY, origLeft, origTop;
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.closest('[data-toggle]')) return;
+    dragging = true;
+    card.classList.add('dragging');
+    card.style.zIndex = zIndex++;
+    const rect = card.getBoundingClientRect();
+    startX = e.clientX; startY = e.clientY;
+    origLeft = rect.left; origTop = rect.top;
+    card.style.left = origLeft + 'px';
+    card.style.top = origTop + 'px';
+    card.style.position = 'absolute';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    card.style.left = (origLeft + e.clientX - startX) + 'px';
+    card.style.top = (origTop + e.clientY - startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (dragging) { dragging = false; card.classList.remove('dragging'); }
+  });
+}
+
+function makeCollapsible(card) {
+  card.addEventListener('click', e => {
+    const toggle = e.target.closest('[data-toggle]');
+    if (!toggle) return;
+    const target = toggle.dataset.toggle;
+    const panel = card.querySelector(`[data-panel="${target}"]`);
+    const arrow = toggle.querySelector('.arrow');
+    if (panel) {
+      panel.classList.toggle('hidden');
+      arrow.classList.toggle('collapsed');
+      arrow.textContent = panel.classList.contains('hidden') ? '▶' : '▼';
+    }
+  });
+}
+
+buildCards();
+</script>
+</body>
+</html>

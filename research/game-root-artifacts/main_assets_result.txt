@@ -1,0 +1,12 @@
+
+=== resources.assets (20KB) ===
+  Total objects: 3
+
+=== sharedassets0.assets (96127KB) ===
+  Total objects: 92
+
+=== globalgamemanagers (142KB) ===
+  Total objects: 18
+
+=== globalgamemanagers.assets (902KB) ===
+  Total objects: 2665

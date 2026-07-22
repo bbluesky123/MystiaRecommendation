@@ -1,0 +1,16 @@
+MystiaRecommendation
+
+本项目基于以下开源项目的数据文件进行开发，按 AGPL-3.0-only 许可证要求保留来源与授权声明：
+
+- blockshy/mystia-steward-companion (AGPL-3.0-only)
+  https://github.com/blockshy/mystia-steward-companion
+
+- AnYiEE/touhou-mystia-izakaya-assistant (AGPL-3.0-only)
+  mystia-steward-companion 所保留来源的项目
+
+- 东方夜雀食堂小助手 (AGPL-3.0-only)
+  https://izakaya.cc
+
+本项目因此以 AGPL-3.0-only 发布。
+
+《东方夜雀食堂》及相关游戏名称、角色名称、角色形象、游戏素材、文本内容、商标标识等权利归各自权利人所有。本项目为非官方社区工具。
