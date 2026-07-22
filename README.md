@@ -35,11 +35,15 @@
 ```
 MystiaRecommendation/
 ├── README.md
+├── LICENSE
+├── NOTICE
 ├── MystiaRecommendation.csproj
+├── build.py                          # 构建脚本
 ├── Plugin.cs                         # 插件主入口 + 解锁检测引擎
 ├── Patches/
 │   ├── CustomerPatch.cs              # 稀客到店/离开事件 Hook
-│   └── InventoryPatch.cs             # 背包相关 Hook
+│   ├── InventoryPatch.cs             # 背包相关 Hook
+│   └── RecipePatch.cs                # 食谱解锁 Hook
 ├── Engine/
 │   ├── CustomerDataEngine.cs         # 稀客数据加载（69个角色）
 │   ├── RecipeMatcher.cs              # 推荐匹配算法
@@ -50,36 +54,56 @@ MystiaRecommendation/
 │   └── OverlayRenderer.cs            # 推荐卡片渲染
 ├── Config/
 │   └── PluginConfig.cs               # 配置项定义
-├── Data/
-│   ├── customers_rare.json           # 69个稀客完整数据（含主场区域）
-│   ├── recipes.json                  # 190个料理数据（含解锁条件）
-│   ├── beverages.json                # 酒水数据
-│   ├── ingredients.json              # 食材数据
-│   └── area_unlock_schedule.json     # 各区区域解锁日程（可手动修改）
-└── Scripts/
-    ├── merge_recipe_unlock.py        # 从 TS 源码合并食谱解锁条件
-    └── merge_missing_customers.py   # 从 TS 源码补齐缺失角色
+└── Data/
+    ├── customers_rare.json           # 69个稀客完整数据（含主场区域）
+    ├── recipes.json                  # 190个料理数据（含解锁条件）
+    ├── beverages.json                # 酒水数据
+    ├── ingredients.json              # 食材数据
+    └── area_unlock_schedule.json     # 各区区域解锁日程（可手动修改）
 ```
 
-## 解锁检测机制
+## 在新 PC 上使用
 
-插件启动时自动读取游戏运行时状态，通过反射调用游戏 API：
+### 前置条件
 
-| 解锁类型 | 检测方法 | 说明 |
-|---------|---------|------|
-| Self | 直接判断 | 初始自带 |
-| Bond | `RunTimeAlbum.GetCharacterKizuna(Int32)` | 羁绊等级 + 经验满检测 |
-| LevelUp | `RunTimePlayerData.Level` | 玩家等级 + 区域天数过滤 |
-| Quest/Shop/Special | `RunTimeStorage.HaveRecipe(Int32)` | 结合区域开放天数 |
+1. **.NET 6 SDK**：从 https://dotnet.microsoft.com/download/dotnet/6.0 下载安装
 
-**区域日程**：从 `area_unlock_schedule.json` 加载，当前包含妖怪兽道(day1)、人间之里(day17)、博丽神社(day34)、红魔馆(day48)、迷途竹林(day69)。Quest 食谱、区域限定的 LevelUp 食谱、以及角色主场所在区域未开放时，对应食谱均不会自动解锁。
+2. **BepInEx 6 IL2CPP**：安装到游戏目录
+   - 下载 BepInEx 6 (IL2CPP x64) 并解压到游戏根目录
+   - 确保 `BepInEx/core/` 和 `BepInEx/interop/` 目录中有对应的 DLL
 
-## 安装
+3. **东方夜雀食堂**（Steam 版）
 
-1. 安装 BepInEx 6 IL2CPP 到游戏目录
-2. 将 `MystiaRecommendation.dll` 放入 `BepInEx/plugins/`
-3. 将 `Data/` 目录复制到 `BepInEx/plugins/Data/`
-4. 启动游戏，进入营业后按 F5 刷新推荐
+4. **Git**（用于克隆仓库）
+
+### 构建安装
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/bbluesky123/MystiaRecommendation.git
+cd MystiaRecommendation
+
+# 2. 编译（将游戏路径替换为你的实际路径）
+python build.py "D:\steam\steamapps\common\Touhou Mystia Izakaya"
+
+# 如果不用 Python，也可以直接用 dotnet：
+# dotnet build -c Release -p:GameDir="你的游戏路径"
+```
+
+编译成功后，DLL 和 Data 文件会自动复制到 `BepInEx/plugins/MystiaRecommendation/`。
+
+### 手动安装（已有编译好的 DLL）
+
+1. 将 `MystiaRecommendation.dll` 放入 `<游戏目录>\BepInEx\plugins\MystiaRecommendation\`
+2. 将 `Data\` 文件夹复制到 `<游戏目录>\BepInEx\plugins\MystiaRecommendation\Data\`
+3. 启动游戏，进入营业后按 F5 刷新
+
+### 更新
+
+```bash
+git pull
+python build.py "你的游戏路径"
+```
 
 ## 配置
 
@@ -93,7 +117,20 @@ MystiaRecommendation/
 
 ## 更新攻略数据
 
-如果发现区域解锁日程不准确，可以直接编辑 `Data/area_unlock_schedule.json`，修改 `absoluteDay` 值即可，无需重新编译插件。
+如果发现区域解锁日程不准确，可以直接编辑 `Data/area_unlock_schedule.json`，修改 `absoluteDay` 值即可，无需重新编译。
+
+## 解锁检测机制
+
+插件启动时自动读取游戏运行时状态，通过反射调用游戏 API：
+
+| 解锁类型 | 检测方法 | 说明 |
+|---------|---------|------|
+| Self | 直接判断 | 初始自带 |
+| Bond | `RunTimeAlbum.GetCharacterKizuna(Int32)` | 羁绊等级 + 经验满检测 |
+| LevelUp | `RunTimePlayerData.Level` | 玩家等级 + 区域天数过滤 |
+| Quest/Shop/Special | `RunTimeStorage.HaveRecipe(Int32)` | 结合区域开放天数 |
+
+**区域日程**：从 `area_unlock_schedule.json` 加载，当前包含妖怪兽道(day1)、人间之里(day17)、博丽神社(day34)、红魔馆(day48)、迷途竹林(day69)。Quest 食谱、区域限定的 LevelUp 食谱、以及角色主场所在区域未开放时，对应食谱均不会自动解锁。
 
 ## 许可证
 
