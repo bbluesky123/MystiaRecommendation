@@ -59,18 +59,30 @@ BepInEx/
 git clone https://github.com/bbluesky123/MystiaRecommendation.git
 cd MystiaRecommendation
 
-# 编辑 .csproj 中的 <GameDir> 指向你的游戏目录，或通过命令行传入：
-python build.py "D:\你的游戏路径"
+# 复制本机配置模板，并将 BepInExDir 改为实际的 BepInEx 目录
+cp Directory.Build.user.props.example Directory.Build.user.props
+
+dotnet build -c Release
 ```
 
-**前置条件**：[.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)、Python 3。
+也可以通过命令行属性或环境变量指定目录，无需创建本机配置文件：
+
+```bash
+dotnet build -c Release -p:BepInExDir="D:\游戏目录\BepInEx"
+MYSTIA_BEPINEX_DIR="/path/to/BepInEx" dotnet build -c Release
+```
+
+构建成功后，DLL 和 `Data/` 会自动复制到 `BepInEx/plugins/MystiaRecommendation/`。
+
+**前置条件**：[.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)。
 
 ## 项目结构
 
 ```
 MystiaRecommendation/
 ├── Plugin.cs                         # 插件主入口 + 解锁检测引擎
-├── build.py                          # 构建脚本
+├── Directory.Build.props             # 公共构建路径规则
+├── Directory.Build.user.props.example # 本机 BepInEx 路径模板
 ├── Patches/
 │   ├── CustomerPatch.cs              # 稀客到店/离开 Hook
 │   ├── InventoryPatch.cs             # 背包相关 Hook
