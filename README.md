@@ -99,10 +99,8 @@ MystiaRecommendation/
 
 本项目以 **AGPL-3.0-only** 发布，完整文本见 [LICENSE](LICENSE)。
 
-本项目数据文件来源于以下 AGPL-3.0 开源项目：
-- [blockshy/mystia-steward-companion](https://github.com/blockshy/mystia-steward-companion)
-- 东方夜雀食堂小助手 ([izakaya.cc](https://izakaya.cc))
+本项目数据来源于东方夜雀食堂小助手 ([izakaya.cc](https://izakaya.cc))，其源码（[AnYiEE/touhou-mystia-izakaya-assistant](https://github.com/AnYiEE/touhou-mystia-izakaya-assistant)）以 AGPL-3.0-only 发布。推荐引擎及解锁检测等逻辑均为独立开发。
 
-来源与授权声明见 [NOTICE](NOTICE)。
+来源与授权声明详见 [NOTICE](NOTICE)。
 
 《东方夜雀食堂》及相关游戏名称、角色名称、角色形象、游戏素材、文本内容、商标标识等权利归各自权利人所有。本项目为非官方社区工具。
