@@ -1,1 +1,0 @@
-Get-ChildItem -Path 'd:\steam\steamapps\common\Touhou Mystia Izakaya\Touhou Mystia Izakaya_Data\StreamingAssets' -Recurse -File | Where-Object { $_.Extension -match '\.(json|txt|csv|xml|dat|cfg)$' } | Select-Object -ExpandProperty FullName

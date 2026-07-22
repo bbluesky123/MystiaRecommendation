@@ -1,6 +1,0 @@
-STDOUT:
-Done.
-
-STDERR:
-
-Return code: 0
