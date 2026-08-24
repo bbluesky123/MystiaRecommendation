@@ -21,7 +21,8 @@ public class PluginConfig
     public PluginConfig(ConfigFile cfg)
     {
         ShowOverlay = cfg.Bind("显示设置", "启用叠加显示", true, "总开关");
-        Position = cfg.Bind("显示设置", "显示位置", "OverCustomer", "OverCustomer / TopLeft / RightSide");
+        Position = cfg.Bind("显示设置", "显示位置", "OverCustomer",
+            "OverCustomer：新卡片首次定位到稀客旁；其他值使用右上角自动列布局");
         Opacity = cfg.Bind("显示设置", "透明度", 0.85f,
             new ConfigDescription("透明度", new AcceptableValueRange<float>(0f, 1f)));
         FontSize = cfg.Bind("显示设置", "字体大小", 14,

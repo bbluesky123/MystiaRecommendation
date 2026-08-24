@@ -116,6 +116,9 @@ public class OverlayRenderer
         // 处理拖拽中的 MouseDrag / MouseUp
         ProcessDragEvents();
 
+        // 默认在稀客/桌子旁初始化新卡片。这里只定位一次，之后以玩家拖拽位置为准。
+        InitializeGuestPositions(active);
+
         // 分两组：自动列布局 vs 手动拖拽位置
         var autoCards = active.Where(kv => !kv.Value.DragX.HasValue).ToList();
         var draggedCards = active.Where(kv => kv.Value.DragX.HasValue).ToList();
@@ -150,18 +153,73 @@ public class OverlayRenderer
         }
 
         // === 阶段2：绘制拖拽卡片（在列布局之上，按Z序） ===
-        foreach (var cardId in _dragOrder)
+        foreach (var cardId in _dragOrder.ToList())
         {
             var kv = draggedCards.FirstOrDefault(k => k.Key == cardId);
             if (kv.Key == 0 && kv.Value == null) continue;
             if (!kv.Value.DragX.HasValue) continue;
             float h = CalcCardHeight(kv.Value);
-            DrawCard(kv.Value.DragX.Value, kv.Value.DragY.Value, kv.Value, h, kv.Key);
+            float x = ClampCardX(kv.Value.DragX.Value);
+            float y = ClampCardY(kv.Value.DragY ?? SCREEN_MARGIN, h);
+            kv.Value.DragX = x;
+            kv.Value.DragY = y;
+            DrawCard(x, y, kv.Value, h, kv.Key);
         }
 
         // 清理不在活跃列表中的拖拽排序
         var activeIds = new HashSet<int>(active.Select(k => k.Key));
         _dragOrder.RemoveAll(id => !activeIds.Contains(id));
+    }
+
+    /// <summary>
+    /// 将新卡片首次放到稀客右侧；靠近屏幕右缘时改放左侧。
+    /// 世界坐标只用于首次定位，不持续跟随，以免覆盖玩家的手动拖拽结果。
+    /// </summary>
+    private void InitializeGuestPositions(List<KeyValuePair<int, CustomerRecommendation>> active)
+    {
+        bool overCustomer = string.Equals(
+            Plugin.PluginConfig.Position.Value,
+            "OverCustomer",
+            System.StringComparison.OrdinalIgnoreCase);
+
+        Camera camera = overCustomer ? Camera.main : null;
+        foreach (var kv in active)
+        {
+            var card = kv.Value;
+            if (!card.DragX.HasValue && camera != null && card.HasCustomerWorldPosition)
+            {
+                Vector3 screenPoint = camera.WorldToScreenPoint(card.CustomerWorldPosition);
+                if (screenPoint.z > 0f)
+                {
+                    float cardHeight = CalcCardHeight(card);
+                    const float guestGap = 45f;
+                    float x = screenPoint.x + guestGap;
+                    if (x + CARD_WIDTH > Screen.width - SCREEN_MARGIN)
+                        x = screenPoint.x - CARD_WIDTH - guestGap;
+
+                    // WorldToScreenPoint 使用左下原点，IMGUI 使用左上原点。
+                    float y = Screen.height - screenPoint.y - guestGap;
+                    card.DragX = ClampCardX(x);
+                    card.DragY = ClampCardY(y, cardHeight);
+                }
+            }
+
+            // 带固定位置的卡片必须登记到 Z 序，否则不会进入第二阶段绘制。
+            if (card.DragX.HasValue && !_dragOrder.Contains(kv.Key))
+                _dragOrder.Add(kv.Key);
+        }
+    }
+
+    private static float ClampCardX(float x)
+    {
+        float maxX = Mathf.Max(SCREEN_MARGIN, Screen.width - CARD_WIDTH - SCREEN_MARGIN);
+        return Mathf.Clamp(x, SCREEN_MARGIN, maxX);
+    }
+
+    private static float ClampCardY(float y, float cardHeight)
+    {
+        float maxY = Mathf.Max(SCREEN_MARGIN, Screen.height - cardHeight - SCREEN_MARGIN);
+        return Mathf.Clamp(y, SCREEN_MARGIN, maxY);
     }
 
     /// <summary>
@@ -476,8 +534,10 @@ public class OverlayRenderer
                 _ => _ratingOkStyle
             };
 
-            // 标题行：[评级] 料理名 +N + 酒水名 +N 💰价格
-            string ratingText = $"[{rec.ExpectedRating}] ";
+            // 标题行：[任务D/夜雀评级] 料理名 +N + 酒水名 +N 💰价格
+            string modeText = rec.IsFixedRecipeTask ? "任务D/" : "";
+            string nightingaleText = rec.NeedNightingale ? "夜雀" : "";
+            string ratingText = $"[{modeText}{nightingaleText}{rec.ExpectedRating}] ";
             GUI.Label(new Rect(rx, cy, hs.CalcSize(new GUIContent(ratingText)).x, LINE_HEIGHT), ratingText, hs);
             rx += hs.CalcSize(new GUIContent(ratingText)).x;
 

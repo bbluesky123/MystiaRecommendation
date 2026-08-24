@@ -12,6 +12,7 @@ public static class CustomerPatch
     private static Dictionary<SpecialGuestsController, GuestState> _guestStates = new();
     private static System.Func<int, string> _getFoodTag;
     private static System.Func<int, string> _getBevTag;
+    private static MethodInfo _containsServeInWorkMission;
     private static Dictionary<int, string> _deskGuests = new();
 
     private class GuestState
@@ -23,6 +24,7 @@ public static class CustomerPatch
         public string TextBevTag;
         public object LastOrder;
         public int LastBudget = -1;
+        public int LastFixedRecipeId = -1;
         public int DeskCode = -1;
     }
 
@@ -64,6 +66,29 @@ public static class CustomerPatch
         catch { return -1; }
     }
 
+    private static UnityEngine.Vector3? ReadGuestWorldPosition(SpecialGuestsController sgc)
+    {
+        try
+        {
+            if (sgc == null) return null;
+
+            // Controller 是逻辑对象，不是 MonoBehaviour；实际场景位置在其客人实例上。
+            var guests = sgc.guestInstances;
+            if (guests == null) return null;
+            for (int i = 0; i < guests.Length; i++)
+            {
+                var guest = guests[i];
+                if (guest != null && guest.transform != null)
+                    return guest.transform.position;
+            }
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static void ClearOrderState(GuestState state)
     {
         state.LastFoodTag = "";
@@ -72,6 +97,7 @@ public static class CustomerPatch
         state.TextBevTag = "";
         state.LastOrder = null;
         state.LastBudget = -1;
+        state.LastFixedRecipeId = -1;
     }
 
     private static bool EnsureCurrentGuest(SpecialGuestsController sgc, string explicitName = null)
@@ -123,7 +149,8 @@ public static class CustomerPatch
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] Detected rare guest: " + __result);
                 int currentDesk = ReadDeskCode(__instance);
                 if (currentDesk >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "waiting order");
+                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "waiting order",
+                        ReadGuestWorldPosition(__instance));
                 return;
             }
             if (!_guestStates.ContainsKey(__instance))
@@ -142,7 +169,8 @@ public static class CustomerPatch
                 int deskIdx = -1;
                 try { deskIdx = __instance.DeskCode; } catch { }
                 if (deskIdx >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "等待订单生成");
+                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "等待订单生成",
+                        ReadGuestWorldPosition(__instance));
             }
         }
         catch { }
@@ -204,6 +232,7 @@ public static class CustomerPatch
                 try { name = sgc.OnGetGuestName(); state.Name = name; } catch { }
             }
             if (string.IsNullOrEmpty(name)) return;
+            int fixedRecipeId = TryReadFixedRecipeIdFromMission(name, state.LastOrder);
 
             // 读取当前轮次的食物/酒水标签。订单文本回调最可靠，订单对象字段作为兜底。
             string reqFoodTag = state.TextFoodTag;
@@ -246,20 +275,26 @@ public static class CustomerPatch
             {
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] 等待完整订单标签: 食物=" + reqFoodTag + ", 酒水=" + reqBevTag);
                 if (deskIdx >= 0)
-                    Plugin.OnCustomerPending(name, reqFoodTag, reqBevTag, deskIdx, "等待完整订单标签");
+                    Plugin.OnCustomerPending(name, reqFoodTag, reqBevTag, deskIdx, "等待完整订单标签",
+                        ReadGuestWorldPosition(sgc));
                 return;
             }
 
             // 多轮点单：只在标签变化时触发新推荐
-            if (reqFoodTag == state.LastFoodTag && reqBevTag == state.LastBevTag)
+            if (reqFoodTag == state.LastFoodTag && reqBevTag == state.LastBevTag
+                && fixedRecipeId == state.LastFixedRecipeId)
                 return;
             state.LastFoodTag = reqFoodTag;
             state.LastBevTag = reqBevTag;
+            state.LastFixedRecipeId = fixedRecipeId;
 
             Plugin.Instance?.Log.LogInfo("[MystiaRec] 稀客点单(" + source + "): " + name + " 座位" + deskIdx);
             Plugin.Instance?.Log.LogInfo("[MystiaRec] 食物标签: " + reqFoodTag + ", 酒水标签: " + reqBevTag);
+            if (fixedRecipeId >= 0)
+                Plugin.Instance?.Log.LogInfo("[MystiaRec] 检测到任务固定料理: foodId=" + fixedRecipeId);
 
-            Plugin.OnCustomerArrived(name, reqFoodTag, reqBevTag, deskIdx, state.LastBudget);
+            Plugin.OnCustomerArrived(name, reqFoodTag, reqBevTag, deskIdx, state.LastBudget, fixedRecipeId,
+                ReadGuestWorldPosition(sgc));
         }
         catch (System.Exception e)
         {
@@ -482,6 +517,64 @@ public static class CustomerPatch
         catch { }
 
         return "";
+    }
+
+    /// <summary>
+    /// 营业任务存在时，游戏的 ContainsSpecialNPCServeInWorkMission 会返回固定 food ID。
+    /// SpecialOrder.RequestFood 仅用作接口返回异常时的同任务兜底，不能单独作为任务判据。
+    /// </summary>
+    private static int TryReadFixedRecipeIdFromMission(string customerName, object orderData)
+    {
+        if (string.IsNullOrEmpty(customerName)) return -1;
+
+        try
+        {
+            var customer = Plugin.DataEngine?.GetCustomer(customerName);
+            if (customer == null) return -1;
+
+            if (_containsServeInWorkMission == null)
+            {
+                var asm = typeof(SpecialGuestsController).Assembly;
+                _containsServeInWorkMission = asm.GetTypes()
+                    .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                    .FirstOrDefault(m => m.Name == "ContainsSpecialNPCServeInWorkMission"
+                        && m.GetParameters().Length == 2);
+                Plugin.Instance?.Log?.LogInfo("[MystiaRec] 营业任务接口: " +
+                    (_containsServeInWorkMission != null ? _containsServeInWorkMission.DeclaringType?.FullName : "未找到"));
+            }
+
+            if (_containsServeInWorkMission == null) return -1;
+
+            object[] args = { customer.id, -1 };
+            bool hasMission = System.Convert.ToBoolean(_containsServeInWorkMission.Invoke(null, args));
+            if (!hasMission) return -1;
+
+            int missionFoodId = System.Convert.ToInt32(args[1]);
+            if (missionFoodId >= 0) return missionFoodId;
+
+            // 理论上任务接口会直接给出 food ID；仅在异常返回时读取同一任务订单中的 RequestFood。
+            if (orderData == null) return -1;
+            var type = orderData.GetType();
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var requestFood = type.GetProperty("RequestFood", flags)?.GetValue(orderData)
+                ?? type.GetMethod("get_RequestFood", flags)?.Invoke(orderData, null);
+            if (requestFood == null) return -1;
+
+            var foodType = requestFood.GetType();
+            foreach (var memberName in new[] { "id", "Id", "ID", "FoodId", "FoodID" })
+            {
+                var value = foodType.GetProperty(memberName, flags)?.GetValue(requestFood)
+                    ?? foodType.GetField(memberName, flags)?.GetValue(requestFood);
+                if (value != null && int.TryParse(value.ToString(), out int id) && id >= 0)
+                    return id;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Plugin.Instance?.Log?.LogWarning("[MystiaRec] 读取任务固定料理失败: " + e.Message);
+        }
+
+        return -1;
     }
 
     private static bool TryResolveTagId(object value, bool beverage, out string tag)

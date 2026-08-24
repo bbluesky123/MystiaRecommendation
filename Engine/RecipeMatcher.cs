@@ -20,7 +20,8 @@ public class RecipeMatcher
         HashSet<string> availableIngredients,
         HashSet<string> availableCookers,
         Dictionary<string, int> ingredientStocks,
-        PopularTrendState popularTrend)
+        PopularTrendState popularTrend,
+        int fixedRecipeId = -1)
     {
         var customer = _dataEngine.GetCustomer(customerName);
         if (customer == null) return new();
@@ -33,7 +34,7 @@ public class RecipeMatcher
         bool hasNightingaleCooker = availableCookers != null && availableCookers.Contains("夜雀厨具");
 
         System.Func<RecipeInfo, bool> normalCookerFilter = r =>
-            availableCookers == null || availableCookers.Count == 0
+            availableCookers == null
             || availableCookers.Contains(r.Cooker)
             || availableCookers.Contains("夜雀" + r.Cooker);
 
@@ -42,6 +43,15 @@ public class RecipeMatcher
 
         System.Func<BeverageInfo, bool> beverageFilter = b =>
             !string.IsNullOrEmpty(reqBevTag) && b.Tags.Contains(reqBevTag);
+
+        // 方案 D：任务订单已经固定料理，禁止替换为其他配方。
+        if (fixedRecipeId >= 0)
+        {
+            return CalculateFixedRecipeTask(
+                fixedRecipeId, reqFoodTag, reqBevTag, maxBudget,
+                positiveTags, negativeTags, unlockedRecipes, unlockedBeverages,
+                availableIngredients, availableCookers, ingredientStocks, popularTrend);
+        }
 
         // 诊断：输出当前收到的订单标签
         Plugin.Instance?.Log.LogInfo($"[MystiaRec] 算法入参: customer={customerName} reqFoodTag={reqFoodTag} reqBevTag={reqBevTag} budget={maxBudget} unlockedRecipes={unlockedRecipes.Count} unlockedBevs={unlockedBeverages.Count} cookers=[{string.Join(",", availableCookers ?? new HashSet<string>())}]");
@@ -61,10 +71,11 @@ public class RecipeMatcher
             .Select(RecipeDatabase.GetBeverage)
             .Any(b => b != null && !string.IsNullOrEmpty(reqBevTag) && b.Tags.Contains(reqBevTag));
 
-        // 判断食材扩展是否可行：有库存≥10且带reqFoodTag的食材
-        bool canExpandFoodTag = !hasMatchingRecipe
-            && ingredientStocks != null && ingredientStocks.Count > 0
+        // 判断食材扩展是否可行：有库存≥10且带reqFoodTag的食材。
+        // 即使已经存在直接命中订单Tag的料理，也必须保留扩展路径；其他料理补Tag后可能得到更高评分。
+        bool canExpandFoodTag = ingredientStocks != null && ingredientStocks.Count > 0
             && availableIngredients != null && availableIngredients.Count > 0
+            && (Plugin.PluginConfig?.MaxExtraIngredients == null || Plugin.PluginConfig.MaxExtraIngredients.Value > 0)
             && availableIngredients.Any(name =>
                 RecipeDatabase.GetIngredientTagIndex().TryGetValue(name, out var tags)
                 && tags.Contains(reqFoodTag)
@@ -95,8 +106,9 @@ public class RecipeMatcher
             branchReqFoodTag = reqFoodTag;
             Plugin.Instance?.Log.LogInfo($"[MystiaRec] 分支A: 正常匹配, {candidates.Count}个候选");
 
-            // 食材扩展补充：匹配料理 ≤ 5 时扩充选项
-            if (matchingRecipes.Count <= 5 && canExpandFoodTag)
+            // 食材扩展补充：直接命中订单Tag的料理不代表已经能达到目标评分。
+            // 保留所有可补Tag的其他料理，之后统一按评分与价格筛选。
+            if (canExpandFoodTag)
             {
                 var expandedCandidates = BuildIngredientExpandedCandidates(
                     unlockedRecipes, unlockedBeverages, maxBudget,
@@ -127,7 +139,7 @@ public class RecipeMatcher
             candidates = BuildCandidates(
                 unlockedRecipes, unlockedBeverages, maxBudget,
                 positiveTags, negativeTags, popularTrend,
-                r => stockFilter(r),
+                r => stockFilter(r) && availableCookers.Contains("夜雀" + r.Cooker),
                 b => true);
             needNightingale = true;
             branchReqFoodTag = "";
@@ -163,9 +175,9 @@ public class RecipeMatcher
                         // 匹配配方厨具对应的夜雀版本（如 "油锅" → "夜雀油锅"）
                         var recipeInfo = RecipeDatabase.GetRecipe(rec.RecipeName);
                         string expectedNightingale = "夜雀" + (recipeInfo?.Cooker ?? "");
-                        var nightingaleCooker = availableCookers.FirstOrDefault(c => c == expectedNightingale)
-                            ?? availableCookers.FirstOrDefault(c => c.StartsWith("夜雀"));
-                        rec.RequiredCooker = nightingaleCooker ?? "夜雀厨具";
+                        rec.RequiredCooker = availableCookers.Contains(expectedNightingale)
+                            ? expectedNightingale
+                            : recipeInfo?.Cooker;
                     }
                     rec.FallbackBelowFour = targetScore < 4;
                 }
@@ -197,14 +209,130 @@ public class RecipeMatcher
             {
                 var recipeInfo = RecipeDatabase.GetRecipe(rec.RecipeName);
                 string expectedNightingale = "夜雀" + (recipeInfo?.Cooker ?? "");
-                var nightingaleCooker = availableCookers.FirstOrDefault(c => c == expectedNightingale)
-                    ?? availableCookers.FirstOrDefault(c => c.StartsWith("夜雀"));
-                rec.RequiredCooker = nightingaleCooker ?? "夜雀厨具";
+                rec.RequiredCooker = availableCookers.Contains(expectedNightingale)
+                    ? expectedNightingale
+                    : recipeInfo?.Cooker;
             }
             rec.FallbackBelowFour = true;
             rec.ExpectedRating = "无法满足4分";
         }
         return fallbackResult;
+    }
+
+    /// <summary>
+    /// 方案 D：任务固定料理。
+    /// 先尝试固定料理自身/附加食材满足订单标签并达到 4 分；失败后仅允许同一道料理走对应夜雀厨具兜底。
+    /// </summary>
+    private List<Recommendation> CalculateFixedRecipeTask(
+        int fixedRecipeId,
+        string reqFoodTag,
+        string reqBevTag,
+        int maxBudget,
+        HashSet<string> positiveTags,
+        HashSet<string> negativeTags,
+        HashSet<string> unlockedRecipes,
+        HashSet<string> unlockedBeverages,
+        HashSet<string> availableIngredients,
+        HashSet<string> availableCookers,
+        Dictionary<string, int> ingredientStocks,
+        PopularTrendState popularTrend)
+    {
+        // 任务接口返回的是成品 Food ID，不是 RunTimeStorage 使用的料理索引。
+        var recipe = RecipeDatabase.GetRecipeByFoodId(fixedRecipeId);
+        if (recipe == null)
+        {
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 无法解析固定料理 foodId={fixedRecipeId}");
+            return new();
+        }
+
+        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D固定料理: {recipe.Name}(foodId={recipe.FoodId}, recipeId={recipe.RecipeId})");
+
+        if (unlockedRecipes == null || !unlockedRecipes.Contains(recipe.Name))
+        {
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 当前存档未持有固定料理 {recipe.Name}");
+            return new();
+        }
+
+        if (availableIngredients == null || !recipe.Ingredients.All(availableIngredients.Contains))
+        {
+            var missing = recipe.Ingredients
+                .Where(i => availableIngredients == null || !availableIngredients.Contains(i))
+                .ToList();
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 固定料理 {recipe.Name} 缺少基础食材 [{string.Join(",", missing)}]");
+            return new();
+        }
+
+        bool cookerAvailable = availableCookers == null
+            || availableCookers.Contains(recipe.Cooker)
+            || availableCookers.Contains("夜雀" + recipe.Cooker);
+        bool matchingNightingaleAvailable = availableCookers != null
+            && availableCookers.Contains("夜雀" + recipe.Cooker);
+
+        var fixedRecipeSet = new HashSet<string> { recipe.Name };
+        System.Func<RecipeInfo, bool> fixedRecipeFilter = r => r.Name == recipe.Name && cookerAvailable;
+        System.Func<BeverageInfo, bool> matchingBeverageFilter = b =>
+            !string.IsNullOrEmpty(reqBevTag) && b.Tags.Contains(reqBevTag);
+
+        // D1/D2：料理自身命中，或通过额外食材补足订单标签。
+        // 同时遵守配置的最大额外食材数，以及游戏底层总食材数不超过 5 的限制。
+        var normalCandidates = BuildCandidates(
+            fixedRecipeSet, unlockedBeverages, maxBudget,
+            positiveTags, negativeTags, popularTrend,
+            fixedRecipeFilter, matchingBeverageFilter);
+        bool loggedMissingIngredients = false;
+        var normalValid = CollectCandidatesAtThreshold(
+            normalCandidates, positiveTags, negativeTags, availableIngredients,
+            ingredientStocks, reqFoodTag, 4, ref loggedMissingIngredients);
+
+        if (normalValid.Count > 0)
+        {
+            Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D成功: 固定料理正常路径 {normalValid.Count}个候选");
+            return MarkFixedTaskRecommendations(PickPriceExtremes(normalValid), recipe, false, availableCookers);
+        }
+
+        // D3：正常标签路径无法达到 4 分时，固定料理不变，仅用对应类型的夜雀厨具绕过订单标签。
+        if (!matchingNightingaleAvailable)
+        {
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D无4分方案，且未配置 夜雀{recipe.Cooker}");
+            return new();
+        }
+
+        var nightingaleCandidates = BuildCandidates(
+            fixedRecipeSet, unlockedBeverages, maxBudget,
+            positiveTags, negativeTags, popularTrend,
+            r => r.Name == recipe.Name,
+            b => true);
+        var nightingaleValid = CollectCandidatesAtThreshold(
+            nightingaleCandidates, positiveTags, negativeTags, availableIngredients,
+            ingredientStocks, "", 4, ref loggedMissingIngredients);
+
+        if (nightingaleValid.Count == 0)
+        {
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 夜雀{recipe.Cooker}路径也无法达到4分");
+            return new();
+        }
+
+        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D成功: 夜雀厨具兜底 {nightingaleValid.Count}个候选");
+        return MarkFixedTaskRecommendations(PickPriceExtremes(nightingaleValid), recipe, true, availableCookers);
+    }
+
+    private static List<Recommendation> MarkFixedTaskRecommendations(
+        List<Recommendation> recommendations,
+        RecipeInfo recipe,
+        bool needNightingale,
+        HashSet<string> availableCookers)
+    {
+        foreach (var recommendation in recommendations)
+        {
+            recommendation.IsFixedRecipeTask = true;
+            recommendation.NeedNightingale = needNightingale;
+            if (needNightingale)
+            {
+                string expected = "夜雀" + recipe.Cooker;
+                recommendation.RequiredCooker = availableCookers?.FirstOrDefault(c => c == expected) ?? expected;
+            }
+        }
+        return recommendations;
     }
 
     /// <summary>
@@ -386,6 +514,7 @@ public class RecipeMatcher
             .Select(RecipeDatabase.GetRecipe)
             .Where(r => r != null && cookerFilter(r))
             .Where(r => r.Ingredients.All(i => availableIngredients.Contains(i))) // 基础食材有库存
+            .Where(r => r.Ingredients.Count < 5) // 添加1个食材后仍不超过游戏硬上限
             .Where(r => !r.PositiveTags.Contains(reqFoodTag)) // 避免和分支A重复
             .ToList();
 
@@ -511,7 +640,9 @@ public class RecipeMatcher
             .ThenByDescending(x => x.Candidate.Score)
             .First();
 
-        var result = new List<Recommendation> { ToRecommendation(bestExpensive.Candidate, bestExpensive.ExtraCost) };
+        var expensiveRecommendation = ToRecommendation(bestExpensive.Candidate, bestExpensive.ExtraCost);
+        expensiveRecommendation.PriceStrategy = "最高消费";
+        var result = new List<Recommendation> { expensiveRecommendation };
 
         // 最低价组中选附加食材成本最低的（去重：排除已选）
         if (minPrice != maxPrice || withCost.Count > 1)
@@ -524,7 +655,11 @@ public class RecipeMatcher
                 .FirstOrDefault();
 
             if (bestCheap != null)
-                result.Add(ToRecommendation(bestCheap.Candidate, bestCheap.ExtraCost));
+            {
+                var cheapRecommendation = ToRecommendation(bestCheap.Candidate, bestCheap.ExtraCost);
+                cheapRecommendation.PriceStrategy = "最低消费";
+                result.Add(cheapRecommendation);
+            }
         }
 
         return result;
@@ -674,6 +809,7 @@ public class RecipeMatcher
     /// </summary>
     private static readonly (string Dominant, string Suppressed)[] TagOverrides = new[]
     {
+        ("昂贵", "实惠"),
         ("大份", "小巧"),
         ("灼热", "凉爽"),
         ("肉", "素"),
@@ -708,6 +844,8 @@ public class Recommendation
     public bool NeedNightingale { get; set; }
     public bool MissingRequiredFoodTag { get; set; }
     public bool FallbackBelowFour { get; set; }
+    public bool IsFixedRecipeTask { get; set; }
+    public string PriceStrategy { get; set; } = "";
 }
 
 internal class MatchCandidate
@@ -778,7 +916,9 @@ public class UnlockCondition
 
 public class RecipeInfo
 {
-    public int Id { get; set; }
+    /// <summary>成品料理的 Food ID；源 JSON 字段名为 id。</summary>
+    public int FoodId { get; set; }
+    /// <summary>RunTimeStorage Recipes / HaveRecipe 使用的料理 ID；源 JSON 字段名为 recipeId。</summary>
     public int RecipeId { get; set; }
     public string Name { get; set; }
     public List<string> Ingredients { get; set; } = new();
@@ -805,7 +945,8 @@ public static class RecipeDatabase
 {
     private static Dictionary<string, RecipeInfo> _recipes = new();
     private static Dictionary<string, BeverageInfo> _beverages = new();
-    private static Dictionary<int, RecipeInfo> _recipesById = new();
+    private static Dictionary<int, RecipeInfo> _recipesByFoodId = new();
+    private static Dictionary<int, RecipeInfo> _recipesByRecipeId = new();
     private static Dictionary<int, BeverageInfo> _beveragesById = new();
     private static Dictionary<string, HashSet<string>> _ingredientTagIndex = new();
     private static Dictionary<string, int> _ingredientPrices = new();
@@ -827,7 +968,7 @@ public static class RecipeDatabase
                 foreach (var t in arr)
                 {
                     var r = new RecipeInfo();
-                    r.Id = t.ContainsKey("id") ? SimpleJson.ToInt(t["id"]) : 0;
+                    r.FoodId = t.ContainsKey("id") ? SimpleJson.ToInt(t["id"]) : 0;
                     r.RecipeId = t.ContainsKey("recipeId") ? SimpleJson.ToInt(t["recipeId"]) : 0;
                     r.Name = t.ContainsKey("name") ? SimpleJson.ToString(t["name"]) : "";
                     r.Cooker = t.ContainsKey("cooker") ? SimpleJson.ToString(t["cooker"]) : "";
@@ -838,11 +979,18 @@ public static class RecipeDatabase
                     r.Ingredients = t.ContainsKey("ingredients") ? SimpleJson.ToStringList(t["ingredients"]) : new();
                     r.PositiveTags = t.ContainsKey("positiveTags") ? SimpleJson.ToStringList(t["positiveTags"]) : new();
                     r.NegativeTags = t.ContainsKey("negativeTags") ? SimpleJson.ToStringList(t["negativeTags"]) : new();
+                    // 游戏的价格标签不是全部写在静态料理标签中，而是按料理基础价格动态附加。
+                    // 边界为严格不等号：价格 < 20 为“实惠”，价格 > 60 为“昂贵”。
+                    if (r.Price < 20 && !r.PositiveTags.Contains("实惠"))
+                        r.PositiveTags.Add("实惠");
+                    else if (r.Price > 60 && !r.PositiveTags.Contains("昂贵"))
+                        r.PositiveTags.Add("昂贵");
                     r.Unlock = ParseUnlockCondition(t);
                     if (!string.IsNullOrEmpty(r.Name))
                     {
                         _recipes[r.Name] = r;
-                        _recipesById[r.Id] = r;
+                        _recipesByFoodId[r.FoodId] = r;
+                        _recipesByRecipeId[r.RecipeId] = r;
                         IndexIngredients(r);
                     }
                 }
@@ -911,7 +1059,10 @@ public static class RecipeDatabase
 
     public static RecipeInfo GetRecipe(string name) => _recipes.TryGetValue(name, out var r) ? r : null;
     public static BeverageInfo GetBeverage(string name) => _beverages.TryGetValue(name, out var b) ? b : null;
-    public static RecipeInfo GetRecipeById(int id) => _recipesById.TryGetValue(id, out var r) ? r : null;
+    /// <summary>按成品 Food ID 查询，供营业任务等返回 foodId 的接口使用。</summary>
+    public static RecipeInfo GetRecipeByFoodId(int foodId) => _recipesByFoodId.TryGetValue(foodId, out var r) ? r : null;
+    /// <summary>按存档所有权使用的 Recipe ID 查询。</summary>
+    public static RecipeInfo GetRecipeByRecipeId(int recipeId) => _recipesByRecipeId.TryGetValue(recipeId, out var r) ? r : null;
     public static BeverageInfo GetBeverageById(int id) => _beveragesById.TryGetValue(id, out var b) ? b : null;
     public static IEnumerable<RecipeInfo> GetAllRecipes() => _recipes.Values;
     public static IEnumerable<BeverageInfo> GetAllBeverages() => _beverages.Values;
