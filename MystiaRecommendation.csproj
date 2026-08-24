@@ -79,6 +79,10 @@
       <HintPath>$(BepInExDir)\interop\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="DEYU.Singletons">
+      <HintPath>$(BepInExDir)\interop\DEYU.Singletons.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <!-- JSON 解析已内置于 SimpleJson.cs，无需外部依赖 -->

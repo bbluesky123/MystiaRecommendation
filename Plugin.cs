@@ -61,7 +61,8 @@ public class Plugin : BasePlugin
     /// <summary>
     /// 稀客到店时调用，支持多个稀客同时到店
     /// </summary>
-    internal static void OnCustomerArrived(string customerName, string reqFoodTag, string reqBevTag, int deskCode, int orderBudget = -1)
+    internal static void OnCustomerArrived(string customerName, string reqFoodTag, string reqBevTag, int deskCode,
+        int orderBudget = -1, int fixedRecipeId = -1, UnityEngine.Vector3? customerWorldPosition = null)
     {
         bool hasCustomer = DataEngine.HasCustomer(customerName);
         var customer = hasCustomer ? DataEngine.GetCustomer(customerName) : null;
@@ -71,24 +72,27 @@ public class Plugin : BasePlugin
 
         Instance?.Log.LogInfo($"[MystiaRec] 开始推荐: {customerName} 座位{deskCode} (预算:{maxBudget})");
         Instance?.Log.LogInfo($"[MystiaRec] 请求: 食物={reqFoodTag}, 酒水={reqBevTag}");
+        if (fixedRecipeId >= 0)
+            Instance?.Log.LogInfo($"[MystiaRec] 方案D: 固定料理foodId={fixedRecipeId}");
         if (!hasCustomer)
             Instance?.Log.LogWarning($"[MystiaRec] 稀客 [{customerName}] 不在数据表中，使用仅按订单匹配的推荐");
 
-        // 主动查询游戏状态
-        var unlockedRecipes = GetUnlockedRecipes();
-        var unlockedBeverages = GetUnlockedBeverages();
-        var availableCookers = GetAvailableCookers();
-        var availableIngredients = GetAvailableIngredients();
-        var ingredientStocks = GetIngredientStocks();
-        var popularTrend = GetPopularTrend();
+        // 每份完整订单都从 RunTimeStorage 捕获一次新快照，避免同场景内沿用过期状态。
+        var gameState = CaptureGameState();
+        var unlockedRecipes = gameState.UnlockedRecipes;
+        var unlockedBeverages = gameState.OwnedBeverages;
+        var availableCookers = gameState.OwnedCookers;
+        var availableIngredients = gameState.AvailableIngredients;
+        var ingredientStocks = gameState.IngredientStocks;
+        var popularTrend = gameState.PopularTrend;
 
-        Instance?.Log.LogInfo($"[MystiaRec] 已解锁: 料理={unlockedRecipes.Count}, 酒水={unlockedBeverages.Count}, 当前厨具={availableCookers.Count}, 食材={availableIngredients.Count}");
+        Instance?.Log.LogInfo($"[MystiaRec] 已解锁: 料理={unlockedRecipes.Count}, 酒水={unlockedBeverages.Count}, 当前厨具={gameState.EquippedCookerCount}, 食材={availableIngredients.Count}");
         if (unlockedRecipes.Count > 0)
             Instance?.Log.LogInfo("[MystiaRec] 当前料理: " + string.Join(",", unlockedRecipes.Where(n => !int.TryParse(n, out _))));
         if (unlockedBeverages.Count > 0)
             Instance?.Log.LogInfo("[MystiaRec] 当前酒水: " + string.Join(",", unlockedBeverages.Where(n => !int.TryParse(n, out _))));
         if (availableCookers.Count > 0)
-            Instance?.Log.LogInfo("[MystiaRec] 当前厨具: " + string.Join(",", availableCookers));
+            Instance?.Log.LogInfo("[MystiaRec] 当前厨具能力: " + string.Join(",", availableCookers));
         if (popularTrend.HasAny)
             Instance?.Log.LogInfo($"[MystiaRec] 流行趋势: 食物喜爱={string.Join(",", popularTrend.LikeFoodTags)} 食物厌恶={string.Join(",", popularTrend.HateFoodTags)} 酒水喜爱={string.Join(",", popularTrend.LikeBeverageTags)} 酒水厌恶={string.Join(",", popularTrend.HateBeverageTags)}");
 
@@ -96,7 +100,8 @@ public class Plugin : BasePlugin
         var recommendations = hasCustomer
             ? Matcher.CalculateByRequestTags(
                 customerName, reqFoodTag, reqBevTag, maxBudget,
-                unlockedRecipes, unlockedBeverages, availableIngredients, availableCookers, ingredientStocks, popularTrend)
+                unlockedRecipes, unlockedBeverages, availableIngredients, availableCookers, ingredientStocks, popularTrend,
+                fixedRecipeId)
             : Matcher.CalculateUnknownByRequestTags(
                 reqFoodTag, reqBevTag, maxBudget,
                 unlockedRecipes, unlockedBeverages, availableIngredients, popularTrend);
@@ -107,10 +112,13 @@ public class Plugin : BasePlugin
         string status = "";
         if (!hasCustomer)
             status = recommendations.Count == 0 ? "稀客数据未收录，无可用订单方案" : "稀客数据未收录，仅按订单匹配";
+        else if (recommendations.Count == 0 && fixedRecipeId >= 0)
+            status = "任务固定料理暂无可达到4分的方案";
         else if (recommendations.Count == 0)
             status = "无可用方案";
 
-        UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag, recommendations, status);
+        UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag, recommendations, status,
+            orderBudget, fixedRecipeId, customerWorldPosition);
 
         Instance?.Log.LogInfo($"[MystiaRec] 推荐完成: {customerName} 座位{deskCode} {recommendations.Count} 个方案");
         foreach (var rec in recommendations)
@@ -124,7 +132,8 @@ public class Plugin : BasePlugin
         }
     }
 
-    internal static void OnCustomerPending(string customerName, string reqFoodTag, string reqBevTag, int deskCode, string statusMessage)
+    internal static void OnCustomerPending(string customerName, string reqFoodTag, string reqBevTag, int deskCode,
+        string statusMessage, UnityEngine.Vector3? customerWorldPosition = null)
     {
         if (string.IsNullOrEmpty(customerName)) return;
 
@@ -142,7 +151,8 @@ public class Plugin : BasePlugin
             cr.Recommendations.Count > 0);
         if (hasCompletedCard) return;
         Instance?.Log.LogInfo($"[MystiaRec] 显示等待卡片: {customerName} 座位{deskCode} {statusMessage}");
-        UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag, new List<Recommendation>(), statusMessage);
+        UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag,
+            new List<Recommendation>(), statusMessage, customerWorldPosition: customerWorldPosition);
     }
 
     private static void UpsertRecommendationCard(
@@ -151,16 +161,40 @@ public class Plugin : BasePlugin
         string reqFoodTag,
         string reqBevTag,
         List<Recommendation> recommendations,
-        string statusMessage)
+        string statusMessage,
+        int orderBudget = -1,
+        int fixedRecipeId = -1,
+        UnityEngine.Vector3? customerWorldPosition = null)
     {
-        // 清除该稀客之前的推荐（同名同座位的旧推荐）
-        var toRemove = new List<int>();
-        foreach (var kv in ActiveRecommendations)
+        // 同一稀客、同一座位采用原对象就地更新，保留拖拽位置、折叠状态和稳定卡片 ID。
+        var existing = ActiveRecommendations.FirstOrDefault(kv =>
+            kv.Value.DeskCode == deskCode && kv.Value.CustomerName == customerName);
+        if (existing.Value != null)
         {
-            if (kv.Value.DeskCode == deskCode)
-                toRemove.Add(kv.Key);
+            var card = existing.Value;
+            card.ReqFoodTag = reqFoodTag;
+            card.ReqBevTag = reqBevTag;
+            card.OrderBudget = orderBudget;
+            card.FixedRecipeId = fixedRecipeId;
+            card.Recommendations = recommendations;
+            card.StatusMessage = statusMessage;
+            card.Timestamp = UnityEngine.Time.time;
+            card.IsFadingOut = false;
+            card.FadeAlpha = 1f;
+            if (customerWorldPosition.HasValue)
+            {
+                card.CustomerWorldPosition = customerWorldPosition.Value;
+                card.HasCustomerWorldPosition = true;
+            }
+            return;
         }
-        foreach (var k in toRemove) ActiveRecommendations.Remove(k);
+
+        // 同一座位若残留其他客人的旧卡片，只清理旧客；新客创建新的稳定卡片。
+        var toRemove = ActiveRecommendations
+            .Where(kv => kv.Value.DeskCode == deskCode)
+            .Select(kv => kv.Key)
+            .ToList();
+        foreach (var key in toRemove) ActiveRecommendations.Remove(key);
 
         // 存储到多稀客推荐字典（用唯一ID）
         int rid = GetNextRecommendId();
@@ -170,10 +204,17 @@ public class Plugin : BasePlugin
             DeskCode = deskCode,
             ReqFoodTag = reqFoodTag,
             ReqBevTag = reqBevTag,
+            OrderBudget = orderBudget,
+            FixedRecipeId = fixedRecipeId,
             Recommendations = recommendations,
             StatusMessage = statusMessage,
             Timestamp = UnityEngine.Time.time
         };
+        if (customerWorldPosition.HasValue)
+        {
+            ActiveRecommendations[rid].CustomerWorldPosition = customerWorldPosition.Value;
+            ActiveRecommendations[rid].HasCustomerWorldPosition = true;
+        }
     }
 
     /// <summary>
@@ -232,6 +273,7 @@ public class Plugin : BasePlugin
         ActiveRecommendations.Clear();
         _cachedUnlockedRecipes = null;
         _cachedAvailableCookers = null;
+        _cachedEquippedCookerCount = 0;
         _cachedBondData = null;
         _cachedPlayerLevel = -1;
         _cachedAbsoluteDay = -1;
@@ -239,6 +281,7 @@ public class Plugin : BasePlugin
 
     private static HashSet<string> _cachedUnlockedRecipes;
     private static HashSet<string> _cachedAvailableCookers;
+    private static int _cachedEquippedCookerCount;
     private static Dictionary<string, (int level, int currentExp, int maxExp)> _cachedBondData;
     private static int _cachedPlayerLevel = -1;
 
@@ -271,7 +314,8 @@ public class Plugin : BasePlugin
 
             Instance?.Log?.LogInfo($"[MystiaRec] 刷新推荐: {card.CustomerName} 座位{card.DeskCode}");
             OnCustomerArrived(card.CustomerName, card.ReqFoodTag ?? "", card.ReqBevTag ?? "",
-                card.DeskCode);
+                card.DeskCode, card.OrderBudget, card.FixedRecipeId,
+                card.HasCustomerWorldPosition ? card.CustomerWorldPosition : null);
         }
 
         if (cards.Count == 0)
@@ -279,12 +323,12 @@ public class Plugin : BasePlugin
     }
 
     /// <summary>
-    /// 基于 from 解锁条件判断已解锁的料理（每晚首次调用后缓存）
-    /// Bond/LevelUp/Self 通过运行时API精确判断，Quest/Shop/Special 回退到 HaveRecipe
+    /// 从 RunTimeStorage 判断当前存档实际拥有的料理。
+    /// 静态解锁条件仅在运行时料理容器不可用的旧版本中作为兼容兜底。
     /// </summary>
-    private static HashSet<string> GetUnlockedRecipes()
+    private static HashSet<string> GetUnlockedRecipes(bool forceRefresh = false)
     {
-        if (_cachedUnlockedRecipes != null)
+        if (!forceRefresh && _cachedUnlockedRecipes != null)
             return _cachedUnlockedRecipes;
 
         var result = new HashSet<string>();
@@ -293,8 +337,12 @@ public class Plugin : BasePlugin
         var fallbackRecipes = new List<string>();    // 回退到HaveRecipe的食谱
         try
         {
+            bool runtimeOwnershipAvailable;
+            var runtimeFoodIds = GetOwnedFoodIdsFromStorage(out runtimeOwnershipAvailable);
             int playerLevel = GetPlayerLevel();
-            var bondLevels = GetBondLevels();
+            var bondLevels = runtimeOwnershipAvailable
+                ? new Dictionary<string, (int level, int currentExp, int maxExp)>()
+                : GetBondLevels();
 
             int totalCount = 0;
             int selfCount = 0, bondCount = 0, levelupCount = 0, fallbackCount = 0;
@@ -304,12 +352,34 @@ public class Plugin : BasePlugin
             {
                 totalCount++;
                 var unlock = info.Unlock;
-                bool unlocked = false;
+                // GetAllRecipes 返回的每个已拥有 Recipe 都直接携带 foodID。
+                // 主路径按 Food ID 映射成品料理，完全绕开 Recipe ID 的数值碰撞。
+                bool unlocked = runtimeOwnershipAvailable
+                    ? runtimeFoodIds.Contains(info.FoodId)
+                    : HaveRecipeSafe(info.RecipeId);
+
+                // 仅旧版本运行时所有权接口不可用时，才通过静态初始料理规则兜底。
+                if (!runtimeOwnershipAvailable && unlock?.Type == UnlockType.Self)
+                    unlocked = true;
+
+                if (unlocked)
+                {
+                    result.Add(info.Name);
+                    continue;
+                }
+
+                // 运行时所有权接口可用时，以存档为唯一准入依据。
+                // 羁绊、日期和区域条件只保留为旧游戏版本的兼容兜底，避免推断出存档并未持有的料理。
+                if (runtimeOwnershipAvailable)
+                {
+                    fallbackRecipes.Add($"{info.Name}(存档未持有)");
+                    continue;
+                }
 
                 if (unlock == null || unlock.Type == UnlockType.Unknown)
                 {
                     // 无解锁数据 → HaveRecipe 兜底
-                    unlocked = HaveRecipeSafe(info.Id);
+                    unlocked = HaveRecipeSafe(info.RecipeId);
                     if (unlocked) fallbackCount++;
                 }
                 else switch (unlock.Type)
@@ -370,7 +440,7 @@ public class Plugin : BasePlugin
                             }
                             else
                             {
-                                unlocked = HaveRecipeSafe(info.Id);
+                                unlocked = HaveRecipeSafe(info.RecipeId);
                                 if (unlocked) fallbackCount++;
                                 else fallbackRecipes.Add($"{info.Name}(LevelUp:{unlock.Area})");
                             }
@@ -391,7 +461,7 @@ public class Plugin : BasePlugin
                         }
                         else
                         {
-                            unlocked = HaveRecipeSafe(info.Id);
+                            unlocked = HaveRecipeSafe(info.RecipeId);
                             if (unlocked) fallbackCount++;
                             else fallbackRecipes.Add($"{info.Name}(QuestOrEvent)");
                         }
@@ -399,13 +469,13 @@ public class Plugin : BasePlugin
                     case UnlockType.Shop:
                     case UnlockType.Special:
                         // 商店/特殊 → HaveRecipe 兜底
-                        unlocked = HaveRecipeSafe(info.Id);
+                        unlocked = HaveRecipeSafe(info.RecipeId);
                         if (unlocked) fallbackCount++;
                         else fallbackRecipes.Add($"{info.Name}({unlock?.Type})");
                         break;
                     default:
                         // 未知类型 → HaveRecipe 兜底
-                        unlocked = HaveRecipeSafe(info.Id);
+                        unlocked = HaveRecipeSafe(info.RecipeId);
                         if (unlocked) fallbackCount++;
                         else fallbackRecipes.Add($"{info.Name}(unknown)");
                         break;
@@ -415,22 +485,60 @@ public class Plugin : BasePlugin
                     result.Add(info.Name);
             }
 
-            Instance?.Log?.LogInfo($"[MystiaRec] 料理诊断(当晚首次): 总数={totalCount}, " +
+            Instance?.Log?.LogInfo($"[MystiaRec] 料理运行时诊断: 总数={totalCount}, " +
                 $"self={selfCount}, bond={bondCount}(跳过{bondSkippedCount}个等级不足), levelup={levelupCount}, fallback={fallbackCount}, " +
-                $"总计解锁={result.Count}, 玩家等级={playerLevel}, 绝对天数={GetAbsoluteDay()}");
+                $"runtimeFoodIds={runtimeFoodIds.Count}, 总计解锁={result.Count}, 玩家等级={playerLevel}, 绝对天数={GetAbsoluteDay()}");
             Instance?.Log?.LogInfo($"[MystiaRec] === 已解锁料理列表({result.Count}个) ===\n[{string.Join(", ", result.OrderBy(n => n))}]");
             if (bondMissingId.Count > 0)
                 Instance?.Log?.LogInfo($"[MystiaRec] 缺少角色ID({bondMissingId.Count}个): [{string.Join("; ", bondMissingId.Take(10))}]");
             if (bondZeroRecipes.Count > 0)
                 Instance?.Log?.LogInfo($"[MystiaRec] 角色羁绊为0({bondZeroRecipes.Count}个): [{string.Join("; ", bondZeroRecipes.Take(10))}]");
             if (fallbackRecipes.Count > 0)
-                Instance?.Log?.LogInfo($"[MystiaRec] HaveRecipe未解锁({fallbackRecipes.Count}个): [{string.Join("; ", fallbackRecipes.Take(10))}]");
+                Instance?.Log?.LogInfo($"[MystiaRec] 存档未持有/兜底未解锁({fallbackRecipes.Count}个): [{string.Join("; ", fallbackRecipes.Take(10))}]");
         }
         catch (System.Exception e)
         {
             Instance?.Log?.LogWarning("[MystiaRec] GetUnlockedRecipes: " + e.Message);
         }
         _cachedUnlockedRecipes = result;
+        return result;
+    }
+
+    /// <summary>
+    /// 直接枚举 RunTimeStorage 中实际持有配方的成品 Food ID。
+    /// Recipe.id 是配方 ID，Recipe.foodID 才能稳定映射到 recipes.json 顶层 id。
+    /// </summary>
+    private static HashSet<int> GetOwnedFoodIdsFromStorage(out bool runtimeOwnershipAvailable)
+    {
+        var result = new HashSet<int>();
+        var mappings = new List<string>();
+        runtimeOwnershipAvailable = false;
+        try
+        {
+            var recipes = GameData.RunTime.Common.RunTimeStorage.GetAllRecipes();
+            if (recipes == null)
+                return result;
+
+            runtimeOwnershipAvailable = true;
+            foreach (var entry in recipes)
+            {
+                if (entry != null)
+                {
+                    int recipeId = entry.id;
+                    int foodId = entry.foodID;
+                    result.Add(foodId);
+                    string name = RecipeDatabase.GetRecipeByFoodId(foodId)?.Name ?? "未收录";
+                    mappings.Add($"recipeId={recipeId}->foodId={foodId}({name})");
+                }
+            }
+
+            Instance?.Log?.LogInfo($"[MystiaRec] 从RunTimeStorage读取料理所有权: " +
+                $"{result.Count}个Food ID, 映射=[{string.Join("; ", mappings)}]");
+        }
+        catch (System.Exception e)
+        {
+            Instance?.Log?.LogWarning("[MystiaRec] 直接读取料理所有权失败，将使用HaveRecipe/旧规则兜底: " + e.Message);
+        }
         return result;
     }
 
@@ -763,7 +871,7 @@ public class Plugin : BasePlugin
                 var allIds = new List<string>();
                 foreach (var bev in beverages)
                 {
-                    if (bev.Key == null) continue;
+                    if (bev.Key == null || bev.Value <= 0) continue;
                     totalCount++;
                     int id = bev.Key.id;
                     var info = RecipeDatabase.GetBeverageById(id);
@@ -784,60 +892,54 @@ public class Plugin : BasePlugin
         return result;
     }
 
-    private static HashSet<string> GetAvailableCookers()
+    private static HashSet<string> GetAvailableCookers(bool forceRefresh = false)
     {
-        if (_cachedAvailableCookers != null)
+        if (!forceRefresh && _cachedAvailableCookers != null)
             return _cachedAvailableCookers;
 
         var result = new HashSet<string>();
+        bool liveConfigurationAvailable = false;
         try
         {
-            var asm = typeof(NightScene.GuestManagementUtility.SpecialGuestsController).Assembly;
-            var type = asm.GetTypes().FirstOrDefault(t => t.Name == "IzakayaConfigure");
-            if (type != null)
+            // 营业场景中的 CookSystemManager 只包含本轮实际放置的厨具。
+            // RunTimeStorage.GetAllCookers() 是永久仓库，不能作为营业主路径。
+            if (NightScene.CookingUtility.CookSystemManager.hasInstance)
             {
-                var cookers = type?.GetProperty("CookerConfigure", BindingFlags.Public | BindingFlags.Static)?.GetValue(null)
-                    as System.Collections.IEnumerable;
-                if (cookers == null)
-                    cookers = type?.GetField("_CookerConfigure_k__BackingField", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null)
-                        as System.Collections.IEnumerable;
-
-                if (cookers != null)
+                var manager = NightScene.CookingUtility.CookSystemManager.Instance;
+                var placedCookers = manager?._AllCookers_k__BackingField;
+                if (placedCookers != null)
                 {
-                    int cookerCount = 0;
-                    foreach (var item in cookers)
+                    liveConfigurationAvailable = true;
+                    int slotCount = 0;
+                    int equippedCookerCount = 0;
+                    var enumerator = placedCookers.GetEnumerator();
+                    while (enumerator.MoveNext())
                     {
-                        cookerCount++;
-                        // 处理 KeyValuePair<Cooker, Int32> 包装
-                        object cooker = item;
-                        if (item != null)
-                        {
-                            var itemType = item.GetType();
-                            if (itemType.IsGenericType && itemType.GetGenericTypeDefinition().Name.StartsWith("KeyValuePair"))
-                            {
-                                var keyProp = itemType.GetProperty("Key");
-                                if (keyProp != null)
-                                    cooker = keyProp.GetValue(item);
-                            }
-                        }
+                        slotCount++;
+                        var controller = enumerator.Current.Value;
+                        if (controller == null || controller.Cooker == null) continue;
+                        object cooker = controller.Cooker;
                         string typeName = ReadMemberText(cooker, "Type", "type", "CookerType", "cookerType");
                         string seriesName = ReadMemberText(cooker, "Series", "series", "CookerSeries", "cookerSeries");
-                        Instance?.Log.LogInfo($"[MystiaRec] 厨具[{cookerCount}]: CookerType={cooker?.GetType().Name}, Type={typeName}, Series={seriesName}, ToString={cooker}");
+                        // 场景字典会为未装备的槽位放入 Type=Empty 的占位 Cooker；不能计为携带厨具。
+                        if (string.Equals(typeName, "Empty", System.StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        equippedCookerCount++;
+                        Instance?.Log.LogInfo($"[MystiaRec] 营业厨具[{equippedCookerCount}]: Type={typeName}, Series={seriesName}");
                         AddResolvedCooker(result, cooker);
                     }
-                    Instance?.Log.LogInfo($"[MystiaRec] 厨具检测: CookerConfigure共{cookerCount}个, 解析结果=[{string.Join(",", result)}]");
+                    _cachedEquippedCookerCount = equippedCookerCount;
+                    Instance?.Log.LogInfo($"[MystiaRec] 营业厨具检测: 实际携带={equippedCookerCount}个/总槽位={slotCount}, " +
+                        $"可用能力=[{string.Join(",", result)}]");
                 }
-                else
-                    Instance?.Log.LogWarning("[MystiaRec] 厨具检测: CookerConfigure为null");
             }
-            else
-                Instance?.Log.LogWarning("[MystiaRec] 厨具检测: 未找到IzakayaConfigure类型");
 
-            if (result.Count == 0)
+            if (!liveConfigurationAvailable)
             {
-                Instance?.Log.LogInfo("[MystiaRec] 厨具检测: 尝试RunTimeStorage备用路径...");
+                Instance?.Log.LogWarning("[MystiaRec] 营业厨具管理器不可用，使用永久仓库兼容兜底；该结果仅供非营业场景诊断");
                 AddAvailableCookersFromStorage(result);
-                Instance?.Log.LogInfo($"[MystiaRec] 厨具检测: 备用路径结果=[{string.Join(",", result)}]");
+                _cachedEquippedCookerCount = 0;
             }
         }
         catch (System.Exception e)
@@ -870,6 +972,9 @@ public class Plugin : BasePlugin
                     // 尝试作为 KeyValuePair 提取 .Key
                     if (itemType.IsGenericType && itemType.GetGenericTypeDefinition().Name.StartsWith("KeyValuePair"))
                     {
+                        var value = itemType.GetProperty("Value")?.GetValue(item);
+                        if (value != null && int.TryParse(value.ToString(), out int count) && count <= 0)
+                            continue;
                         var keyProp = itemType.GetProperty("Key");
                         if (keyProp != null)
                             cooker = keyProp.GetValue(item);
@@ -936,21 +1041,17 @@ public class Plugin : BasePlugin
         return "";
     }
 
-    private static bool IsRecipeUnlocked(int recipeId, int foodId)
+    private static bool IsRecipeUnlocked(int recipeIndex)
     {
         try
         {
             // 仅通过 HaveRecipe 判断——CheckRecipeIsLocked 对未相遇的食谱也可能返回 false
-            if (GameData.RunTime.Common.RunTimeStorage.HaveRecipe(recipeId))
-                return true;
-            if (foodId != recipeId && GameData.RunTime.Common.RunTimeStorage.HaveRecipe(foodId))
-                return true;
+            return GameData.RunTime.Common.RunTimeStorage.HaveRecipe(recipeIndex);
         }
         catch (System.Exception e)
         {
             Instance?.Log.LogWarning("[MystiaRec] HaveRecipe check failed: " + e.Message);
         }
-
         return false;
     }
 
@@ -981,6 +1082,41 @@ public class Plugin : BasePlugin
             Instance?.Log.LogWarning("[MystiaRec] GetIngredientStocks: " + e.Message);
         }
         return result;
+    }
+
+    /// <summary>
+    /// 在 Unity 主线程捕获本次推荐使用的完整运行时状态。
+    /// JSON 只提供稳定定义与 ID 映射；是否拥有、当前库存和营业配置均以存档为准。
+    /// </summary>
+    private static RecommendationGameStateSnapshot CaptureGameState()
+    {
+        // 等级、日期和羁绊也随快照重新读取，避免同场景推进后保留旧值。
+        _cachedPlayerLevel = -1;
+        _cachedAbsoluteDay = -1;
+        _cachedBondData = null;
+
+        // 先发现并注册运行时食材 ID，再读取库存，避免遗漏高位 DLC ID。
+        var availableIngredients = GetAvailableIngredients();
+        var ingredientStocks = GetIngredientStocks();
+        var snapshot = new RecommendationGameStateSnapshot
+        {
+            UnlockedRecipes = new HashSet<string>(GetUnlockedRecipes(forceRefresh: true)),
+            OwnedBeverages = new HashSet<string>(GetUnlockedBeverages()),
+            OwnedCookers = new HashSet<string>(GetAvailableCookers(forceRefresh: true)),
+            EquippedCookerCount = _cachedEquippedCookerCount,
+            AvailableIngredients = new HashSet<string>(availableIngredients),
+            IngredientStocks = new Dictionary<string, int>(ingredientStocks),
+            PopularTrend = GetPopularTrend(),
+            PlayerLevel = GetPlayerLevel(),
+            AbsoluteDay = GetAbsoluteDay()
+        };
+
+        Instance?.Log?.LogInfo(
+            $"[MystiaRec] 运行时快照: day={snapshot.AbsoluteDay}, level={snapshot.PlayerLevel}, " +
+            $"料理={snapshot.UnlockedRecipes.Count}, 酒水={snapshot.OwnedBeverages.Count}, " +
+            $"可用食材={snapshot.AvailableIngredients.Count}, 营业厨具={snapshot.EquippedCookerCount}, " +
+            $"厨具能力={snapshot.OwnedCookers.Count}");
+        return snapshot;
     }
 
     private static PopularTrendState GetPopularTrend()
@@ -1459,6 +1595,8 @@ public class CustomerRecommendation
     public int DeskCode { get; set; }
     public string ReqFoodTag { get; set; }
     public string ReqBevTag { get; set; }
+    public int OrderBudget { get; set; } = -1;
+    public int FixedRecipeId { get; set; } = -1;
     public List<Recommendation> Recommendations { get; set; } = new();
     public string StatusMessage { get; set; } = "";
     public float Timestamp { get; set; }
@@ -1468,6 +1606,8 @@ public class CustomerRecommendation
     // 拖拽位置（null=自动列布局）
     public float? DragX { get; set; }
     public float? DragY { get; set; }
+    public UnityEngine.Vector3 CustomerWorldPosition { get; set; }
+    public bool HasCustomerWorldPosition { get; set; }
 
     // 折叠状态（默认全部展开）
     public bool OverviewCollapsed { get; set; }
