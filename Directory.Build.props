@@ -1,0 +1,9 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Directory.Build.user.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.user.props')" />
+
+  <PropertyGroup>
+    <BepInExDir Condition="'$(BepInExDir)' == '' and '$(GameDir)' != ''">$(GameDir)/BepInEx</BepInExDir>
+    <BepInExDir Condition="'$(BepInExDir)' == '' and '$(MYSTIA_BEPINEX_DIR)' != ''">$(MYSTIA_BEPINEX_DIR)</BepInExDir>
+  </PropertyGroup>
+</Project>

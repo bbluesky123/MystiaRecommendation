@@ -178,25 +178,51 @@ UI 会使用 `任务D` 标识这类推荐，避免与普通自由选菜方案混
 前置条件：
 
 - [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
-- Python 3
 - 已正确安装 BepInEx 6 IL2CPP 的游戏目录
 
 ```powershell
 git clone https://github.com/bbluesky123/MystiaRecommendation.git
 cd MystiaRecommendation
-python build.py "D:\你的游戏路径"
+
+# 复制本机配置模板
+Copy-Item Directory.Build.user.props.example Directory.Build.user.props
 ```
 
-也可以直接修改 `MystiaRecommendation.csproj` 中的 `<GameDir>`，再运行：
+打开新生成的 `Directory.Build.user.props`，把 `BepInExDir` 修改为本机实际的 BepInEx 目录：
+
+```xml
+<Project>
+  <PropertyGroup>
+    <BepInExDir>D:\steam\steamapps\common\Touhou Mystia Izakaya\BepInEx</BepInExDir>
+  </PropertyGroup>
+</Project>
+```
+
+`Directory.Build.user.props` 只保存本机路径，已经被 `.gitignore` 忽略，不会上传到 GitHub。
+
+配置完成后执行：
 
 ```powershell
-python build.py
+dotnet build -c Release
 ```
 
-脚本依次执行 `dotnet restore` 和 Release 构建。构建完成后，MSBuild 会把 DLL 和 `Data/*.json` 复制到：
+也可以不创建本机配置文件，直接通过命令行参数指定路径：
+
+```powershell
+dotnet build -c Release -p:BepInExDir="D:\游戏目录\BepInEx"
+```
+
+或者使用环境变量：
+
+```powershell
+$env:MYSTIA_BEPINEX_DIR = "D:\游戏目录\BepInEx"
+dotnet build -c Release
+```
+
+构建前，MSBuild 会检查 BepInEx 核心程序集和游戏 IL2CPP 程序集是否存在。构建成功后，DLL 和 `Data/` 会自动复制到：
 
 ```text
-<游戏目录>\BepInEx\plugins\MystiaRecommendation\
+BepInEx/plugins/MystiaRecommendation/
 ```
 
 ## 项目结构
@@ -206,7 +232,8 @@ MystiaRecommendation/
 ├── Plugin.cs                         # 插件入口、推荐编排、运行时状态与解锁检测
 ├── MyPluginInfo.cs                   # 插件 GUID、名称和版本
 ├── MystiaRecommendation.csproj      # .NET/BepInEx/游戏程序集引用与部署目标
-├── build.py                          # Restore + Release 构建脚本
+├── Directory.Build.props             # 公共构建路径和本地配置加载规则
+├── Directory.Build.user.props.example # 本机 BepInEx 路径模板
 ├── Patches/
 │   ├── CustomerPatch.cs              # 当前实际注册的稀客、订单和离场 Harmony Hook
 │   ├── InventoryPatch.cs             # 预留文件，当前没有补丁实现

@@ -1,9 +1,9 @@
 bin/
 obj/
 .vs/
+Directory.Build.user.props
 *.user
 *.suo
 .DS_Store
 Thumbs.db
 .claude/
-MystiaRecommendation-v1.0.0.zip
