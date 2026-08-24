@@ -75,7 +75,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="DEYU.Singletons">
-      <HintPath>$(BepInExDir)\interop\DEYU.Singletons.dll</HintPath>
+      <HintPath>$(BepInExDir)/interop/DEYU.Singletons.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -101,6 +101,8 @@
            Text="BepInEx core assemblies were not found under '$(BepInExDir)/core'. Check BepInExDir." />
     <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/Assembly-CSharp.dll')"
            Text="Game interop assemblies were not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
+    <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/DEYU.Singletons.dll')"
+           Text="DEYU.Singletons.dll was not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
   </Target>
 
   <Target Name="CopyToPlugins" AfterTargets="Build">
