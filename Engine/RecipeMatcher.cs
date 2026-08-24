@@ -594,7 +594,9 @@ public class RecipeMatcher
 
         return new Recommendation
         {
+            RecipeFoodId = recipe.FoodId,
             RecipeName = recipe.Name,
+            BaseIngredients = recipe.Ingredients.ToList(),
             RecipeTags = candidate.Tags.ToList(),
             Ingredients = ingredients,
             ExtraIngredients = candidate.ExtraIngredients.ToList(),
@@ -829,7 +831,9 @@ public class RecipeMatcher
 
 public class Recommendation
 {
+    public int RecipeFoodId { get; set; }
     public string RecipeName { get; set; }
+    public List<string> BaseIngredients { get; set; } = new();
     public List<string> RecipeTags { get; set; } = new();
     public List<string> Ingredients { get; set; } = new();
     public List<string> ExtraIngredients { get; set; } = new();

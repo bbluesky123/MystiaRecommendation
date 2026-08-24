@@ -24,6 +24,7 @@ public class Plugin : BasePlugin
     // 多稀客支持：唯一ID -> 推荐信息
     internal static Dictionary<int, CustomerRecommendation> ActiveRecommendations { get; private set; } = new();
     private static int _nextRecommendId = 0;
+    private static long _nextOrderSequence = 0;
     internal static int GetNextRecommendId() => _nextRecommendId++;
 
     public override void Load()
@@ -48,6 +49,7 @@ public class Plugin : BasePlugin
 
         Log.LogInfo("正在注册 Harmony 补丁...");
         Harmony.PatchAll(typeof(Patches.CustomerPatch));
+        Harmony.PatchAll(typeof(Patches.CookerPatch));
 
         Log.LogInfo("正在注册 UI 渲染组件...");
         UI.GUIBehaviour.Create();
@@ -62,7 +64,8 @@ public class Plugin : BasePlugin
     /// 稀客到店时调用，支持多个稀客同时到店
     /// </summary>
     internal static void OnCustomerArrived(string customerName, string reqFoodTag, string reqBevTag, int deskCode,
-        int orderBudget = -1, int fixedRecipeId = -1, UnityEngine.Vector3? customerWorldPosition = null)
+        int orderBudget = -1, int fixedRecipeId = -1, UnityEngine.Vector3? customerWorldPosition = null,
+        long orderKey = 0)
     {
         bool hasCustomer = DataEngine.HasCustomer(customerName);
         var customer = hasCustomer ? DataEngine.GetCustomer(customerName) : null;
@@ -118,7 +121,7 @@ public class Plugin : BasePlugin
             status = "无可用方案";
 
         UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag, recommendations, status,
-            orderBudget, fixedRecipeId, customerWorldPosition);
+            orderBudget, fixedRecipeId, customerWorldPosition, orderKey);
 
         Instance?.Log.LogInfo($"[MystiaRec] 推荐完成: {customerName} 座位{deskCode} {recommendations.Count} 个方案");
         foreach (var rec in recommendations)
@@ -164,7 +167,8 @@ public class Plugin : BasePlugin
         string statusMessage,
         int orderBudget = -1,
         int fixedRecipeId = -1,
-        UnityEngine.Vector3? customerWorldPosition = null)
+        UnityEngine.Vector3? customerWorldPosition = null,
+        long orderKey = 0)
     {
         // 同一稀客、同一座位采用原对象就地更新，保留拖拽位置、折叠状态和稳定卡片 ID。
         var existing = ActiveRecommendations.FirstOrDefault(kv =>
@@ -172,12 +176,23 @@ public class Plugin : BasePlugin
         if (existing.Value != null)
         {
             var card = existing.Value;
+            bool isNewOrder = orderKey > 0 && card.OrderKey != orderKey;
+            if (isNewOrder)
+            {
+                RuntimeOrderTracker.RemoveForCard(existing.Key);
+                card.OrderSequence = ++_nextOrderSequence;
+                card.MatchedRecommendationIndex = -1;
+                card.TrackingState = RecommendationTrackingState.AwaitingCook;
+                card.ActiveAssignmentId = 0;
+            }
             card.ReqFoodTag = reqFoodTag;
             card.ReqBevTag = reqBevTag;
             card.OrderBudget = orderBudget;
             card.FixedRecipeId = fixedRecipeId;
             card.Recommendations = recommendations;
             card.StatusMessage = statusMessage;
+            if (orderKey > 0)
+                card.OrderKey = orderKey;
             card.Timestamp = UnityEngine.Time.time;
             card.IsFadingOut = false;
             card.FadeAlpha = 1f;
@@ -208,7 +223,10 @@ public class Plugin : BasePlugin
             FixedRecipeId = fixedRecipeId,
             Recommendations = recommendations,
             StatusMessage = statusMessage,
-            Timestamp = UnityEngine.Time.time
+            Timestamp = UnityEngine.Time.time,
+            OrderKey = orderKey,
+            OrderSequence = ++_nextOrderSequence,
+            TrackingState = RecommendationTrackingState.AwaitingCook
         };
         if (customerWorldPosition.HasValue)
         {
@@ -229,6 +247,7 @@ public class Plugin : BasePlugin
 
         foreach (var key in keys)
         {
+            RuntimeOrderTracker.RemoveForCard(key);
             ActiveRecommendations.Remove(key);
             Instance?.Log.LogInfo($"[MystiaRec] 稀客离店: 座位{deskCode}");
         }
@@ -236,6 +255,26 @@ public class Plugin : BasePlugin
         // 防止离场后 OnGetGuestName 钩子重新创建卡片
         _recentlyDepartedDesks.Add(deskCode);
         _lastDepartTime = UnityEngine.Time.time;
+    }
+
+    /// <summary>
+    /// 游戏确认本轮料理和酒水都已上齐后，立即关闭当前卡片。
+    /// 不校验玩家最终交付的内容是否等于推荐方案。
+    /// </summary>
+    internal static void OnOrderFulfilled(int deskCode)
+    {
+        if (deskCode < 0) return;
+        var keys = ActiveRecommendations
+            .Where(kv => kv.Value.DeskCode == deskCode)
+            .Select(kv => kv.Key)
+            .ToList();
+        foreach (var key in keys)
+        {
+            RuntimeOrderTracker.RemoveForCard(key);
+            ActiveRecommendations.Remove(key);
+        }
+        if (keys.Count > 0)
+            Instance?.Log?.LogInfo($"[MystiaRec] 本轮料理和酒水均已上齐，关闭卡片: 座位{deskCode + 1}");
     }
 
     private static HashSet<int> _recentlyDepartedDesks = new();
@@ -260,6 +299,7 @@ public class Plugin : BasePlugin
         foreach (var key in keys)
         {
             var card = ActiveRecommendations[key];
+            RuntimeOrderTracker.RemoveForCard(key);
             ActiveRecommendations.Remove(key);
             Instance?.Log.LogInfo($"[MystiaRec] 座位换客，清理旧卡片: {card.CustomerName} -> {currentCustomerName} 座位{deskCode}");
         }
@@ -271,6 +311,8 @@ public class Plugin : BasePlugin
     internal static void ClearAllRecommendations()
     {
         ActiveRecommendations.Clear();
+        RuntimeOrderTracker.Reset();
+        _nextOrderSequence = 0;
         _cachedUnlockedRecipes = null;
         _cachedAvailableCookers = null;
         _cachedEquippedCookerCount = 0;
@@ -308,6 +350,8 @@ public class Plugin : BasePlugin
         foreach (var kv in cards)
         {
             var card = kv.Value;
+            if (card.TrackingState != RecommendationTrackingState.AwaitingCook)
+                continue;
             // 跳过没有有效标签的卡片（等待订单状态）
             if (string.IsNullOrEmpty(card.ReqFoodTag) && string.IsNullOrEmpty(card.ReqBevTag))
                 continue;
@@ -315,7 +359,8 @@ public class Plugin : BasePlugin
             Instance?.Log?.LogInfo($"[MystiaRec] 刷新推荐: {card.CustomerName} 座位{card.DeskCode}");
             OnCustomerArrived(card.CustomerName, card.ReqFoodTag ?? "", card.ReqBevTag ?? "",
                 card.DeskCode, card.OrderBudget, card.FixedRecipeId,
-                card.HasCustomerWorldPosition ? card.CustomerWorldPosition : null);
+                card.HasCustomerWorldPosition ? card.CustomerWorldPosition : null,
+                card.OrderKey);
         }
 
         if (cards.Count == 0)
@@ -1599,6 +1644,12 @@ public class CustomerRecommendation
     public int FixedRecipeId { get; set; } = -1;
     public List<Recommendation> Recommendations { get; set; } = new();
     public string StatusMessage { get; set; } = "";
+    public long OrderKey { get; set; }
+    public long OrderSequence { get; set; }
+    // -1=尚未匹配；-2=A/B料理完全相同，仅酒水无法由厨具判断；>=0=已自动匹配的方案索引。
+    public int MatchedRecommendationIndex { get; set; } = -1;
+    internal RecommendationTrackingState TrackingState { get; set; } = RecommendationTrackingState.AwaitingCook;
+    public long ActiveAssignmentId { get; set; }
     public float Timestamp { get; set; }
     public bool IsFadingOut { get; set; }
     public float FadeAlpha { get; set; } = 1f;

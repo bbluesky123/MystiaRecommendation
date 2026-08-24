@@ -14,6 +14,8 @@ public static class CustomerPatch
     private static System.Func<int, string> _getBevTag;
     private static MethodInfo _containsServeInWorkMission;
     private static Dictionary<int, string> _deskGuests = new();
+    private static float _nextFulfillmentPollTime;
+    private const float FulfillmentPollInterval = 0.1f;
 
     private class GuestState
     {
@@ -26,6 +28,10 @@ public static class CustomerPatch
         public int LastBudget = -1;
         public int LastFixedRecipeId = -1;
         public int DeskCode = -1;
+        public System.IntPtr LastOrderPointer = System.IntPtr.Zero;
+        public long OrderVersion;
+        public long RecommendedOrderVersion = -1;
+        public long CompletedOrderVersion = -1;
     }
 
     static CustomerPatch()
@@ -98,6 +104,10 @@ public static class CustomerPatch
         state.LastOrder = null;
         state.LastBudget = -1;
         state.LastFixedRecipeId = -1;
+        state.LastOrderPointer = System.IntPtr.Zero;
+        state.OrderVersion = 0;
+        state.RecommendedOrderVersion = -1;
+        state.CompletedOrderVersion = -1;
     }
 
     private static bool EnsureCurrentGuest(SpecialGuestsController sgc, string explicitName = null)
@@ -158,12 +168,8 @@ public static class CustomerPatch
             var state = _guestStates[__instance];
             if (state.Name != __result)
             {
+                ClearOrderState(state);
                 state.Name = __result;
-                state.LastFoodTag = "";
-                state.LastBevTag = "";
-                state.TextFoodTag = "";
-                state.TextBevTag = "";
-                state.LastOrder = null;
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] 检测到稀客: " + __result);
 
                 int deskIdx = -1;
@@ -221,7 +227,25 @@ public static class CustomerPatch
             if (!_guestStates.ContainsKey(sgc))
                 _guestStates[sgc] = new GuestState();
             var state = _guestStates[sgc];
-            state.LastOrder = orderData ?? state.LastOrder;
+
+            if (orderData != null)
+            {
+                var pointer = TryGetIl2CppPointer(orderData);
+                bool changedOrder = pointer != System.IntPtr.Zero
+                    ? pointer != state.LastOrderPointer
+                    : !object.ReferenceEquals(orderData, state.LastOrder);
+                if (changedOrder)
+                {
+                    state.OrderVersion++;
+                    state.LastOrderPointer = pointer;
+                    state.RecommendedOrderVersion = -1;
+                    state.CompletedOrderVersion = -1;
+                    state.LastFoodTag = "";
+                    state.LastBevTag = "";
+                    Plugin.Instance?.Log?.LogInfo($"[MystiaRec] 新订单对象: version={state.OrderVersion} ptr={pointer}");
+                }
+                state.LastOrder = orderData;
+            }
             int orderBudget = TryReadBudgetFromObject(state.LastOrder);
             if (orderBudget > 0)
                 state.LastBudget = orderBudget;
@@ -280,13 +304,18 @@ public static class CustomerPatch
                 return;
             }
 
-            // 多轮点单：只在标签变化时触发新推荐
-            if (reqFoodTag == state.LastFoodTag && reqBevTag == state.LastBevTag
-                && fixedRecipeId == state.LastFixedRecipeId)
+            // 同一订单可能同时经过基类和派生类钩子；按订单对象去重，而不是按标签去重。
+            // 这样连续两轮提出完全相同的标签也能正常刷新。
+            if (state.CompletedOrderVersion == state.OrderVersion
+                || (state.RecommendedOrderVersion == state.OrderVersion
+                    && reqFoodTag == state.LastFoodTag
+                    && reqBevTag == state.LastBevTag
+                    && fixedRecipeId == state.LastFixedRecipeId))
                 return;
             state.LastFoodTag = reqFoodTag;
             state.LastBevTag = reqBevTag;
             state.LastFixedRecipeId = fixedRecipeId;
+            state.RecommendedOrderVersion = state.OrderVersion;
 
             Plugin.Instance?.Log.LogInfo("[MystiaRec] 稀客点单(" + source + "): " + name + " 座位" + deskIdx);
             Plugin.Instance?.Log.LogInfo("[MystiaRec] 食物标签: " + reqFoodTag + ", 酒水标签: " + reqBevTag);
@@ -294,7 +323,7 @@ public static class CustomerPatch
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] 检测到任务固定料理: foodId=" + fixedRecipeId);
 
             Plugin.OnCustomerArrived(name, reqFoodTag, reqBevTag, deskIdx, state.LastBudget, fixedRecipeId,
-                ReadGuestWorldPosition(sgc));
+                ReadGuestWorldPosition(sgc), state.OrderVersion);
         }
         catch (System.Exception e)
         {
@@ -306,6 +335,46 @@ public static class CustomerPatch
     {
         _guestStates.Clear();
         _deskGuests.Clear();
+        _nextFulfillmentPollTime = 0f;
+    }
+
+    /// <summary>
+    /// 只检查本 Mod 已经跟踪到的稀客订单。
+    ///
+    /// 不再补丁 OrderBase 的上菜/上酒属性：这些属性由普通客人和稀客共用，
+    /// 在 IL2CPP 下拦截它们会把普通订单也带进 Mod 的完成检测，存在原生崩溃风险。
+    /// </summary>
+    public static void PollFulfilledRareOrders()
+    {
+        if (UnityEngine.Time.unscaledTime < _nextFulfillmentPollTime) return;
+        _nextFulfillmentPollTime = UnityEngine.Time.unscaledTime + FulfillmentPollInterval;
+
+        if (Plugin.ActiveRecommendations.Count == 0 || _guestStates.Count == 0) return;
+
+        foreach (var pair in _guestStates.ToList())
+        {
+            var state = pair.Value;
+            if (state == null || state.LastOrder == null) continue;
+            if (state.CompletedOrderVersion == state.OrderVersion) continue;
+            if (state.RecommendedOrderVersion != state.OrderVersion) continue;
+            if (!Plugin.ActiveRecommendations.Any(kv => kv.Value.DeskCode == state.DeskCode)) continue;
+
+            try
+            {
+                if (state.LastOrder is not GuestsManager.OrderBase order) continue;
+                if (order.ServFood == null || order.ServBeverage == null) continue;
+
+                state.CompletedOrderVersion = state.OrderVersion;
+                state.TextFoodTag = "";
+                state.TextBevTag = "";
+                Plugin.OnOrderFulfilled(state.DeskCode);
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Instance?.Log?.LogWarning(
+                    $"[MystiaRec] 稀客订单完成检测失败: 座位{state.DeskCode + 1} {e.Message}");
+            }
+        }
     }
 
     private static void ResetOrderText(SpecialGuestsController sgc)
@@ -345,6 +414,17 @@ public static class CustomerPatch
     }
 
     private static int _leaveLogCount = 0;
+
+    private static System.IntPtr TryGetIl2CppPointer(object value)
+    {
+        try
+        {
+            if (value is Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase il2CppObject)
+                return il2CppObject.Pointer;
+        }
+        catch { }
+        return System.IntPtr.Zero;
+    }
 
     private static void TryClearLeavingGuest(GuestGroupController guest)
     {

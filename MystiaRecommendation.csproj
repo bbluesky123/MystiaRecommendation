@@ -54,6 +54,10 @@
       <HintPath>$(BepInExDir)/interop/UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BepInExDir)/interop/UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(BepInExDir)/interop/UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>false</Private>
@@ -72,6 +76,10 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(BepInExDir)/interop/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(BepInExDir)/interop/Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="DEYU.Singletons">
@@ -101,6 +109,8 @@
            Text="BepInEx core assemblies were not found under '$(BepInExDir)/core'. Check BepInExDir." />
     <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/Assembly-CSharp.dll')"
            Text="Game interop assemblies were not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
+    <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/Assembly-CSharp-firstpass.dll')"
+           Text="Assembly-CSharp-firstpass.dll was not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
     <Error Condition="'$(BepInExDir)' != '' and !Exists('$(BepInExDir)/interop/DEYU.Singletons.dll')"
            Text="DEYU.Singletons.dll was not found under '$(BepInExDir)/interop'. Start the game once with BepInEx IL2CPP or check BepInExDir." />
   </Target>
