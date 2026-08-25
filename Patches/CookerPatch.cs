@@ -53,17 +53,4 @@ public static class CookerPatch
         RuntimeOrderTracker.OnDishReceived(value, __result);
     }
 
-    [HarmonyPatch(typeof(IzakayaTray), "Deliver")]
-    [HarmonyPostfix]
-    public static void OnTrayDeliver(Sellable value)
-    {
-        RuntimeOrderTracker.OnDishDelivered(value);
-    }
-
-    [HarmonyPatch(typeof(IzakayaTray), "DeliverInternal")]
-    [HarmonyPostfix]
-    public static void OnTrayDeliverInternal(Sellable value)
-    {
-        RuntimeOrderTracker.OnDishDelivered(value);
-    }
 }

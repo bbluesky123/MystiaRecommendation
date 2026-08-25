@@ -40,6 +40,8 @@ public class OverlayRenderer
     private GUIStyle _hateLineStyle;
     private GUIStyle _planTitleStyle;
     private GUIStyle _compactStyle;
+    private GUIStyle _pendingInteractionStyle;
+    private GUIStyle _pendingWaitingStyle;
     private GUIStyle _badgeStyle;
 
     // 布局常量
@@ -48,8 +50,11 @@ public class OverlayRenderer
     private const float CARD_PADDING = 8;
     private const float CARD_SPACING = 10;
     private const float SCREEN_MARGIN = 10;
-    private const int MAX_PER_COLUMN = 4;
     private const int MAX_RECIPES = 2;
+    // 这里只保存游戏“可能出现”的四个槽位坐标，不代表玩家当前拥有四个槽位。
+    // 是否存在该槽位完全以 IzakayaTray.Receive 返回的真实索引和托盘对象为准。
+    private static readonly float[] TRAY_SLOT_X_RATIOS = { 0.484f, 0.565f, 0.646f, 0.727f };
+    private const float TRAY_SLOT_Y_RATIO = 0.932f;
 
     // 行高
     private const float LINE_HEIGHT = 22;
@@ -92,7 +97,7 @@ public class OverlayRenderer
         var active = allCards
             .Where(kv => !kv.Value.IsFadingOut || kv.Value.FadeAlpha > 0)
             .OrderBy(kv => kv.Key)
-            .Take(MAX_PER_COLUMN * 2)
+            .Take(12)
             .ToList();
 
         if (active.Count == 0) return;
@@ -125,43 +130,14 @@ public class OverlayRenderer
         // 处理拖拽中的 MouseDrag / MouseUp
         ProcessDragEvents();
 
-        // 默认在稀客/桌子旁初始化新卡片。这里只定位一次，之后以玩家拖拽位置为准。
-        InitializeGuestPositions(active);
-
-        // 分两组：自动列布局 vs 手动拖拽位置
+        // 完整方案进入右上角决策区；确认方案和等待提示进入桌边区。
         var autoCards = active.Where(kv => !kv.Value.DragX.HasValue).ToList();
         var draggedCards = active.Where(kv => kv.Value.DragX.HasValue).ToList();
+        var decisionCards = autoCards.Where(kv => IsDecisionCard(kv.Value)).ToList();
+        var localCards = autoCards.Where(kv => !IsDecisionCard(kv.Value)).ToList();
 
-        // === 阶段1：列布局绘制自动卡片 ===
-        var cardHeights = new List<float>();
-        foreach (var kv in autoCards)
-            cardHeights.Add(CalcCardHeight(kv.Value));
-
-        int leftCount = System.Math.Min(autoCards.Count, MAX_PER_COLUMN);
-        int rightCount = System.Math.Min(System.Math.Max(0, autoCards.Count - MAX_PER_COLUMN), MAX_PER_COLUMN);
-
-        float rightEdge = Screen.width - SCREEN_MARGIN;
-        // 自动布局始终以完整卡片的左上角为锚点。
-        // 卡片变紧凑时只缩短右边，不让左边随宽度变化而移动。
-        float leftColX = rightEdge - CARD_WIDTH;
-        float rightColX = leftColX - CARD_WIDTH - 12;
-
-        float cy = SCREEN_MARGIN;
-        for (int i = 0; i < leftCount; i++)
-        {
-            DrawCard(leftColX, cy, autoCards[i].Value, cardHeights[i], autoCards[i].Key);
-            cy += cardHeights[i] + CARD_SPACING;
-        }
-
-        if (rightCount > 0)
-        {
-            cy = SCREEN_MARGIN;
-            for (int i = leftCount; i < leftCount + rightCount; i++)
-            {
-                DrawCard(rightColX, cy, autoCards[i].Value, cardHeights[i], autoCards[i].Key);
-                cy += cardHeights[i] + CARD_SPACING;
-            }
-        }
+        DrawDecisionCards(decisionCards);
+        DrawLocalCards(localCards);
 
         // === 阶段2：绘制拖拽卡片（在列布局之上，按Z序） ===
         foreach (var cardId in _dragOrder.ToList())
@@ -184,44 +160,101 @@ public class OverlayRenderer
         DrawDishBadges();
     }
 
-    /// <summary>
-    /// 将新卡片首次放到稀客右侧；靠近屏幕右缘时改放左侧。
-    /// 世界坐标只用于首次定位，不持续跟随，以免覆盖玩家的手动拖拽结果。
-    /// </summary>
-    private void InitializeGuestPositions(List<KeyValuePair<int, CustomerRecommendation>> active)
+    private void DrawDecisionCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
-        bool overCustomer = string.Equals(
-            Plugin.PluginConfig.Position.Value,
-            "OverCustomer",
-            System.StringComparison.OrdinalIgnoreCase);
+        float y = SCREEN_MARGIN;
+        int column = 0;
+        float bottom = Screen.height - SCREEN_MARGIN;
 
-        Camera camera = overCustomer ? Camera.main : null;
-        foreach (var kv in active)
+        foreach (var kv in cards)
         {
-            var card = kv.Value;
-            if (!card.DragX.HasValue && camera != null && card.HasCustomerWorldPosition)
+            float height = CalcCardHeight(kv.Value);
+            if (y > SCREEN_MARGIN && y + height > bottom)
             {
-                Vector3 screenPoint = camera.WorldToScreenPoint(card.CustomerWorldPosition);
-                if (screenPoint.z > 0f)
-                {
-                    float cardHeight = CalcCardHeight(card);
-                    float cardWidth = GetCardWidth(card);
-                    const float guestGap = 45f;
-                    float x = screenPoint.x + guestGap;
-                    if (x + cardWidth > Screen.width - SCREEN_MARGIN)
-                        x = screenPoint.x - cardWidth - guestGap;
-
-                    // WorldToScreenPoint 使用左下原点，IMGUI 使用左上原点。
-                    float y = Screen.height - screenPoint.y - guestGap;
-                    card.DragX = ClampCardX(x, cardWidth);
-                    card.DragY = ClampCardY(y, cardHeight);
-                }
+                column++;
+                y = SCREEN_MARGIN;
             }
 
-            // 带固定位置的卡片必须登记到 Z 序，否则不会进入第二阶段绘制。
-            if (card.DragX.HasValue && !_dragOrder.Contains(kv.Key))
-                _dragOrder.Add(kv.Key);
+            // 第一列贴右上角；放满后向左开启下一列。
+            float x = Screen.width - SCREEN_MARGIN - CARD_WIDTH - column * (CARD_WIDTH + 12);
+            x = ClampCardX(x, CARD_WIDTH);
+            DrawCard(x, y, kv.Value, height, kv.Key);
+            y += height + CARD_SPACING;
         }
+    }
+
+    private void DrawLocalCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
+    {
+        var occupied = new List<Rect>();
+        float fallbackY = SCREEN_MARGIN;
+
+        foreach (var kv in cards)
+        {
+            var card = kv.Value;
+            float width = GetCardWidth(card);
+            float height = CalcCardHeight(card);
+            Rect rect;
+
+            if (TryGetGuestScreenPoint(card, out var guestPoint))
+            {
+                const float guestGap = 38f;
+                bool placeRight = IsRightSidePrompt(card);
+                float x = placeRight
+                    ? guestPoint.x + guestGap
+                    : guestPoint.x - width - guestGap;
+
+                // 首选方向超出屏幕时，自动换到桌子的另一侧。
+                if (placeRight && x + width > Screen.width - SCREEN_MARGIN)
+                    x = guestPoint.x - width - guestGap;
+                else if (!placeRight && x < SCREEN_MARGIN)
+                    x = guestPoint.x + guestGap;
+
+                float y = guestPoint.y - height * 0.5f;
+                rect = new Rect(ClampCardX(x, width), ClampCardY(y, height), width, height);
+                rect = ResolveLocalCollision(rect, occupied);
+            }
+            else
+            {
+                rect = new Rect(SCREEN_MARGIN, fallbackY, width, height);
+                fallbackY += height + CARD_SPACING;
+            }
+
+            occupied.Add(rect);
+            DrawCard(rect.x, rect.y, card, height, kv.Key);
+        }
+    }
+
+    private static bool TryGetGuestScreenPoint(CustomerRecommendation card, out Vector2 point)
+    {
+        point = default;
+        try
+        {
+            if (!card.HasCustomerWorldPosition || Camera.main == null) return false;
+            Vector3 screen = Camera.main.WorldToScreenPoint(card.CustomerWorldPosition);
+            if (screen.z <= 0f) return false;
+            point = new Vector2(screen.x, Screen.height - screen.y);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static Rect ResolveLocalCollision(Rect rect, List<Rect> occupied)
+    {
+        for (int attempt = 0; attempt < occupied.Count + 2; attempt++)
+        {
+            var overlap = occupied.FirstOrDefault(other => other.Overlaps(rect));
+            if (overlap.width <= 0f) break;
+
+            float below = overlap.yMax + 6f;
+            if (below + rect.height <= Screen.height - SCREEN_MARGIN)
+                rect.y = below;
+            else
+                rect.y = Mathf.Max(SCREEN_MARGIN, overlap.yMin - rect.height - 6f);
+        }
+        return rect;
     }
 
     private static float ClampCardX(float x, float cardWidth)
@@ -274,6 +307,9 @@ public class OverlayRenderer
     {
         float contentW = GetCardWidth(cr) - CARD_PADDING * 2;
         float h = CARD_PADDING;
+
+        if (IsPending(cr))
+            return h + LINE_HEIGHT * 2 + 8 + CARD_PADDING;
 
         if (IsCompact(cr))
             return h + LINE_HEIGHT * 3 + 8 + CARD_PADDING;
@@ -341,6 +377,18 @@ public class OverlayRenderer
         GUI.Label(new Rect(x + CARD_PADDING, cy, 16, LINE_HEIGHT), "⠿", _dragHandleStyle);
         string deskLabel = $"#{cr.DeskCode + 1}";
         GUI.Label(new Rect(x + CARD_PADDING + 16, cy, 28, LINE_HEIGHT), deskLabel, _deskStyle);
+
+        if (IsPending(cr))
+        {
+            GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), cr.CustomerName, _titleStyle);
+            cy += LINE_HEIGHT + 4;
+            string status = string.IsNullOrWhiteSpace(cr.StatusMessage)
+                ? (cr.PendingState == PendingRecommendationState.WaitingNextRound ? "等待下一轮" : "请对话获取需求")
+                : cr.StatusMessage;
+            GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT),
+                status, GetPendingStyle(cr));
+            return;
+        }
 
         if (IsCompact(cr))
         {
@@ -413,8 +461,23 @@ public class OverlayRenderer
            && card.MatchedRecommendationIndex >= 0
            && card.MatchedRecommendationIndex < card.Recommendations.Count;
 
+    private static bool IsPending(CustomerRecommendation card)
+        => card.PendingState != PendingRecommendationState.None;
+
+    private static bool IsDecisionCard(CustomerRecommendation card)
+        => !IsPending(card) && !IsCompact(card);
+
+    private static bool IsRightSidePrompt(CustomerRecommendation card)
+        => card.PendingState == PendingRecommendationState.NeedsInteraction
+           || card.PendingState == PendingRecommendationState.ReadingOrder;
+
     private static float GetCardWidth(CustomerRecommendation card)
-        => IsCompact(card) ? COMPACT_CARD_WIDTH : CARD_WIDTH;
+        => IsCompact(card) || IsPending(card) ? COMPACT_CARD_WIDTH : CARD_WIDTH;
+
+    private GUIStyle GetPendingStyle(CustomerRecommendation card)
+        => card.PendingState == PendingRecommendationState.WaitingNextRound
+            ? _pendingWaitingStyle
+            : _pendingInteractionStyle;
 
     private static string BuildLikeLine(CustomerData customer)
     {
@@ -451,7 +514,10 @@ public class OverlayRenderer
         string planName = rec.IsFixedRecipeTask
             ? (card.Recommendations.Count > 1 ? $"D-{(char)('A' + index)}" : "D")
             : ((char)('A' + index)).ToString();
-        return $"方案 {planName}{nightingale}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}";
+        string fallback = rec.FallbackBelowFour && !string.IsNullOrWhiteSpace(rec.FallbackReason)
+            ? $"（{rec.FallbackReason}）"
+            : "";
+        return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}";
     }
 
     private static string BuildIngredientLine(Recommendation rec)
@@ -539,20 +605,14 @@ public class OverlayRenderer
             if (elements == null) return false;
 
             int trayIndex = assignment.TrayIndex;
-            if (trayIndex >= elements.Length) return false;
+            if (trayIndex >= elements.Length || trayIndex >= TRAY_SLOT_X_RATIOS.Length) return false;
             var current = elements[trayIndex];
-            // trayIndex 是 IzakayaTray.Receive 返回的真实格子编号。
-            // 游戏可能为同一道料理创建不同的 IL2CPP 包装对象，因此这里不再要求引用/GUID相同。
             if (current == null) return false;
-            if (!NightScene.UI.UIManager.hasInstance) return false;
 
-            var trayPanel = NightScene.UI.UIManager.Instance?.WorkSceneSustainedPannel?.WorkSceneTrayPannel;
-            var trayField = trayPanel?.TrayField;
-            if (trayField == null || trayIndex >= trayField.childCount) return false;
-            var world = trayField.GetChild(trayIndex).position;
-            Camera uiCamera = trayPanel.TrayCanvas != null ? trayPanel.TrayCanvas.worldCamera : null;
-            var screen = RectTransformUtility.WorldToScreenPoint(uiCamera, world);
-            position = new Vector2(screen.x, Screen.height - screen.y);
+            // 只有料理实际进入了玩家当前已开放的槽位，Receive 才会给 assignment.TrayIndex 赋值。
+            // 因此低等级只有2槽时，未开放的第3/4槽永远不会被绘制。
+            float xRatio = TRAY_SLOT_X_RATIOS[trayIndex];
+            position = new Vector2(Screen.width * xRatio, Screen.height * TRAY_SLOT_Y_RATIO);
             return true;
         }
         catch
@@ -756,6 +816,22 @@ public class OverlayRenderer
             fontSize = fontSize + 1,
             fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(1f, 0.93f, 0.73f) },
+            clipping = TextClipping.Overflow
+        };
+
+        _pendingInteractionStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.58f, 0.16f) },
+            clipping = TextClipping.Overflow
+        };
+
+        _pendingWaitingStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.86f, 0.3f) },
             clipping = TextClipping.Overflow
         };
 

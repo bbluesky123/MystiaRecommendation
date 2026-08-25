@@ -136,7 +136,8 @@ public class Plugin : BasePlugin
     }
 
     internal static void OnCustomerPending(string customerName, string reqFoodTag, string reqBevTag, int deskCode,
-        string statusMessage, UnityEngine.Vector3? customerWorldPosition = null)
+        string statusMessage, UnityEngine.Vector3? customerWorldPosition = null,
+        PendingRecommendationState pendingState = PendingRecommendationState.NeedsInteraction)
     {
         if (string.IsNullOrEmpty(customerName)) return;
 
@@ -147,15 +148,16 @@ public class Plugin : BasePlugin
             return;
         }
 
-        bool hasCompletedCard = ActiveRecommendations.Values.Any(cr =>
+        bool hasActiveOrderCard = ActiveRecommendations.Values.Any(cr =>
             cr.DeskCode == deskCode &&
             cr.CustomerName == customerName &&
-            cr.Recommendations != null &&
-            cr.Recommendations.Count > 0);
-        if (hasCompletedCard) return;
+            cr.PendingState == PendingRecommendationState.None &&
+            cr.OrderKey > 0);
+        if (hasActiveOrderCard) return;
         Instance?.Log.LogInfo($"[MystiaRec] 显示等待卡片: {customerName} 座位{deskCode} {statusMessage}");
         UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag,
-            new List<Recommendation>(), statusMessage, customerWorldPosition: customerWorldPosition);
+            new List<Recommendation>(), statusMessage, customerWorldPosition: customerWorldPosition,
+            pendingState: pendingState);
     }
 
     private static void UpsertRecommendationCard(
@@ -168,7 +170,8 @@ public class Plugin : BasePlugin
         int orderBudget = -1,
         int fixedRecipeId = -1,
         UnityEngine.Vector3? customerWorldPosition = null,
-        long orderKey = 0)
+        long orderKey = 0,
+        PendingRecommendationState pendingState = PendingRecommendationState.None)
     {
         // 同一稀客、同一座位采用原对象就地更新，保留拖拽位置、折叠状态和稳定卡片 ID。
         var existing = ActiveRecommendations.FirstOrDefault(kv =>
@@ -176,6 +179,7 @@ public class Plugin : BasePlugin
         if (existing.Value != null)
         {
             var card = existing.Value;
+            var previousPendingState = card.PendingState;
             bool isNewOrder = orderKey > 0 && card.OrderKey != orderKey;
             if (isNewOrder)
             {
@@ -185,12 +189,20 @@ public class Plugin : BasePlugin
                 card.TrackingState = RecommendationTrackingState.AwaitingCook;
                 card.ActiveAssignmentId = 0;
             }
+            if (isNewOrder || previousPendingState != pendingState)
+            {
+                // 完整方案、桌边等待提示和桌边制作卡片使用不同布局区。
+                // 跨状态时清除上一布局的拖拽坐标；同状态 F5 刷新仍保留位置。
+                card.DragX = null;
+                card.DragY = null;
+            }
             card.ReqFoodTag = reqFoodTag;
             card.ReqBevTag = reqBevTag;
             card.OrderBudget = orderBudget;
             card.FixedRecipeId = fixedRecipeId;
             card.Recommendations = recommendations;
             card.StatusMessage = statusMessage;
+            card.PendingState = pendingState;
             if (orderKey > 0)
                 card.OrderKey = orderKey;
             card.Timestamp = UnityEngine.Time.time;
@@ -223,6 +235,7 @@ public class Plugin : BasePlugin
             FixedRecipeId = fixedRecipeId,
             Recommendations = recommendations,
             StatusMessage = statusMessage,
+            PendingState = pendingState,
             Timestamp = UnityEngine.Time.time,
             OrderKey = orderKey,
             OrderSequence = ++_nextOrderSequence,
@@ -271,10 +284,25 @@ public class Plugin : BasePlugin
         foreach (var key in keys)
         {
             RuntimeOrderTracker.RemoveForCard(key);
-            ActiveRecommendations.Remove(key);
+            var card = ActiveRecommendations[key];
+            card.ReqFoodTag = "";
+            card.ReqBevTag = "";
+            card.OrderBudget = -1;
+            card.FixedRecipeId = -1;
+            card.Recommendations = new List<Recommendation>();
+            card.StatusMessage = "等待下一轮";
+            card.PendingState = PendingRecommendationState.WaitingNextRound;
+            card.MatchedRecommendationIndex = -1;
+            card.TrackingState = RecommendationTrackingState.AwaitingCook;
+            card.ActiveAssignmentId = 0;
+            card.DragX = null;
+            card.DragY = null;
+            card.Timestamp = UnityEngine.Time.time;
+            card.IsFadingOut = false;
+            card.FadeAlpha = 1f;
         }
         if (keys.Count > 0)
-            Instance?.Log?.LogInfo($"[MystiaRec] 本轮料理和酒水均已上齐，关闭卡片: 座位{deskCode + 1}");
+            Instance?.Log?.LogInfo($"[MystiaRec] 本轮料理和酒水均已上齐，进入等待下一轮: 座位{deskCode + 1}");
     }
 
     private static HashSet<int> _recentlyDepartedDesks = new();
@@ -1634,6 +1662,14 @@ public class Plugin : BasePlugin
 /// <summary>
 /// 单个稀客的推荐数据
 /// </summary>
+internal enum PendingRecommendationState
+{
+    None,
+    NeedsInteraction,
+    ReadingOrder,
+    WaitingNextRound
+}
+
 public class CustomerRecommendation
 {
     public string CustomerName { get; set; }
@@ -1644,6 +1680,7 @@ public class CustomerRecommendation
     public int FixedRecipeId { get; set; } = -1;
     public List<Recommendation> Recommendations { get; set; } = new();
     public string StatusMessage { get; set; } = "";
+    internal PendingRecommendationState PendingState { get; set; }
     public long OrderKey { get; set; }
     public long OrderSequence { get; set; }
     // -1=尚未匹配；-2=A/B料理完全相同，仅酒水无法由厨具判断；>=0=已自动匹配的方案索引。
@@ -1654,7 +1691,7 @@ public class CustomerRecommendation
     public bool IsFadingOut { get; set; }
     public float FadeAlpha { get; set; } = 1f;
 
-    // 拖拽位置（null=自动列布局）
+    // 当前显示状态下的手动拖拽位置（null=由决策区/桌边区自动布局）
     public float? DragX { get; set; }
     public float? DragY { get; set; }
     public UnityEngine.Vector3 CustomerWorldPosition { get; set; }

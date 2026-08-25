@@ -222,6 +222,7 @@ public class RecipeMatcher
     /// <summary>
     /// 方案 D：任务固定料理。
     /// 先尝试固定料理自身/附加食材满足订单标签并达到 4 分；失败后仅允许同一道料理走对应夜雀厨具兜底。
+    /// 如果当前配置无论如何都无法达到 4 分，仍保留固定料理，并给出唯一的当前最高分组合。
     /// </summary>
     private List<Recommendation> CalculateFixedRecipeTask(
         int fixedRecipeId,
@@ -247,31 +248,38 @@ public class RecipeMatcher
 
         Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D固定料理: {recipe.Name}(foodId={recipe.FoodId}, recipeId={recipe.RecipeId})");
 
-        if (unlockedRecipes == null || !unlockedRecipes.Contains(recipe.Name))
+        bool ownsRecipe = unlockedRecipes != null && unlockedRecipes.Contains(recipe.Name);
+        if (!ownsRecipe)
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 当前存档未持有固定料理 {recipe.Name}，仍显示任务料理制作信息");
+
+        var missingBaseIngredients = recipe.Ingredients
+            .Where(i => availableIngredients == null || !availableIngredients.Contains(i))
+            .ToList();
+        if (missingBaseIngredients.Count > 0)
         {
-            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 当前存档未持有固定料理 {recipe.Name}");
-            return new();
+            Plugin.Instance?.Log.LogWarning(
+                $"[MystiaRec] 固定料理 {recipe.Name} 缺少基础食材 [{string.Join(",", missingBaseIngredients)}]，仍显示制作信息");
         }
 
-        if (availableIngredients == null || !recipe.Ingredients.All(availableIngredients.Contains))
-        {
-            var missing = recipe.Ingredients
-                .Where(i => availableIngredients == null || !availableIngredients.Contains(i))
-                .ToList();
-            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 固定料理 {recipe.Name} 缺少基础食材 [{string.Join(",", missing)}]");
-            return new();
-        }
-
-        bool cookerAvailable = availableCookers == null
-            || availableCookers.Contains(recipe.Cooker)
-            || availableCookers.Contains("夜雀" + recipe.Cooker);
+        bool normalCookerAvailable = availableCookers == null
+            || availableCookers.Contains(recipe.Cooker);
         bool matchingNightingaleAvailable = availableCookers != null
             && availableCookers.Contains("夜雀" + recipe.Cooker);
+        bool cookerAvailable = normalCookerAvailable || matchingNightingaleAvailable;
 
         var fixedRecipeSet = new HashSet<string> { recipe.Name };
-        System.Func<RecipeInfo, bool> fixedRecipeFilter = r => r.Name == recipe.Name && cookerAvailable;
+        System.Func<RecipeInfo, bool> fixedRecipeFilter = r => r.Name == recipe.Name
+            && ownsRecipe
+            && missingBaseIngredients.Count == 0
+            && normalCookerAvailable;
         System.Func<BeverageInfo, bool> matchingBeverageFilter = b =>
             !string.IsNullOrEmpty(reqBevTag) && b.Tags.Contains(reqBevTag);
+        bool hasMatchingBeverage = unlockedBeverages
+            .Select(RecipeDatabase.GetBeverage)
+            .Any(b => b != null && matchingBeverageFilter(b));
+        System.Func<BeverageInfo, bool> fallbackBeverageFilter = hasMatchingBeverage
+            ? matchingBeverageFilter
+            : b => true;
 
         // D1/D2：料理自身命中，或通过额外食材补足订单标签。
         // 同时遵守配置的最大额外食材数，以及游戏底层总食材数不超过 5 的限制。
@@ -291,29 +299,211 @@ public class RecipeMatcher
         }
 
         // D3：正常标签路径无法达到 4 分时，固定料理不变，仅用对应类型的夜雀厨具绕过订单标签。
-        if (!matchingNightingaleAvailable)
+        var nightingaleCandidates = new List<MatchCandidate>();
+        var nightingaleValid = new List<MatchCandidate>();
+        if (matchingNightingaleAvailable && ownsRecipe && missingBaseIngredients.Count == 0)
         {
-            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D无4分方案，且未配置 夜雀{recipe.Cooker}");
-            return new();
-        }
+            nightingaleCandidates = BuildCandidates(
+                fixedRecipeSet, unlockedBeverages, maxBudget,
+                positiveTags, negativeTags, popularTrend,
+                r => r.Name == recipe.Name,
+                matchingBeverageFilter);
+            nightingaleValid = CollectCandidatesAtThreshold(
+                nightingaleCandidates, positiveTags, negativeTags, availableIngredients,
+                ingredientStocks, "", 4, ref loggedMissingIngredients);
 
-        var nightingaleCandidates = BuildCandidates(
+            if (nightingaleValid.Count > 0)
+            {
+                Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D成功: 夜雀厨具兜底 {nightingaleValid.Count}个候选");
+                return MarkFixedTaskRecommendations(PickPriceExtremes(nightingaleValid), recipe, true, availableCookers);
+            }
+
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D: 夜雀{recipe.Cooker}路径也无法达到4分，改取当前最高分");
+        }
+        else if (!matchingNightingaleAvailable)
+            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D无4分方案，且未配置 夜雀{recipe.Cooker}，改取当前最高分");
+
+        // D4：达不到4分时不再按价格拆成两套，只返回当前分数最高的一套。
+        // 即使固定料理已经占满5个食材，也会比较所有可用酒水并算出唯一最高分。
+        var fallbackSources = new List<MatchCandidate>();
+
+        var normalFallbackCandidates = BuildCandidates(
             fixedRecipeSet, unlockedBeverages, maxBudget,
             positiveTags, negativeTags, popularTrend,
-            r => r.Name == recipe.Name,
-            b => true);
-        var nightingaleValid = CollectCandidatesAtThreshold(
-            nightingaleCandidates, positiveTags, negativeTags, availableIngredients,
-            ingredientStocks, "", 4, ref loggedMissingIngredients);
-
-        if (nightingaleValid.Count == 0)
+            r => r.Name == recipe.Name
+                && ownsRecipe
+                && missingBaseIngredients.Count == 0
+                && normalCookerAvailable,
+            fallbackBeverageFilter);
+        var normalBest = CollectHighestScoringCandidates(
+            normalFallbackCandidates, positiveTags, negativeTags, availableIngredients,
+            ingredientStocks, "", ref loggedMissingIngredients);
+        var normalRequiredTagBest = CollectHighestScoringCandidates(
+            normalFallbackCandidates, positiveTags, negativeTags, availableIngredients,
+            ingredientStocks, reqFoodTag, ref loggedMissingIngredients);
+        normalBest.AddRange(normalRequiredTagBest);
+        foreach (var candidate in normalBest)
         {
-            Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D失败: 夜雀{recipe.Cooker}路径也无法达到4分");
-            return new();
+            candidate.MissingRequiredFoodTag = !HasRequiredFoodTag(candidate.Tags, reqFoodTag);
+            candidate.FallbackBelowFour = true;
+        }
+        fallbackSources.AddRange(normalBest);
+
+        if (matchingNightingaleAvailable && ownsRecipe && missingBaseIngredients.Count == 0)
+        {
+            var nightingaleFallbackCandidates = BuildCandidates(
+                fixedRecipeSet, unlockedBeverages, maxBudget,
+                positiveTags, negativeTags, popularTrend,
+                r => r.Name == recipe.Name,
+                fallbackBeverageFilter);
+            var nightingaleBest = CollectHighestScoringCandidates(
+                nightingaleFallbackCandidates, positiveTags, negativeTags, availableIngredients,
+                ingredientStocks, "", ref loggedMissingIngredients);
+            foreach (var candidate in nightingaleBest)
+            {
+                candidate.NeedNightingale = true;
+                candidate.MissingRequiredFoodTag = false;
+                candidate.FallbackBelowFour = true;
+            }
+            fallbackSources.AddRange(nightingaleBest);
         }
 
-        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D成功: 夜雀厨具兜底 {nightingaleValid.Count}个候选");
-        return MarkFixedTaskRecommendations(PickPriceExtremes(nightingaleValid), recipe, true, availableCookers);
+        var fallback = PickHighestScore(fallbackSources, reqBevTag);
+        if (fallback == null)
+        {
+            // 即使当前缺料理、基础食材、厨具或可用酒水，也至少把任务固定料理的制作方法显示出来。
+            fallback = BuildFixedRecipeInformationFallback(
+                recipe, unlockedBeverages, positiveTags, negativeTags,
+                reqFoodTag, missingBaseIngredients, ownsRecipe, cookerAvailable);
+        }
+
+        if (fallback == null)
+            return new();
+
+        fallback.IsFixedRecipeTask = true;
+        fallback.FallbackBelowFour = true;
+        if (fallback.MissingRequiredFoodTag)
+        {
+            int theoretical = System.Math.Max(0, fallback.Score);
+            int expected = System.Math.Min(3, theoretical);
+            string missingCooker = !matchingNightingaleAvailable ? $"未携带夜雀{recipe.Cooker}；" : "";
+            fallback.FallbackReason = theoretical > 3
+                ? $"{missingCooker}无法满足需求，理论{theoretical}分/预计{expected}分"
+                : $"{missingCooker}无法满足需求，当前最高{expected}分";
+            fallback.ExpectedRating = fallback.FallbackReason;
+        }
+        else
+        {
+            int expected = System.Math.Max(0, fallback.Score);
+            fallback.FallbackReason = $"未达到4分，当前最高{expected}分";
+            fallback.ExpectedRating = fallback.FallbackReason;
+        }
+
+        Plugin.Instance?.Log.LogInfo(
+            $"[MystiaRec] 方案D最高分兜底: {fallback.RecipeName}+{fallback.BeverageName} " +
+            $"score={fallback.Score} reason={fallback.FallbackReason}");
+        return new List<Recommendation> { fallback };
+    }
+
+    private List<MatchCandidate> CollectHighestScoringCandidates(
+        List<MatchCandidate> sourceCandidates,
+        HashSet<string> positiveTags,
+        HashSet<string> negativeTags,
+        HashSet<string> availableIngredients,
+        Dictionary<string, int> ingredientStocks,
+        string requiredFoodTag,
+        ref bool loggedMissingIngredients)
+    {
+        if (sourceCandidates == null || sourceCandidates.Count == 0)
+            return new();
+
+        int maxPossibleScore = positiveTags?.Count ?? 0;
+        int minPossibleScore = -(negativeTags?.Count ?? 0);
+        for (int targetScore = maxPossibleScore; targetScore >= minPossibleScore; targetScore--)
+        {
+            var candidates = CollectCandidatesAtThreshold(
+                sourceCandidates, positiveTags, negativeTags, availableIngredients,
+                ingredientStocks, requiredFoodTag, targetScore, ref loggedMissingIngredients);
+            if (candidates.Count > 0)
+                return candidates;
+        }
+
+        return string.IsNullOrEmpty(requiredFoodTag)
+            ? sourceCandidates.Select(c => c.Clone()).ToList()
+            : new List<MatchCandidate>();
+    }
+
+    private Recommendation PickHighestScore(List<MatchCandidate> candidates, string requiredBeverageTag)
+    {
+        var best = candidates?
+            .GroupBy(c => c.Identity)
+            .Select(g => g.OrderByDescending(c => c.Score).First())
+            // 缺少订单食物 Tag 时，游戏即使算出4分以上也只按最高3分结算。
+            // 因此先比较预计结算分，不能让“理论6分但封顶3分”压过真正可结算5分的夜雀方案。
+            .OrderByDescending(c => c.MissingRequiredFoodTag
+                ? System.Math.Min(3, c.Score)
+                : c.Score)
+            .ThenBy(c => c.MissingRequiredFoodTag)
+            .ThenByDescending(c => c.Score)
+            .ThenByDescending(c => !string.IsNullOrEmpty(requiredBeverageTag)
+                && c.Beverage?.Tags?.Contains(requiredBeverageTag) == true)
+            .ThenBy(c => RecipeDatabase.GetTotalExtraIngredientCost(c.ExtraIngredients))
+            .ThenBy(c => c.Beverage?.Name ?? "")
+            .FirstOrDefault();
+
+        if (best == null) return null;
+        var recommendation = ToRecommendation(
+            best, RecipeDatabase.GetTotalExtraIngredientCost(best.ExtraIngredients));
+        recommendation.PriceStrategy = "当前最高分";
+        return recommendation;
+    }
+
+    private static Recommendation BuildFixedRecipeInformationFallback(
+        RecipeInfo recipe,
+        HashSet<string> unlockedBeverages,
+        HashSet<string> positiveTags,
+        HashSet<string> negativeTags,
+        string requiredFoodTag,
+        List<string> missingBaseIngredients,
+        bool ownsRecipe,
+        bool cookerAvailable)
+    {
+        var beverage = unlockedBeverages?
+            .Select(RecipeDatabase.GetBeverage)
+            .Where(b => b != null)
+            .OrderByDescending(b => b.Tags.Count(positiveTags.Contains) - b.Tags.Count(negativeTags.Contains))
+            .ThenBy(b => b.Name)
+            .FirstOrDefault();
+
+        var tags = new HashSet<string>(recipe.PositiveTags);
+        if (beverage?.Tags != null) tags.UnionWith(beverage.Tags);
+        ResolveTagOverrides(tags);
+        int score = ScoreTags(tags, positiveTags, negativeTags);
+
+        string unavailable = !ownsRecipe
+            ? "当前未持有该料理"
+            : missingBaseIngredients.Count > 0
+                ? "缺少基础食材：" + string.Join("、", missingBaseIngredients)
+                : !cookerAvailable ? "当前未携带可制作该料理的厨具" : "";
+
+        return new Recommendation
+        {
+            RecipeFoodId = recipe.FoodId,
+            RecipeName = recipe.Name,
+            BaseIngredients = recipe.Ingredients.ToList(),
+            RecipeTags = tags.ToList(),
+            Ingredients = recipe.Ingredients.ToList(),
+            RequiredCooker = recipe.Cooker,
+            BeverageName = beverage?.Name ?? "无可用酒水",
+            BeverageTags = beverage?.Tags ?? new List<string>(),
+            TotalPrice = recipe.Price + (beverage?.Price ?? 0),
+            Score = score,
+            ExpectedRating = unavailable,
+            MissingRequiredFoodTag = !HasRequiredFoodTag(tags, requiredFoodTag),
+            FallbackBelowFour = true,
+            IsFixedRecipeTask = true,
+            PriceStrategy = "制作信息"
+        };
     }
 
     private static List<Recommendation> MarkFixedTaskRecommendations(
@@ -850,6 +1040,7 @@ public class Recommendation
     public bool FallbackBelowFour { get; set; }
     public bool IsFixedRecipeTask { get; set; }
     public string PriceStrategy { get; set; } = "";
+    public string FallbackReason { get; set; } = "";
 }
 
 internal class MatchCandidate

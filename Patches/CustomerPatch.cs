@@ -159,7 +159,7 @@ public static class CustomerPatch
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] Detected rare guest: " + __result);
                 int currentDesk = ReadDeskCode(__instance);
                 if (currentDesk >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "waiting order",
+                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "请对话获取需求",
                         ReadGuestWorldPosition(__instance));
                 return;
             }
@@ -175,7 +175,7 @@ public static class CustomerPatch
                 int deskIdx = -1;
                 try { deskIdx = __instance.DeskCode; } catch { }
                 if (deskIdx >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "等待订单生成",
+                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "请对话获取需求",
                         ReadGuestWorldPosition(__instance));
             }
         }
@@ -299,8 +299,8 @@ public static class CustomerPatch
             {
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] 等待完整订单标签: 食物=" + reqFoodTag + ", 酒水=" + reqBevTag);
                 if (deskIdx >= 0)
-                    Plugin.OnCustomerPending(name, reqFoodTag, reqBevTag, deskIdx, "等待完整订单标签",
-                        ReadGuestWorldPosition(sgc));
+                    Plugin.OnCustomerPending(name, reqFoodTag, reqBevTag, deskIdx, "正在获取需求",
+                        ReadGuestWorldPosition(sgc), PendingRecommendationState.ReadingOrder);
                 return;
             }
 
@@ -362,7 +362,14 @@ public static class CustomerPatch
             try
             {
                 if (state.LastOrder is not GuestsManager.OrderBase order) continue;
-                if (order.ServFood == null || order.ServBeverage == null) continue;
+                var servedFood = order.ServFood;
+                var servedBeverage = order.ServBeverage;
+
+                // 料理一旦真正上桌，就不应再把座位数字留在原托盘槽位。
+                if (servedFood != null)
+                    RuntimeOrderTracker.RemoveForDesk(state.DeskCode);
+
+                if (servedFood == null || servedBeverage == null) continue;
 
                 state.CompletedOrderVersion = state.OrderVersion;
                 state.TextFoodTag = "";

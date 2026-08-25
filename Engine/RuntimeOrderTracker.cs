@@ -128,6 +128,12 @@ internal static class RuntimeOrderTracker
             chosen.Card.MatchedRecommendationIndex = selectedIndex;
             chosen.Card.TrackingState = RecommendationTrackingState.Cooking;
             chosen.Card.ActiveAssignmentId = assignmentId;
+            if (selectedIndex >= 0)
+            {
+                // 从右上角完整决策卡切换到桌边紧凑卡，不能沿用决策区坐标。
+                chosen.Card.DragX = null;
+                chosen.Card.DragY = null;
+            }
             _assignments[assignmentId] = assignment;
 
             string plan = selectedIndex >= 0 ? ((char)('A' + selectedIndex)).ToString() : "A/B同料理";
@@ -175,6 +181,8 @@ internal static class RuntimeOrderTracker
                 card.MatchedRecommendationIndex = -1;
                 card.TrackingState = RecommendationTrackingState.AwaitingCook;
                 card.ActiveAssignmentId = 0;
+                card.DragX = null;
+                card.DragY = null;
                 _assignments.Remove(assignment.Id);
                 Plugin.Instance?.Log?.LogInfo(
                     $"[MystiaRec] 料理失败，恢复完整方案: 座位{card.DeskCode + 1} " +
@@ -263,38 +271,6 @@ internal static class RuntimeOrderTracker
         catch (Exception e)
         {
             Plugin.Instance?.Log?.LogWarning("[MystiaRec] 绑定托盘料理失败: " + e.Message);
-        }
-    }
-
-    internal static void OnDishDelivered(Sellable delivered)
-    {
-        try
-        {
-            if (delivered == null) return;
-            var active = _assignments.Values
-                .Where(a => a.InTray)
-                .OrderBy(a => a.Id)
-                .ToList();
-            if (active.Count == 0) return;
-
-            var assignment = active.FirstOrDefault(a => IsSameSellable(a.Result, delivered));
-            if (assignment == null)
-            {
-                int deliveredFoodId = -1;
-                try { deliveredFoodId = delivered.Id; } catch { }
-                assignment = active.FirstOrDefault(a => a.ExpectedFoodId == deliveredFoodId);
-            }
-            if (assignment == null) return;
-
-            assignment.InTray = false;
-            assignment.TrayIndex = -1;
-            Plugin.Instance?.Log?.LogInfo(
-                $"[MystiaRec] 稀客料理离开托盘: 座位{assignment.DeskCode + 1} " +
-                $"foodId={assignment.ExpectedFoodId}");
-        }
-        catch (Exception e)
-        {
-            Plugin.Instance?.Log?.LogWarning("[MystiaRec] 清理托盘料理标记失败: " + e.Message);
         }
     }
 
