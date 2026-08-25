@@ -7,5 +7,5 @@ internal static class MyPluginInfo
 {
     public const string PLUGIN_GUID = "com.mystia.recommendation";
     public const string PLUGIN_NAME = "MystiaRecommendation";
-    public const string PLUGIN_VERSION = "1.0.0";
+    public const string PLUGIN_VERSION = "2.0.0";
 }
