@@ -12,6 +12,8 @@ public class OverlayRenderer
 {
     private bool _stylesInitialized;
     private Texture2D _bgCard;
+    private Texture2D _badgeCookingBg;
+    private Texture2D _badgeCompletedBg;
     private float _bgOpacity = -1f;
 
     // 样式
@@ -34,14 +36,25 @@ public class OverlayRenderer
     private GUIStyle _recipeNameStyle;
     private GUIStyle _beverageNameStyle;
     private GUIStyle _ingredientStyle;
+    private GUIStyle _likeLineStyle;
+    private GUIStyle _hateLineStyle;
+    private GUIStyle _planTitleStyle;
+    private GUIStyle _compactStyle;
+    private GUIStyle _pendingInteractionStyle;
+    private GUIStyle _pendingWaitingStyle;
+    private GUIStyle _badgeStyle;
 
     // 布局常量
-    private const float CARD_WIDTH = 310;
+    private const float CARD_WIDTH = 360;
+    private const float COMPACT_CARD_WIDTH = 180;
     private const float CARD_PADDING = 8;
     private const float CARD_SPACING = 10;
     private const float SCREEN_MARGIN = 10;
-    private const int MAX_PER_COLUMN = 4;
     private const int MAX_RECIPES = 2;
+    // 这里只保存游戏“可能出现”的四个槽位坐标，不代表玩家当前拥有四个槽位。
+    // 是否存在该槽位完全以 IzakayaTray.Receive 返回的真实索引和托盘对象为准。
+    private static readonly float[] TRAY_SLOT_X_RATIOS = { 0.484f, 0.565f, 0.646f, 0.727f };
+    private const float TRAY_SLOT_Y_RATIO = 0.932f;
 
     // 行高
     private const float LINE_HEIGHT = 22;
@@ -84,7 +97,7 @@ public class OverlayRenderer
         var active = allCards
             .Where(kv => !kv.Value.IsFadingOut || kv.Value.FadeAlpha > 0)
             .OrderBy(kv => kv.Key)
-            .Take(MAX_PER_COLUMN * 2)
+            .Take(12)
             .ToList();
 
         if (active.Count == 0) return;
@@ -103,6 +116,7 @@ public class OverlayRenderer
             .ToList();
         foreach (var key in toRemove)
         {
+            RuntimeOrderTracker.RemoveForCard(key);
             Plugin.ActiveRecommendations.Remove(key);
             _dragOrder.Remove(key);
             if (_draggedCardId == key) _draggedCardId = -1;
@@ -116,41 +130,14 @@ public class OverlayRenderer
         // 处理拖拽中的 MouseDrag / MouseUp
         ProcessDragEvents();
 
-        // 默认在稀客/桌子旁初始化新卡片。这里只定位一次，之后以玩家拖拽位置为准。
-        InitializeGuestPositions(active);
-
-        // 分两组：自动列布局 vs 手动拖拽位置
+        // 完整方案进入右上角决策区；确认方案和等待提示进入桌边区。
         var autoCards = active.Where(kv => !kv.Value.DragX.HasValue).ToList();
         var draggedCards = active.Where(kv => kv.Value.DragX.HasValue).ToList();
+        var decisionCards = autoCards.Where(kv => IsDecisionCard(kv.Value)).ToList();
+        var localCards = autoCards.Where(kv => !IsDecisionCard(kv.Value)).ToList();
 
-        // === 阶段1：列布局绘制自动卡片 ===
-        var cardHeights = new List<float>();
-        foreach (var kv in autoCards)
-            cardHeights.Add(CalcCardHeight(kv.Value));
-
-        int leftCount = System.Math.Min(autoCards.Count, MAX_PER_COLUMN);
-        int rightCount = System.Math.Min(System.Math.Max(0, autoCards.Count - MAX_PER_COLUMN), MAX_PER_COLUMN);
-
-        float rightEdge = Screen.width - SCREEN_MARGIN;
-        float leftColX = rightEdge - CARD_WIDTH;
-        float rightColX = leftColX - CARD_WIDTH - 12;
-
-        float cy = SCREEN_MARGIN;
-        for (int i = 0; i < leftCount; i++)
-        {
-            DrawCard(leftColX, cy, autoCards[i].Value, cardHeights[i], autoCards[i].Key);
-            cy += cardHeights[i] + CARD_SPACING;
-        }
-
-        if (rightCount > 0)
-        {
-            cy = SCREEN_MARGIN;
-            for (int i = leftCount; i < leftCount + rightCount; i++)
-            {
-                DrawCard(rightColX, cy, autoCards[i].Value, cardHeights[i], autoCards[i].Key);
-                cy += cardHeights[i] + CARD_SPACING;
-            }
-        }
+        DrawDecisionCards(decisionCards);
+        DrawLocalCards(localCards);
 
         // === 阶段2：绘制拖拽卡片（在列布局之上，按Z序） ===
         foreach (var cardId in _dragOrder.ToList())
@@ -159,7 +146,7 @@ public class OverlayRenderer
             if (kv.Key == 0 && kv.Value == null) continue;
             if (!kv.Value.DragX.HasValue) continue;
             float h = CalcCardHeight(kv.Value);
-            float x = ClampCardX(kv.Value.DragX.Value);
+            float x = ClampCardX(kv.Value.DragX.Value, GetCardWidth(kv.Value));
             float y = ClampCardY(kv.Value.DragY ?? SCREEN_MARGIN, h);
             kv.Value.DragX = x;
             kv.Value.DragY = y;
@@ -169,50 +156,110 @@ public class OverlayRenderer
         // 清理不在活跃列表中的拖拽排序
         var activeIds = new HashSet<int>(active.Select(k => k.Key));
         _dragOrder.RemoveAll(id => !activeIds.Contains(id));
+
+        DrawDishBadges();
     }
 
-    /// <summary>
-    /// 将新卡片首次放到稀客右侧；靠近屏幕右缘时改放左侧。
-    /// 世界坐标只用于首次定位，不持续跟随，以免覆盖玩家的手动拖拽结果。
-    /// </summary>
-    private void InitializeGuestPositions(List<KeyValuePair<int, CustomerRecommendation>> active)
+    private void DrawDecisionCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
-        bool overCustomer = string.Equals(
-            Plugin.PluginConfig.Position.Value,
-            "OverCustomer",
-            System.StringComparison.OrdinalIgnoreCase);
+        float y = SCREEN_MARGIN;
+        int column = 0;
+        float bottom = Screen.height - SCREEN_MARGIN;
 
-        Camera camera = overCustomer ? Camera.main : null;
-        foreach (var kv in active)
+        foreach (var kv in cards)
         {
-            var card = kv.Value;
-            if (!card.DragX.HasValue && camera != null && card.HasCustomerWorldPosition)
+            float height = CalcCardHeight(kv.Value);
+            if (y > SCREEN_MARGIN && y + height > bottom)
             {
-                Vector3 screenPoint = camera.WorldToScreenPoint(card.CustomerWorldPosition);
-                if (screenPoint.z > 0f)
-                {
-                    float cardHeight = CalcCardHeight(card);
-                    const float guestGap = 45f;
-                    float x = screenPoint.x + guestGap;
-                    if (x + CARD_WIDTH > Screen.width - SCREEN_MARGIN)
-                        x = screenPoint.x - CARD_WIDTH - guestGap;
-
-                    // WorldToScreenPoint 使用左下原点，IMGUI 使用左上原点。
-                    float y = Screen.height - screenPoint.y - guestGap;
-                    card.DragX = ClampCardX(x);
-                    card.DragY = ClampCardY(y, cardHeight);
-                }
+                column++;
+                y = SCREEN_MARGIN;
             }
 
-            // 带固定位置的卡片必须登记到 Z 序，否则不会进入第二阶段绘制。
-            if (card.DragX.HasValue && !_dragOrder.Contains(kv.Key))
-                _dragOrder.Add(kv.Key);
+            // 第一列贴右上角；放满后向左开启下一列。
+            float x = Screen.width - SCREEN_MARGIN - CARD_WIDTH - column * (CARD_WIDTH + 12);
+            x = ClampCardX(x, CARD_WIDTH);
+            DrawCard(x, y, kv.Value, height, kv.Key);
+            y += height + CARD_SPACING;
         }
     }
 
-    private static float ClampCardX(float x)
+    private void DrawLocalCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
-        float maxX = Mathf.Max(SCREEN_MARGIN, Screen.width - CARD_WIDTH - SCREEN_MARGIN);
+        var occupied = new List<Rect>();
+        float fallbackY = SCREEN_MARGIN;
+
+        foreach (var kv in cards)
+        {
+            var card = kv.Value;
+            float width = GetCardWidth(card);
+            float height = CalcCardHeight(card);
+            Rect rect;
+
+            if (TryGetGuestScreenPoint(card, out var guestPoint))
+            {
+                const float guestGap = 38f;
+                bool placeRight = IsRightSidePrompt(card);
+                float x = placeRight
+                    ? guestPoint.x + guestGap
+                    : guestPoint.x - width - guestGap;
+
+                // 首选方向超出屏幕时，自动换到桌子的另一侧。
+                if (placeRight && x + width > Screen.width - SCREEN_MARGIN)
+                    x = guestPoint.x - width - guestGap;
+                else if (!placeRight && x < SCREEN_MARGIN)
+                    x = guestPoint.x + guestGap;
+
+                float y = guestPoint.y - height * 0.5f;
+                rect = new Rect(ClampCardX(x, width), ClampCardY(y, height), width, height);
+                rect = ResolveLocalCollision(rect, occupied);
+            }
+            else
+            {
+                rect = new Rect(SCREEN_MARGIN, fallbackY, width, height);
+                fallbackY += height + CARD_SPACING;
+            }
+
+            occupied.Add(rect);
+            DrawCard(rect.x, rect.y, card, height, kv.Key);
+        }
+    }
+
+    private static bool TryGetGuestScreenPoint(CustomerRecommendation card, out Vector2 point)
+    {
+        point = default;
+        try
+        {
+            if (!card.HasCustomerWorldPosition || Camera.main == null) return false;
+            Vector3 screen = Camera.main.WorldToScreenPoint(card.CustomerWorldPosition);
+            if (screen.z <= 0f) return false;
+            point = new Vector2(screen.x, Screen.height - screen.y);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static Rect ResolveLocalCollision(Rect rect, List<Rect> occupied)
+    {
+        for (int attempt = 0; attempt < occupied.Count + 2; attempt++)
+        {
+            var overlap = occupied.FirstOrDefault(other => other.Overlaps(rect));
+            if (overlap.width <= 0f) break;
+
+            float below = overlap.yMax + 6f;
+            if (below + rect.height <= Screen.height - SCREEN_MARGIN)
+                rect.y = below;
+            else
+                rect.y = Mathf.Max(SCREEN_MARGIN, overlap.yMin - rect.height - 6f);
+        }
+        return rect;
+    }
+
+    private static float ClampCardX(float x, float cardWidth)
+    {
+        float maxX = Mathf.Max(SCREEN_MARGIN, Screen.width - cardWidth - SCREEN_MARGIN);
         return Mathf.Clamp(x, SCREEN_MARGIN, maxX);
     }
 
@@ -258,73 +305,53 @@ public class OverlayRenderer
 
     private float CalcCardHeight(CustomerRecommendation cr)
     {
+        float contentW = GetCardWidth(cr) - CARD_PADDING * 2;
         float h = CARD_PADDING;
-        h += LINE_HEIGHT + 4; // 标题行
 
-        // 概述区 toggle 行（始终显示）
-        h += TAG_LINE_HEIGHT + 2;
+        if (IsPending(cr))
+            return h + LINE_HEIGHT * 2 + 8 + CARD_PADDING;
 
-        if (!cr.OverviewCollapsed)
+        if (IsCompact(cr))
+            return h + LINE_HEIGHT * 3 + 8 + CARD_PADDING;
+
+        h += LINE_HEIGHT + 4;
+        var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
+        if (customer != null)
         {
-            var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
-            if (customer != null)
-            {
-                int tagCount = customer.positiveTags.Count + customer.negativeTags.Count
-                    + (customer.beverageTags?.Count ?? 0);
-                if (!string.IsNullOrEmpty(cr.ReqFoodTag)) tagCount++;
-                if (!string.IsNullOrEmpty(cr.ReqBevTag)) tagCount++;
-                int tagRows = System.Math.Max(1, (int)System.Math.Ceiling(tagCount * 55.0 / (CARD_WIDTH - CARD_PADDING * 2)));
-                h += tagRows * TAG_LINE_HEIGHT + 4;
-            }
-            else
-            {
-                int tagCount = 0;
-                if (!string.IsNullOrEmpty(cr.ReqFoodTag)) tagCount++;
-                if (!string.IsNullOrEmpty(cr.ReqBevTag)) tagCount++;
-                h += System.Math.Max(1, tagCount) * TAG_LINE_HEIGHT + 4;
-            }
-
-            if (!string.IsNullOrEmpty(cr.StatusMessage))
-                h += LINE_HEIGHT;
+            h += TextHeight(_likeLineStyle, BuildLikeLine(customer), contentW);
+            if (customer.negativeTags.Count > 0)
+                h += TextHeight(_hateLineStyle, BuildHateLine(customer), contentW);
+            h += 4;
         }
 
-        // 方案区
         int recCount = System.Math.Min(cr.Recommendations.Count, MAX_RECIPES);
         if (recCount == 0)
-        {
             h += LINE_HEIGHT + 2;
-        }
         for (int i = 0; i < recCount; i++)
         {
-            h += LINE_HEIGHT + 2; // toggle 行
-            bool collapsed = (i == 0) ? cr.Rec1Collapsed : cr.Rec2Collapsed;
-            if (!collapsed)
-            {
-                var rec = cr.Recommendations[i];
-                if (rec.RecipeTags != null && rec.RecipeTags.Count > 0)
-                    h += LINE_HEIGHT;
-                if (rec.BeverageTags != null && rec.BeverageTags.Count > 0)
-                    h += LINE_HEIGHT;
-                h += LINE_HEIGHT + 2; // 食材+厨具+总价
-            }
+            var rec = cr.Recommendations[i];
+            h += TextHeight(_planTitleStyle, BuildPlanTitle(cr, rec, i), contentW);
+            h += TextHeight(_ingredientStyle, BuildIngredientLine(rec), contentW);
+            h += TextHeight(_detailStyle, BuildPlanTagLine(cr, rec), contentW);
+            h += 7;
         }
 
-        h += CARD_PADDING;
-        return h;
+        return h + CARD_PADDING;
     }
 
     private void DrawCard(float x, float y, CustomerRecommendation cr, float totalH, int cardId)
     {
         GUI.color = new Color(1, 1, 1, cr.FadeAlpha);
+        float cardWidth = GetCardWidth(cr);
 
         // 卡片背景
-        GUI.DrawTexture(new Rect(x, y, CARD_WIDTH, totalH), _bgCard);
+        GUI.DrawTexture(new Rect(x, y, cardWidth, totalH), _bgCard);
 
         float cy = y + CARD_PADDING;
-        float contentW = CARD_WIDTH - CARD_PADDING * 2;
+        float contentW = cardWidth - CARD_PADDING * 2;
 
         // ===== 标题行（可拖拽） =====
-        Rect headerRect = new Rect(x, y, CARD_WIDTH, LINE_HEIGHT + CARD_PADDING + 4);
+        Rect headerRect = new Rect(x, y, cardWidth, LINE_HEIGHT + CARD_PADDING + 4);
 
         // 拖拽检测（使用原始 Input 输入，绕过 IMGUI Event.current 被游戏消费的问题）
         if (!_eventConsumed && _inputMouseDown
@@ -348,249 +375,249 @@ public class OverlayRenderer
 
         // 拖拽手柄标识（⠿ 三点点，浅灰色）
         GUI.Label(new Rect(x + CARD_PADDING, cy, 16, LINE_HEIGHT), "⠿", _dragHandleStyle);
-
         string deskLabel = $"#{cr.DeskCode + 1}";
         GUI.Label(new Rect(x + CARD_PADDING + 16, cy, 28, LINE_HEIGHT), deskLabel, _deskStyle);
-        GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT),
-            $"★ {cr.CustomerName}", _titleStyle);
-        cy += LINE_HEIGHT + 4;
 
-        // 标题栏底部分隔线，标识可拖拽区域边界
-        GUI.DrawTexture(new Rect(x + CARD_PADDING, cy - 2, contentW, 1), Texture2D.whiteTexture,
-            ScaleMode.StretchToFill, true, 0, new Color(0.3f, 0.3f, 0.5f, 0.5f), 0, 0);
-
-        // ===== 概述区 =====
-        string ovToggle = cr.OverviewCollapsed ? "▶" : "▼";
-        Rect ovToggleRect = new Rect(x + CARD_PADDING, cy, 18, TAG_LINE_HEIGHT);
-        GUI.Label(ovToggleRect, ovToggle, _sectionToggleStyle);
-        GUI.Label(new Rect(x + CARD_PADDING + 18, cy, contentW - 18, TAG_LINE_HEIGHT),
-            "稀客需求", _sectionHeaderStyle);
-
-        // 折叠切换（使用原始 Input 输入）
-        if (!_eventConsumed && _inputMouseDown
-            && ovToggleRect.Contains(new Vector2(_inputMouseX, _inputMouseY)))
+        if (IsPending(cr))
         {
-            cr.OverviewCollapsed = !cr.OverviewCollapsed;
-            _eventConsumed = true;
-            _inputMouseDown = false;
-        }
-        cy += TAG_LINE_HEIGHT + 2;
-
-        if (!cr.OverviewCollapsed)
-        {
-            var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
-            if (customer != null)
-            {
-                float tagX = x + CARD_PADDING;
-                float tagMaxX = x + CARD_WIDTH - CARD_PADDING;
-                float tagRowH = TAG_LINE_HEIGHT;
-
-                // 正面标签
-                foreach (var tag in customer.positiveTags)
-                {
-                    string text = "+" + tag;
-                    float tw = _tagPosStyle.CalcSize(new GUIContent(text)).x + 6;
-                    if (tagX + tw > tagMaxX && tagX > x + CARD_PADDING + 1)
-                    {
-                        tagX = x + CARD_PADDING;
-                        cy += tagRowH;
-                    }
-                    GUI.Label(new Rect(tagX, cy, tw, tagRowH), text, _tagPosStyle);
-                    tagX += tw + 2;
-                }
-                // 负面标签
-                foreach (var tag in customer.negativeTags)
-                {
-                    string text = "-" + tag;
-                    float tw = _tagNegStyle.CalcSize(new GUIContent(text)).x + 6;
-                    if (tagX + tw > tagMaxX && tagX > x + CARD_PADDING + 1)
-                    {
-                        tagX = x + CARD_PADDING;
-                        cy += tagRowH;
-                    }
-                    GUI.Label(new Rect(tagX, cy, tw, tagRowH), text, _tagNegStyle);
-                    tagX += tw + 2;
-                }
-                // 酒水喜好标签（紫色，跟在负面标签后面）
-                if (customer.beverageTags != null)
-                {
-                    foreach (var tag in customer.beverageTags)
-                    {
-                        float tw = _tagBevPrefStyle.CalcSize(new GUIContent(tag)).x + 6;
-                        if (tagX + tw > tagMaxX && tagX > x + CARD_PADDING + 1)
-                        {
-                            tagX = x + CARD_PADDING;
-                            cy += tagRowH;
-                        }
-                        GUI.Label(new Rect(tagX, cy, tw, tagRowH), tag, _tagBevPrefStyle);
-                        tagX += tw + 2;
-                    }
-                }
-                // 食/饮标签
-                if (!string.IsNullOrEmpty(cr.ReqFoodTag))
-                {
-                    string text = "食:" + cr.ReqFoodTag;
-                    float tw = _tagReqStyle.CalcSize(new GUIContent(text)).x + 6;
-                    if (tagX + tw > tagMaxX && tagX > x + CARD_PADDING + 1)
-                    {
-                        tagX = x + CARD_PADDING;
-                        cy += tagRowH;
-                    }
-                    GUI.Label(new Rect(tagX, cy, tw, tagRowH), text, _tagReqStyle);
-                    tagX += tw + 2;
-                }
-                if (!string.IsNullOrEmpty(cr.ReqBevTag))
-                {
-                    string text = "饮:" + cr.ReqBevTag;
-                    float tw = _tagBevStyle.CalcSize(new GUIContent(text)).x + 6;
-                    if (tagX + tw > tagMaxX && tagX > x + CARD_PADDING + 1)
-                    {
-                        tagX = x + CARD_PADDING;
-                        cy += tagRowH;
-                    }
-                    GUI.Label(new Rect(tagX, cy, tw, tagRowH), text, _tagBevStyle);
-                }
-                cy += tagRowH + 4;
-            }
-            else
-            {
-                float tagX = x + CARD_PADDING;
-                if (!string.IsNullOrEmpty(cr.ReqFoodTag))
-                {
-                    string text = "食:" + cr.ReqFoodTag;
-                    float tw = _tagReqStyle.CalcSize(new GUIContent(text)).x + 6;
-                    GUI.Label(new Rect(tagX, cy, tw, TAG_LINE_HEIGHT), text, _tagReqStyle);
-                    tagX += tw + 2;
-                }
-                if (!string.IsNullOrEmpty(cr.ReqBevTag))
-                {
-                    string text = "饮:" + cr.ReqBevTag;
-                    float tw = _tagBevStyle.CalcSize(new GUIContent(text)).x + 6;
-                    GUI.Label(new Rect(tagX, cy, tw, TAG_LINE_HEIGHT), text, _tagBevStyle);
-                }
-                cy += TAG_LINE_HEIGHT + 4;
-            }
-
-            if (!string.IsNullOrEmpty(cr.StatusMessage))
-            {
-                GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), cr.StatusMessage, _detailStyle);
-                cy += LINE_HEIGHT;
-            }
-        }
-
-        // ===== 推荐方案区 =====
-        var recs = cr.Recommendations.Take(MAX_RECIPES).ToList();
-        if (recs.Count == 0)
-        {
-            GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), "无可用方案", _detailStyle);
+            GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), cr.CustomerName, _titleStyle);
+            cy += LINE_HEIGHT + 4;
+            string status = string.IsNullOrWhiteSpace(cr.StatusMessage)
+                ? (cr.PendingState == PendingRecommendationState.WaitingNextRound ? "等待下一轮" : "请对话获取需求")
+                : cr.StatusMessage;
+            GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT),
+                status, GetPendingStyle(cr));
             return;
         }
 
-        var customerForScore = Plugin.DataEngine.GetCustomer(cr.CustomerName);
-        var posTags = customerForScore?.positiveTags ?? new List<string>();
-        var negTags = customerForScore?.negativeTags ?? new List<string>();
-        var bevPrefs = customerForScore?.beverageTags ?? new List<string>();
-        var allPositive = new HashSet<string>(posTags.Concat(bevPrefs));
+        if (IsCompact(cr))
+        {
+            var rec = cr.Recommendations[cr.MatchedRecommendationIndex];
+            GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), cr.CustomerName, _titleStyle);
+            cy += LINE_HEIGHT + 4;
+            string star = rec.ExtraIngredients != null && rec.ExtraIngredients.Count > 0 ? "★" : "";
+            GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), rec.RecipeName + star, _compactStyle);
+            cy += LINE_HEIGHT;
+            GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), rec.BeverageName, _beverageNameStyle);
+            return;
+        }
+
+        string requirements = string.Join("　", new[] { cr.ReqFoodTag, cr.ReqBevTag }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+        string title = string.IsNullOrEmpty(requirements)
+            ? cr.CustomerName
+            : $"{cr.CustomerName}　需求：{requirements}";
+        GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), title, _titleStyle);
+        cy += LINE_HEIGHT + 4;
+
+        var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
+        if (customer != null)
+        {
+            string likeLine = BuildLikeLine(customer);
+            float likeH = TextHeight(_likeLineStyle, likeLine, contentW);
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, likeH), likeLine, _likeLineStyle);
+            cy += likeH;
+
+            if (customer.negativeTags.Count > 0)
+            {
+                string hateLine = BuildHateLine(customer);
+                float hateH = TextHeight(_hateLineStyle, hateLine, contentW);
+                GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, hateH), hateLine, _hateLineStyle);
+                cy += hateH;
+            }
+            cy += 4;
+        }
+
+        var recs = cr.Recommendations.Take(MAX_RECIPES).ToList();
+        if (recs.Count == 0)
+        {
+            string status = string.IsNullOrEmpty(cr.StatusMessage) ? "无可用方案" : cr.StatusMessage;
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, LINE_HEIGHT), status, _detailStyle);
+            return;
+        }
 
         for (int i = 0; i < recs.Count; i++)
         {
             var rec = recs[i];
-            bool collapsed = (i == 0) ? cr.Rec1Collapsed : cr.Rec2Collapsed;
-            string recToggle = collapsed ? "▶" : "▼";
-            Rect recToggleRect = new Rect(x + CARD_PADDING + 4, cy, 18, LINE_HEIGHT);
+            string planTitle = BuildPlanTitle(cr, rec, i);
+            float titleH = TextHeight(_planTitleStyle, planTitle, contentW);
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, titleH), planTitle, _planTitleStyle);
+            cy += titleH;
 
-            GUI.Label(recToggleRect, recToggle, _sectionToggleStyle);
+            string ingredientLine = BuildIngredientLine(rec);
+            float ingredientH = TextHeight(_ingredientStyle, ingredientLine, contentW);
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, ingredientH), ingredientLine, _ingredientStyle);
+            cy += ingredientH;
 
-            // 折叠切换（使用原始 Input 输入）
-            if (!_eventConsumed && _inputMouseDown
-                && recToggleRect.Contains(new Vector2(_inputMouseX, _inputMouseY)))
-            {
-                if (i == 0) cr.Rec1Collapsed = !cr.Rec1Collapsed;
-                else cr.Rec2Collapsed = !cr.Rec2Collapsed;
-                _eventConsumed = true;
-                _inputMouseDown = false;
-            }
+            string tagLine = BuildPlanTagLine(cr, rec);
+            float tagH = TextHeight(_detailStyle, tagLine, contentW);
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, tagH), tagLine, _detailStyle);
+            cy += tagH + 7;
+        }
+    }
 
-            // 料理评分 = 总标签中去掉酒水标签后的正负匹配
-            var recipeOnlyTags = new HashSet<string>(rec.RecipeTags ?? new List<string>());
-            if (rec.BeverageTags != null)
-                foreach (var bt in rec.BeverageTags) recipeOnlyTags.Remove(bt);
-            int recipeScore = recipeOnlyTags.Count(allPositive.Contains) - recipeOnlyTags.Count(negTags.Contains);
-            int bevScore = (rec.BeverageTags ?? new List<string>()).Count(allPositive.Contains)
-                         - (rec.BeverageTags ?? new List<string>()).Count(negTags.Contains);
+    private static bool IsCompact(CustomerRecommendation card)
+        => card.TrackingState != RecommendationTrackingState.AwaitingCook
+           && card.MatchedRecommendationIndex >= 0
+           && card.MatchedRecommendationIndex < card.Recommendations.Count;
 
-            string recipeScoreStr = recipeScore > 0 ? $"+{recipeScore}" : recipeScore.ToString();
-            string bevScoreStr = bevScore > 0 ? $"+{bevScore}" : bevScore.ToString();
-            var recipeScoreStyle = recipeScore > 0 ? _scorePosStyle : _scoreZeroStyle;
-            var bevScoreStyleFinal = bevScore > 0 ? _scorePosStyle : _scoreZeroStyle;
+    private static bool IsPending(CustomerRecommendation card)
+        => card.PendingState != PendingRecommendationState.None;
 
-            float rx = x + CARD_PADDING + 4 + 18;
+    private static bool IsDecisionCard(CustomerRecommendation card)
+        => !IsPending(card) && !IsCompact(card);
 
-            // 评级颜色
-            var hs = rec.ExpectedRating switch
-            {
-                "完美" => _ratingPerfectStyle,
-                "优秀" => _ratingGoodStyle,
-                _ => _ratingOkStyle
-            };
+    private static bool IsRightSidePrompt(CustomerRecommendation card)
+        => card.PendingState == PendingRecommendationState.NeedsInteraction
+           || card.PendingState == PendingRecommendationState.ReadingOrder;
 
-            // 标题行：[任务D/夜雀评级] 料理名 +N + 酒水名 +N 💰价格
-            string modeText = rec.IsFixedRecipeTask ? "任务D/" : "";
-            string nightingaleText = rec.NeedNightingale ? "夜雀" : "";
-            string ratingText = $"[{modeText}{nightingaleText}{rec.ExpectedRating}] ";
-            GUI.Label(new Rect(rx, cy, hs.CalcSize(new GUIContent(ratingText)).x, LINE_HEIGHT), ratingText, hs);
-            rx += hs.CalcSize(new GUIContent(ratingText)).x;
+    private static float GetCardWidth(CustomerRecommendation card)
+        => IsCompact(card) || IsPending(card) ? COMPACT_CARD_WIDTH : CARD_WIDTH;
 
-            string recipeText = $"{rec.RecipeName} ";
-            GUI.Label(new Rect(rx, cy, _recipeNameStyle.CalcSize(new GUIContent(recipeText)).x, LINE_HEIGHT), recipeText, _recipeNameStyle);
-            rx += _recipeNameStyle.CalcSize(new GUIContent(recipeText)).x;
+    private GUIStyle GetPendingStyle(CustomerRecommendation card)
+        => card.PendingState == PendingRecommendationState.WaitingNextRound
+            ? _pendingWaitingStyle
+            : _pendingInteractionStyle;
 
-            string rsBadge = $" {recipeScoreStr} ";
-            GUI.Label(new Rect(rx, cy, recipeScoreStyle.CalcSize(new GUIContent(rsBadge)).x, LINE_HEIGHT), rsBadge, recipeScoreStyle);
-            rx += recipeScoreStyle.CalcSize(new GUIContent(rsBadge)).x;
+    private static string BuildLikeLine(CustomerData customer)
+    {
+        var tags = customer.positiveTags
+            .Concat(customer.beverageTags ?? new List<string>())
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Distinct();
+        return "喜好：" + string.Join("　", tags);
+    }
 
-            string plusText = " + ";
-            GUI.Label(new Rect(rx, cy, _detailStyle.CalcSize(new GUIContent(plusText)).x, LINE_HEIGHT), plusText, _detailStyle);
-            rx += _detailStyle.CalcSize(new GUIContent(plusText)).x;
+    private static string BuildHateLine(CustomerData customer)
+        => "厌恶：" + string.Join("　", customer.negativeTags.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct());
 
-            string bevText = $"{rec.BeverageName} ";
-            GUI.Label(new Rect(rx, cy, _beverageNameStyle.CalcSize(new GUIContent(bevText)).x, LINE_HEIGHT), bevText, _beverageNameStyle);
-            rx += _beverageNameStyle.CalcSize(new GUIContent(bevText)).x;
+    private static void GetPositiveScores(CustomerRecommendation card, Recommendation rec,
+        out int recipeScore, out int beverageScore, out HashSet<string> recipeTags)
+    {
+        var customer = Plugin.DataEngine.GetCustomer(card.CustomerName);
+        var positives = new HashSet<string>(customer?.positiveTags ?? new List<string>());
+        positives.UnionWith(customer?.beverageTags ?? new List<string>());
 
-            string bsBadge = $" {bevScoreStr} ";
-            GUI.Label(new Rect(rx, cy, bevScoreStyleFinal.CalcSize(new GUIContent(bsBadge)).x, LINE_HEIGHT), bsBadge, bevScoreStyleFinal);
-            rx += bevScoreStyleFinal.CalcSize(new GUIContent(bsBadge)).x;
+        recipeTags = new HashSet<string>(rec.RecipeTags ?? new List<string>());
+        foreach (var beverageTag in rec.BeverageTags ?? new List<string>())
+            recipeTags.Remove(beverageTag);
 
-            string priceText = $" 💰{rec.TotalPrice}";
-            GUI.Label(new Rect(rx, cy, contentW - (rx - x - CARD_PADDING - 4), LINE_HEIGHT), priceText, _detailStyle);
+        recipeScore = recipeTags.Count(positives.Contains);
+        beverageScore = (rec.BeverageTags ?? new List<string>()).Distinct().Count(positives.Contains);
+    }
 
-            cy += LINE_HEIGHT + 2;
+    private static string BuildPlanTitle(CustomerRecommendation card, Recommendation rec, int index)
+    {
+        GetPositiveScores(card, rec, out int recipeScore, out int beverageScore, out _);
+        string nightingale = rec.NeedNightingale ? "（夜雀）" : "";
+        string star = rec.ExtraIngredients != null && rec.ExtraIngredients.Count > 0 ? "★" : "";
+        string planName = rec.IsFixedRecipeTask
+            ? (card.Recommendations.Count > 1 ? $"D-{(char)('A' + index)}" : "D")
+            : ((char)('A' + index)).ToString();
+        string fallback = rec.FallbackBelowFour && !string.IsNullOrWhiteSpace(rec.FallbackReason)
+            ? $"（{rec.FallbackReason}）"
+            : "";
+        return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}";
+    }
 
-            if (!collapsed)
-            {
-                // 料理标签
-                if (rec.RecipeTags != null && rec.RecipeTags.Count > 0)
-                {
-                    string tags = string.Join(" ", rec.RecipeTags.Take(7));
-                    GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), $"🏷️{tags}", _detailStyle);
-                    cy += LINE_HEIGHT;
-                }
+    private static string BuildIngredientLine(Recommendation rec)
+    {
+        var baseIngredients = rec.BaseIngredients != null && rec.BaseIngredients.Count > 0
+            ? rec.BaseIngredients
+            : (rec.Ingredients ?? new List<string>()).Where(i => !i.StartsWith("+")).ToList();
+        string text = baseIngredients.Count > 0 ? string.Join("、", baseIngredients) : "无";
+        if (rec.ExtraIngredients != null && rec.ExtraIngredients.Count > 0)
+            text += "（" + string.Join("、", rec.ExtraIngredients) + "）";
+        if (!string.IsNullOrWhiteSpace(rec.RequiredCooker))
+            text += "（" + rec.RequiredCooker + "）";
+        return text;
+    }
 
-                // 酒水标签
-                if (rec.BeverageTags != null && rec.BeverageTags.Count > 0)
-                {
-                    string tags = string.Join(" ", rec.BeverageTags.Take(5));
-                    GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT), $"饮:{tags}", _tagBevStyle);
-                    cy += LINE_HEIGHT;
-                }
+    private static string BuildPlanTagLine(CustomerRecommendation card, Recommendation rec)
+    {
+        GetPositiveScores(card, rec, out _, out _, out var recipeTags);
+        var customer = Plugin.DataEngine.GetCustomer(card.CustomerName);
+        var positives = new HashSet<string>(customer?.positiveTags ?? new List<string>());
+        positives.UnionWith(customer?.beverageTags ?? new List<string>());
 
-                // 食材+厨具+总价
-                string ingredients = rec.Ingredients.Count > 0 ? string.Join(",", rec.Ingredients) : "无";
-                string budgetFlag = rec.OverBudget ? "⚠" : "";
-                GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT),
-                    $"🥢{ingredients}  🔧{rec.RequiredCooker}{budgetFlag}", _ingredientStyle);
-                cy += LINE_HEIGHT + 2;
-            }
+        IEnumerable<string> Format(IEnumerable<string> tags) => tags
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Distinct()
+            .Select(t => positives.Contains(t) ? t + " +1" : t);
+
+        return string.Join("　", Format(recipeTags).Concat(Format(rec.BeverageTags ?? new List<string>())));
+    }
+
+    private static float TextHeight(GUIStyle style, string text, float width)
+        => Mathf.Max(LINE_HEIGHT, style.CalcHeight(new GUIContent(text ?? ""), width));
+
+    private void DrawDishBadges()
+    {
+        GUI.color = Color.white;
+        foreach (var assignment in RuntimeOrderTracker.Assignments.ToList())
+        {
+            if (!Plugin.ActiveRecommendations.ContainsKey(assignment.CardId)) continue;
+            if (!TryGetDishScreenPosition(assignment, out var position)) continue;
+
+            var rect = new Rect(position.x - 18, position.y - 28, 38, 24);
+            GUI.DrawTexture(rect, assignment.Completed ? _badgeCompletedBg : _badgeCookingBg);
+            GUI.Label(rect, $"#{assignment.DeskCode + 1}", _badgeStyle);
+        }
+    }
+
+    private static bool TryGetDishScreenPosition(RareDishAssignment assignment, out Vector2 position)
+    {
+        position = default;
+        try
+        {
+            // 料理完成后优先跟随真正进入托盘的对象。
+            if (assignment.Completed && TryGetTrayScreenPosition(assignment, out position))
+                return true;
+
+            // 料理已经离开厨具后，即使它随后被交付/移出托盘，也不能让标记跳回旧厨具。
+            if (assignment.Extracted)
+                return false;
+
+            var controller = assignment.Controller;
+            if (controller == null || Camera.main == null) return false;
+            Vector3 world = controller.transform.position;
+            if (controller.resultVisual != null)
+                world = controller.resultVisual.transform.position;
+            var screen = Camera.main.WorldToScreenPoint(world);
+            if (screen.z <= 0f) return false;
+            position = new Vector2(screen.x, Screen.height - screen.y);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryGetTrayScreenPosition(RareDishAssignment assignment, out Vector2 position)
+    {
+        position = default;
+        if (!assignment.InTray || assignment.TrayIndex < 0) return false;
+        try
+        {
+            var tray = GameData.RunTime.NightSceneUtility.IzakayaTray.Instance?.Tray;
+            var elements = tray?.Elements;
+            if (elements == null) return false;
+
+            int trayIndex = assignment.TrayIndex;
+            if (trayIndex >= elements.Length || trayIndex >= TRAY_SLOT_X_RATIOS.Length) return false;
+            var current = elements[trayIndex];
+            if (current == null) return false;
+
+            // 只有料理实际进入了玩家当前已开放的槽位，Receive 才会给 assignment.TrayIndex 赋值。
+            // 因此低等级只有2槽时，未开放的第3/4槽永远不会被绘制。
+            float xRatio = TRAY_SLOT_X_RATIOS[trayIndex];
+            position = new Vector2(Screen.width * xRatio, Screen.height * TRAY_SLOT_Y_RATIO);
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -600,6 +627,12 @@ public class OverlayRenderer
         _bgCard = new Texture2D(1, 1);
         _bgCard.SetPixel(0, 0, new Color(0.05f, 0.05f, 0.12f, opacity * 0.55f));
         _bgCard.Apply();
+        _badgeCookingBg = new Texture2D(1, 1);
+        _badgeCookingBg.SetPixel(0, 0, new Color(0.08f, 0.45f, 0.95f, 0.92f));
+        _badgeCookingBg.Apply();
+        _badgeCompletedBg = new Texture2D(1, 1);
+        _badgeCompletedBg.SetPixel(0, 0, new Color(0.12f, 0.72f, 0.28f, 0.92f));
+        _badgeCompletedBg.Apply();
 
         int tagFontSize = System.Math.Max(fontSize - 1, 10);
 
@@ -660,7 +693,8 @@ public class OverlayRenderer
         {
             fontSize = tagFontSize,
             normal = { textColor = new Color(0.8f, 0.8f, 0.8f) },
-            clipping = TextClipping.Overflow
+            wordWrap = true,
+            clipping = TextClipping.Clip
         };
 
         _ratingPerfectStyle = new GUIStyle(GUI.skin.label)
@@ -746,7 +780,68 @@ public class OverlayRenderer
             fontSize = tagFontSize,
             fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(0.87f, 0.93f, 1f) },  // 浅蓝白 #ddeeff
+            wordWrap = true,
+            clipping = TextClipping.Clip
+        };
+
+        _likeLineStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = tagFontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.36f, 0.36f) },
+            wordWrap = true,
+            clipping = TextClipping.Clip
+        };
+
+        _hateLineStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = tagFontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(0.68f, 0.55f, 1f) },
+            wordWrap = true,
+            clipping = TextClipping.Clip
+        };
+
+        _planTitleStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.86f, 0.3f) },
+            wordWrap = true,
+            clipping = TextClipping.Clip
+        };
+
+        _compactStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize + 1,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.93f, 0.73f) },
             clipping = TextClipping.Overflow
+        };
+
+        _pendingInteractionStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.58f, 0.16f) },
+            clipping = TextClipping.Overflow
+        };
+
+        _pendingWaitingStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.86f, 0.3f) },
+            clipping = TextClipping.Overflow
+        };
+
+        _badgeStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize + 2,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = Color.white },
+            alignment = TextAnchor.MiddleCenter,
+            clipping = TextClipping.Clip
         };
     }
 }
