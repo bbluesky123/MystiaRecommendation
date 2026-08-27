@@ -3,6 +3,7 @@ using HarmonyLib;
 using MystiaRecommendation.Engine;
 using NightScene.CookingUtility;
 using GameData.RunTime.NightSceneUtility;
+using NightScene.UI.CookingUtility;
 
 namespace MystiaRecommendation.Patches;
 
@@ -51,6 +52,55 @@ public static class CookerPatch
     public static void OnTrayReceiveInternal(Sellable value, int __result)
     {
         RuntimeOrderTracker.OnDishReceived(value, __result);
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "ReturnTrayToStorage")]
+    [HarmonyPrefix]
+    public static void OnReturnTrayToStoragePrefix(Sellable __0, out long __state)
+    {
+        __state = RuntimeOrderTracker.OnDishReturnStarted(__0);
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "ReturnTrayToStorage")]
+    [HarmonyPostfix]
+    public static void OnReturnTrayToStoragePostfix(Sellable __0, long __state)
+    {
+        RuntimeOrderTracker.OnDishReturnedToStorage(__0, __state);
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "Extract")]
+    [HarmonyPrefix]
+    public static void OnStorageExtractPrefix(Sellable __0)
+    {
+        RuntimeOrderTracker.OnStorageExtractStarted(__0);
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "Extract")]
+    [HarmonyPostfix]
+    public static void OnStorageExtractPostfix()
+    {
+        RuntimeOrderTracker.OnStorageExtractFinished();
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "OnPanelOpen")]
+    [HarmonyPrefix]
+    public static void OnStoragePanelOpen()
+    {
+        RuntimeOrderTracker.OnStoragePanelOpened();
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "OnElementEnabled")]
+    [HarmonyPostfix]
+    public static void OnStorageElementEnabled(object[] __args)
+    {
+        RuntimeOrderTracker.OnStorageElementEnabled(__args);
+    }
+
+    [HarmonyPatch(typeof(WorkSceneStoragePannel), "OnPanelClose")]
+    [HarmonyPrefix]
+    public static void OnStoragePanelClose()
+    {
+        RuntimeOrderTracker.OnStoragePanelClosed();
     }
 
 }

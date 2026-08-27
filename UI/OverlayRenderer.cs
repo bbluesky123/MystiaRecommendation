@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using MystiaRecommendation.Engine;
+using NightScene.UI;
 
 namespace MystiaRecommendation.UI;
 
@@ -12,6 +13,7 @@ public class OverlayRenderer
 {
     private bool _stylesInitialized;
     private Texture2D _bgCard;
+    private Texture2D _badgeBorderBg;
     private Texture2D _badgeCookingBg;
     private Texture2D _badgeCompletedBg;
     private float _bgOpacity = -1f;
@@ -42,6 +44,8 @@ public class OverlayRenderer
     private GUIStyle _compactStyle;
     private GUIStyle _pendingInteractionStyle;
     private GUIStyle _pendingWaitingStyle;
+    private GUIStyle _taskWarningStyle;
+    private GUIStyle _badgeShadowStyle;
     private GUIStyle _badgeStyle;
 
     // 布局常量
@@ -51,11 +55,6 @@ public class OverlayRenderer
     private const float CARD_SPACING = 10;
     private const float SCREEN_MARGIN = 10;
     private const int MAX_RECIPES = 2;
-    // 这里只保存游戏“可能出现”的四个槽位坐标，不代表玩家当前拥有四个槽位。
-    // 是否存在该槽位完全以 IzakayaTray.Receive 返回的真实索引和托盘对象为准。
-    private static readonly float[] TRAY_SLOT_X_RATIOS = { 0.484f, 0.565f, 0.646f, 0.727f };
-    private const float TRAY_SLOT_Y_RATIO = 0.932f;
-
     // 行高
     private const float LINE_HEIGHT = 22;
     private const float TAG_LINE_HEIGHT = 20;
@@ -75,6 +74,10 @@ public class OverlayRenderer
     private bool _inputMouseUp;
     private bool _inputMouseHeld;
     private int _lastInputFrame;
+    private static int _deskPointCacheFrame = -1000;
+    private static Dictionary<int, Vector2> _deskPointCache = new();
+    private static WorkSceneTrayPannel _trayPanelCache;
+    private static int _trayPanelLookupFrame = -1000;
 
     // Z序：最近拖拽的ID排最后
     private List<int> _dragOrder = new();
@@ -117,6 +120,7 @@ public class OverlayRenderer
         foreach (var key in toRemove)
         {
             RuntimeOrderTracker.RemoveForCard(key);
+            Plugin.ReleaseBeverageReservation(key);
             Plugin.ActiveRecommendations.Remove(key);
             _dragOrder.Remove(key);
             if (_draggedCardId == key) _draggedCardId = -1;
@@ -186,41 +190,118 @@ public class OverlayRenderer
     private void DrawLocalCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
         var occupied = new List<Rect>();
-        float fallbackY = SCREEN_MARGIN;
+        DrawLocalSeatColumns(cards, occupied);
+    }
 
-        foreach (var kv in cards)
+    /// <summary>
+    /// 所有桌边提示按桌号固定分栏：5-8 号桌统一放左侧，1-4 号桌统一放右侧。
+    /// “请对话/正在获取需求/等待下一轮”和已确认订单使用同一规则，只认桌号牌，
+    /// 人物位置不参与桌边卡片定位。
+    /// </summary>
+    private void DrawLocalSeatColumns(
+        List<KeyValuePair<int, CustomerRecommendation>> cards,
+        List<Rect> occupied)
+    {
+        var deskPoints = GetDeskScreenPoints();
+        var anchored = cards
+            .Select(kv =>
+            {
+                bool hasPoint = deskPoints.TryGetValue(kv.Value.DeskCode, out var point);
+                return (Card: kv, HasPoint: hasPoint, Point: point);
+            })
+            .Where(x => x.HasPoint)
+            .ToList();
+
+        if (anchored.Count == 0) return;
+
+        var positioned = anchored
+            .Select(x =>
+            {
+                bool placeRight = IsRightDeskGroup(x.Card.Value.DeskCode);
+                return (x.Card, x.Point, PlaceRight: placeRight);
+            })
+            .ToList();
+
+        const float seatGap = 34f;
+        float leftColumnX = positioned.Any(x => !x.PlaceRight)
+            ? positioned.Where(x => !x.PlaceRight).Average(x => x.Point.x)
+                - COMPACT_CARD_WIDTH - seatGap
+            : SCREEN_MARGIN;
+        float rightColumnX = positioned.Any(x => x.PlaceRight)
+            ? positioned.Where(x => x.PlaceRight).Average(x => x.Point.x) + seatGap
+            : Screen.width - SCREEN_MARGIN - COMPACT_CARD_WIDTH;
+
+        foreach (var entry in positioned.OrderBy(x => x.Point.y).ThenBy(x => x.Card.Value.DeskCode))
         {
-            var card = kv.Value;
-            float width = GetCardWidth(card);
-            float height = CalcCardHeight(card);
-            Rect rect;
-
-            if (TryGetGuestScreenPoint(card, out var guestPoint))
-            {
-                const float guestGap = 38f;
-                bool placeRight = IsRightSidePrompt(card);
-                float x = placeRight
-                    ? guestPoint.x + guestGap
-                    : guestPoint.x - width - guestGap;
-
-                // 首选方向超出屏幕时，自动换到桌子的另一侧。
-                if (placeRight && x + width > Screen.width - SCREEN_MARGIN)
-                    x = guestPoint.x - width - guestGap;
-                else if (!placeRight && x < SCREEN_MARGIN)
-                    x = guestPoint.x + guestGap;
-
-                float y = guestPoint.y - height * 0.5f;
-                rect = new Rect(ClampCardX(x, width), ClampCardY(y, height), width, height);
-                rect = ResolveLocalCollision(rect, occupied);
-            }
-            else
-            {
-                rect = new Rect(SCREEN_MARGIN, fallbackY, width, height);
-                fallbackY += height + CARD_SPACING;
-            }
+            float height = CalcCardHeight(entry.Card.Value);
+            float x = entry.PlaceRight ? rightColumnX : leftColumnX;
+            float y = entry.Point.y - height * 0.5f;
+            var rect = new Rect(
+                ClampCardX(x, COMPACT_CARD_WIDTH),
+                ClampCardY(y, height),
+                COMPACT_CARD_WIDTH,
+                height);
 
             occupied.Add(rect);
-            DrawCard(rect.x, rect.y, card, height, kv.Key);
+            DrawCard(rect.x, rect.y, entry.Card.Value, height, entry.Card.Key);
+        }
+
+    }
+
+    private static bool IsRightDeskGroup(int deskCode)
+    {
+        // DeskCode 为零基：0-3 对应 1-4 号右侧桌，4-7 对应 5-8 号左侧桌。
+        return deskCode >= 0 && deskCode < 4;
+    }
+
+    private static Dictionary<int, Vector2> GetDeskScreenPoints()
+    {
+        // 桌子位置在营业场景中基本固定；每半秒左右重扫一次即可，避免 OnGUI 多遍调用
+        // 时反复执行 FindObjectsOfType。
+        if (Time.frameCount - _deskPointCacheFrame < 30 && _deskPointCache.Count > 0)
+            return _deskPointCache;
+
+        var result = new Dictionary<int, Vector2>();
+        try
+        {
+            if (Camera.main == null) return result;
+            var displayers = UnityEngine.Object.FindObjectsOfType<
+                NightScene.GuestManagementUtility.GuestTableDisplayer>();
+            if (displayers == null) return result;
+
+            foreach (var displayer in displayers)
+            {
+                if (displayer == null || displayer.transform == null) continue;
+                int deskNumber = ReadDisplayedDeskNumber(displayer);
+                if (deskNumber < 1 || deskNumber > 8) continue;
+
+                Vector3 screen = Camera.main.WorldToScreenPoint(displayer.transform.position);
+                if (screen.z <= 0f) continue;
+                result[deskNumber - 1] = new Vector2(screen.x, Screen.height - screen.y);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Plugin.Instance?.Log?.LogWarning("[MystiaRec] 读取桌号牌位置失败: " + e.Message);
+        }
+        _deskPointCacheFrame = Time.frameCount;
+        _deskPointCache = result;
+        return result;
+    }
+
+    private static int ReadDisplayedDeskNumber(object displayer)
+    {
+        try
+        {
+            var deskLabel = displayer.GetType().GetProperty("deskCode")?.GetValue(displayer);
+            if (deskLabel == null) return -1;
+            string text = deskLabel.GetType().GetProperty("text")?.GetValue(deskLabel)?.ToString() ?? "";
+            string digits = new string(text.Where(char.IsDigit).ToArray());
+            return int.TryParse(digits, out int deskNumber) ? deskNumber : -1;
+        }
+        catch
+        {
+            return -1;
         }
     }
 
@@ -315,6 +396,8 @@ public class OverlayRenderer
             return h + LINE_HEIGHT * 3 + 8 + CARD_PADDING;
 
         h += LINE_HEIGHT + 4;
+        if (ShouldDrawDecisionStatus(cr))
+            h += TextHeight(_taskWarningStyle, cr.StatusMessage, contentW) + 2;
         var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
         if (customer != null)
         {
@@ -410,6 +493,13 @@ public class OverlayRenderer
         GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), title, _titleStyle);
         cy += LINE_HEIGHT + 4;
 
+        if (ShouldDrawDecisionStatus(cr))
+        {
+            float statusH = TextHeight(_taskWarningStyle, cr.StatusMessage, contentW);
+            GUI.Label(new Rect(x + CARD_PADDING, cy, contentW, statusH), cr.StatusMessage, _taskWarningStyle);
+            cy += statusH + 2;
+        }
+
         var customer = Plugin.DataEngine.GetCustomer(cr.CustomerName);
         if (customer != null)
         {
@@ -467,6 +557,11 @@ public class OverlayRenderer
     private static bool IsDecisionCard(CustomerRecommendation card)
         => !IsPending(card) && !IsCompact(card);
 
+    private static bool ShouldDrawDecisionStatus(CustomerRecommendation card)
+        => IsDecisionCard(card)
+           && card.Recommendations.Count > 0
+           && !string.IsNullOrWhiteSpace(card.StatusMessage);
+
     private static bool IsRightSidePrompt(CustomerRecommendation card)
         => card.PendingState == PendingRecommendationState.NeedsInteraction
            || card.PendingState == PendingRecommendationState.ReadingOrder;
@@ -517,7 +612,7 @@ public class OverlayRenderer
         string fallback = rec.FallbackBelowFour && !string.IsNullOrWhiteSpace(rec.FallbackReason)
             ? $"（{rec.FallbackReason}）"
             : "";
-        return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}";
+        return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}　￥{rec.TotalPrice}";
     }
 
     private static string BuildIngredientLine(Recommendation rec)
@@ -559,9 +654,14 @@ public class OverlayRenderer
             if (!Plugin.ActiveRecommendations.ContainsKey(assignment.CardId)) continue;
             if (!TryGetDishScreenPosition(assignment, out var position)) continue;
 
-            var rect = new Rect(position.x - 18, position.y - 28, 38, 24);
-            GUI.DrawTexture(rect, assignment.Completed ? _badgeCompletedBg : _badgeCookingBg);
-            GUI.Label(rect, $"#{assignment.DeskCode + 1}", _badgeStyle);
+            var borderRect = new Rect(position.x - 21, position.y - 30, 42, 28);
+            var badgeRect = new Rect(borderRect.x + 2, borderRect.y + 2,
+                borderRect.width - 4, borderRect.height - 4);
+            GUI.DrawTexture(borderRect, _badgeBorderBg);
+            GUI.DrawTexture(badgeRect, assignment.Completed ? _badgeCompletedBg : _badgeCookingBg);
+            GUI.Label(new Rect(badgeRect.x + 1, badgeRect.y + 1, badgeRect.width, badgeRect.height),
+                $"#{assignment.DeskCode + 1}", _badgeShadowStyle);
+            GUI.Label(badgeRect, $"#{assignment.DeskCode + 1}", _badgeStyle);
         }
     }
 
@@ -572,6 +672,10 @@ public class OverlayRenderer
         {
             // 料理完成后优先跟随真正进入托盘的对象。
             if (assignment.Completed && TryGetTrayScreenPosition(assignment, out position))
+                return true;
+
+            // 仅当储藏面板打开且对应料理图标当前可见时，编码才跟随储藏格显示。
+            if (assignment.Completed && TryGetStorageScreenPosition(assignment, out position))
                 return true;
 
             // 料理已经离开厨具后，即使它随后被交付/移出托盘，也不能让标记跳回旧厨具。
@@ -597,23 +701,115 @@ public class OverlayRenderer
     private static bool TryGetTrayScreenPosition(RareDishAssignment assignment, out Vector2 position)
     {
         position = default;
-        if (!assignment.InTray || assignment.TrayIndex < 0) return false;
+        if (!RuntimeOrderTracker.TryResolveTrayIndex(assignment, out int trayIndex)) return false;
         try
         {
             var tray = GameData.RunTime.NightSceneUtility.IzakayaTray.Instance?.Tray;
             var elements = tray?.Elements;
             if (elements == null) return false;
 
-            int trayIndex = assignment.TrayIndex;
-            if (trayIndex >= elements.Length || trayIndex >= TRAY_SLOT_X_RATIOS.Length) return false;
+            if (trayIndex >= elements.Length) return false;
             var current = elements[trayIndex];
-            if (current == null) return false;
+            if (!RuntimeOrderTracker.IsSameSellable(assignment.Result, current)) return false;
 
-            // 只有料理实际进入了玩家当前已开放的槽位，Receive 才会给 assignment.TrayIndex 赋值。
-            // 因此低等级只有2槽时，未开放的第3/4槽永远不会被绘制。
-            float xRatio = TRAY_SLOT_X_RATIOS[trayIndex];
-            position = new Vector2(Screen.width * xRatio, Screen.height * TRAY_SLOT_Y_RATIO);
+            return TryGetActualTraySlotScreenPosition(trayIndex, out position);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryGetActualTraySlotScreenPosition(int trayIndex, out Vector2 position)
+    {
+        position = default;
+        if (trayIndex < 0) return false;
+        try
+        {
+            var panel = GetActiveTrayPanel();
+            var instances = panel?.m_AllTrayInstances;
+            if (instances == null) return false;
+
+            int slotCount = instances.Count;
+            try
+            {
+                int gameSlotCount = GameData.RunTime.NightSceneUtility.IzakayaTray.Instance?.TrayMaxNum ?? 0;
+                if (gameSlotCount > 0)
+                    slotCount = Mathf.Min(slotCount, gameSlotCount);
+            }
+            catch { }
+
+            var screenPoints = new List<Vector2>();
+            for (int i = 0; i < instances.Count; i++)
+            {
+                var cluster = instances[i].Item1;
+                if (cluster == null || cluster.transform == null
+                    || !cluster.transform.gameObject.activeInHierarchy)
+                    continue;
+                if (TryGetUiScreenPosition(cluster.transform, out var screenPoint))
+                    screenPoints.Add(screenPoint);
+            }
+
+            // 实例池顺序不作为槽位顺序；画面中从左到右就是托盘索引从小到大。
+            screenPoints = screenPoints.OrderBy(p => p.x).Take(slotCount).ToList();
+            if (trayIndex >= screenPoints.Count) return false;
+            position = screenPoints[trayIndex];
             return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static WorkSceneTrayPannel GetActiveTrayPanel()
+    {
+        try
+        {
+            if (_trayPanelCache != null && _trayPanelCache.gameObject.activeInHierarchy)
+                return _trayPanelCache;
+            if (Time.frameCount - _trayPanelLookupFrame < 30) return null;
+
+            _trayPanelLookupFrame = Time.frameCount;
+            _trayPanelCache = UnityEngine.Object.FindObjectsOfType<WorkSceneTrayPannel>()
+                .FirstOrDefault(panel => panel != null && panel.gameObject.activeInHierarchy);
+            return _trayPanelCache;
+        }
+        catch
+        {
+            _trayPanelCache = null;
+            return null;
+        }
+    }
+
+    private static bool TryGetUiScreenPosition(Transform transform, out Vector2 position)
+    {
+        position = default;
+        if (transform == null) return false;
+
+        Vector3 worldCenter = transform.position;
+        if (transform is RectTransform rectTransform)
+            worldCenter = rectTransform.TransformPoint(rectTransform.rect.center);
+
+        Camera uiCamera = null;
+        var canvas = transform.GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            uiCamera = canvas.worldCamera;
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCamera, worldCenter);
+        position = new Vector2(screen.x, Screen.height - screen.y);
+        return true;
+    }
+
+    private static bool TryGetStorageScreenPosition(RareDishAssignment assignment, out Vector2 position)
+    {
+        position = default;
+        try
+        {
+            if (!RuntimeOrderTracker.TryGetStorageTransform(assignment, out var transform)
+                || transform == null)
+                return false;
+
+            return TryGetUiScreenPosition(transform, out position);
         }
         catch
         {
@@ -627,6 +823,9 @@ public class OverlayRenderer
         _bgCard = new Texture2D(1, 1);
         _bgCard.SetPixel(0, 0, new Color(0.05f, 0.05f, 0.12f, opacity * 0.55f));
         _bgCard.Apply();
+        _badgeBorderBg = new Texture2D(1, 1);
+        _badgeBorderBg.SetPixel(0, 0, new Color(0.015f, 0.015f, 0.02f, 0.98f));
+        _badgeBorderBg.Apply();
         _badgeCookingBg = new Texture2D(1, 1);
         _badgeCookingBg.SetPixel(0, 0, new Color(0.08f, 0.45f, 0.95f, 0.92f));
         _badgeCookingBg.Apply();
@@ -833,6 +1032,24 @@ public class OverlayRenderer
             fontStyle = FontStyle.Bold,
             normal = { textColor = new Color(1f, 0.86f, 0.3f) },
             clipping = TextClipping.Overflow
+        };
+
+        _taskWarningStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = new Color(1f, 0.5f, 0.2f) },
+            wordWrap = true,
+            clipping = TextClipping.Clip
+        };
+
+        _badgeShadowStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = fontSize + 2,
+            fontStyle = FontStyle.Bold,
+            normal = { textColor = Color.black },
+            alignment = TextAnchor.MiddleCenter,
+            clipping = TextClipping.Clip
         };
 
         _badgeStyle = new GUIStyle(GUI.skin.label)

@@ -33,7 +33,6 @@ public class CustomerDataEngine
                 c.positiveTags = t.ContainsKey("positiveTags") ? SimpleJson.ToStringList(t["positiveTags"]) : new();
                 c.negativeTags = t.ContainsKey("negativeTags") ? SimpleJson.ToStringList(t["negativeTags"]) : new();
                 c.beverageTags = t.ContainsKey("beverageTags") ? SimpleJson.ToStringList(t["beverageTags"]) : new();
-                c.places = t.ContainsKey("places") ? SimpleJson.ToStringList(t["places"]) : new();
                 c.positiveTagMapping = t.ContainsKey("positiveTagMapping") ? ReadStringDictionary(t["positiveTagMapping"]) : new();
                 c.beverageTagMapping = t.ContainsKey("beverageTagMapping") ? ReadStringDictionary(t["beverageTagMapping"]) : new();
 
@@ -100,14 +99,24 @@ public class CustomerData
     public List<string> positiveTags { get; set; } = new();
     public List<string> negativeTags { get; set; } = new();
     public List<string> beverageTags { get; set; } = new();
-    public List<string> places { get; set; } = new();
     public Dictionary<string, string> positiveTagMapping { get; set; } = new();
     public Dictionary<string, string> beverageTagMapping { get; set; } = new();
     public SpellCardData spellCards { get; set; }
 
-    public int MaxBudget => price.Count >= 2
-        ? (int)System.Math.Ceiling(price[1] * enduranceLimit)
-        : 999;
+    /// <summary>
+    /// 夜雀小助手 price 区间的上界，表示这位稀客本次到店可消费总额的估计上限。
+    /// enduranceLimit 是另一项顾客属性，不能用于放大预算上界。
+    /// </summary>
+    public int BudgetUpperBound => price.Count >= 2
+        ? System.Math.Max(price[0], price[1])
+        : (price.Count == 1 ? price[0] : 999);
+
+    public int BudgetLowerBound => price.Count >= 2
+        ? System.Math.Min(price[0], price[1])
+        : (price.Count == 1 ? price[0] : 0);
+
+    // 保留旧名称供现有调用兼容；语义统一为静态预算区间上界。
+    public int MaxBudget => BudgetUpperBound;
 }
 
 public class SpellCardData

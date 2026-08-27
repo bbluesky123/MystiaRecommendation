@@ -305,7 +305,7 @@
       "人间之里"
     ],
     "price": [
-      200,
+      250,
       400
     ],
     "enduranceLimit": 1.2,
@@ -344,8 +344,8 @@
       "人间之里"
     ],
     "price": [
-      200,
-      400
+      150,
+      300
     ],
     "enduranceLimit": 1.1,
     "positiveTags": [
@@ -386,8 +386,8 @@
       "旧地狱"
     ],
     "price": [
-      400,
-      700
+      600,
+      800
     ],
     "enduranceLimit": 1.8,
     "positiveTags": [
@@ -426,8 +426,8 @@
       "神灵庙"
     ],
     "price": [
-      500,
-      1000
+      2000,
+      3000
     ],
     "enduranceLimit": 1.05,
     "positiveTags": [
@@ -471,8 +471,8 @@
       "人间之里"
     ],
     "price": [
-      300,
-      500
+      3000,
+      5000
     ],
     "enduranceLimit": 1.1,
     "positiveTags": [
@@ -509,8 +509,8 @@
       "红魔馆"
     ],
     "price": [
-      300,
-      500
+      200,
+      400
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -587,8 +587,8 @@
       "迷途竹林"
     ],
     "price": [
-      500,
-      800
+      1000,
+      1500
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -626,8 +626,8 @@
       "红魔馆"
     ],
     "price": [
-      400,
-      700
+      600,
+      1000
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -667,8 +667,8 @@
       "妖怪之山"
     ],
     "price": [
-      200,
-      400
+      100,
+      200
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -709,7 +709,7 @@
     ],
     "price": [
       200,
-      500
+      400
     ],
     "enduranceLimit": 1.25,
     "positiveTags": [
@@ -749,8 +749,8 @@
       "妖怪之山"
     ],
     "price": [
-      100,
-      300
+      1200,
+      1600
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -787,8 +787,8 @@
       "博丽神社"
     ],
     "price": [
-      100,
-      300
+      300,
+      400
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -827,8 +827,8 @@
       "人间之里"
     ],
     "price": [
-      200,
-      400
+      400,
+      600
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -863,8 +863,8 @@
       "天界"
     ],
     "price": [
-      400,
-      700
+      500,
+      800
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -901,8 +901,8 @@
       "命莲寺"
     ],
     "price": [
-      400,
-      600
+      1300,
+      1800
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -942,7 +942,7 @@
     ],
     "price": [
       300,
-      500
+      400
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -976,8 +976,8 @@
       "冥界"
     ],
     "price": [
-      500,
-      1000
+      1500,
+      2000
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -1015,8 +1015,8 @@
       "神灵庙"
     ],
     "price": [
-      300,
-      600
+      514,
+      850
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -1061,7 +1061,7 @@
     ],
     "price": [
       300,
-      600
+      400
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -1099,8 +1099,8 @@
       "魔法森林"
     ],
     "price": [
-      300,
-      600
+      500,
+      800
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -1138,8 +1138,8 @@
       "旧地狱"
     ],
     "price": [
-      500,
-      1000
+      9999,
+      9999
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -1180,8 +1180,8 @@
       "命莲寺"
     ],
     "price": [
-      200,
-      500
+      300,
+      600
     ],
     "enduranceLimit": 1.1,
     "positiveTags": [
@@ -1219,7 +1219,7 @@
       "妖怪之山"
     ],
     "price": [
-      300,
+      400,
       600
     ],
     "enduranceLimit": 1.2,
@@ -1267,7 +1267,7 @@
     ],
     "price": [
       300,
-      500
+      400
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -1305,8 +1305,8 @@
       "旧地狱"
     ],
     "price": [
-      500,
-      800
+      600,
+      1000
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -1348,8 +1348,8 @@
       "地灵殿"
     ],
     "price": [
-      400,
-      700
+      500,
+      600
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -1391,8 +1391,8 @@
       "地灵殿"
     ],
     "price": [
-      300,
-      600
+      500,
+      700
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -1430,8 +1430,8 @@
       "地灵殿"
     ],
     "price": [
-      400,
-      600
+      500,
+      800
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -1470,8 +1470,8 @@
       "地灵殿"
     ],
     "price": [
-      400,
-      700
+      800,
+      1200
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -1508,7 +1508,7 @@
     ],
     "price": [
       400,
-      700
+      600
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -1551,7 +1551,7 @@
     ],
     "price": [
       300,
-      600
+      500
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -1594,8 +1594,8 @@
       "神灵庙"
     ],
     "price": [
-      400,
-      700
+      600,
+      900
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -1636,7 +1636,7 @@
     ],
     "price": [
       400,
-      700
+      900
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -1679,8 +1679,8 @@
       "神灵庙"
     ],
     "price": [
-      400,
-      700
+      500,
+      600
     ],
     "enduranceLimit": 1.5,
     "positiveTags": [
@@ -1721,8 +1721,8 @@
       "命莲寺"
     ],
     "price": [
-      400,
-      800
+      1000,
+      1200
     ],
     "enduranceLimit": 2.0,
     "positiveTags": [
@@ -1806,8 +1806,8 @@
       "太阳花田"
     ],
     "price": [
-      500,
-      800
+      1200,
+      1800
     ],
     "enduranceLimit": 1.3,
     "positiveTags": [
@@ -1853,8 +1853,8 @@
       "辉针城"
     ],
     "price": [
-      200,
-      400
+      300,
+      600
     ],
     "enduranceLimit": 1.1,
     "positiveTags": [
@@ -1896,8 +1896,8 @@
       "辉针城"
     ],
     "price": [
-      300,
-      600
+      600,
+      1200
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -1941,7 +1941,7 @@
     ],
     "price": [
       300,
-      500
+      600
     ],
     "enduranceLimit": 1.2,
     "positiveTags": [
@@ -1981,8 +1981,8 @@
       "红魔馆"
     ],
     "price": [
-      500,
-      1000
+      4950,
+      5000
     ],
     "enduranceLimit": 1.05,
     "positiveTags": [
@@ -2023,8 +2023,8 @@
       "月之都"
     ],
     "price": [
-      500,
-      1000
+      1200,
+      1500
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2069,8 +2069,8 @@
       "月之都"
     ],
     "price": [
-      500,
-      1000
+      1000,
+      1200
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2114,8 +2114,8 @@
       "月之都"
     ],
     "price": [
-      400,
-      800
+      300,
+      500
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2156,8 +2156,8 @@
       "博丽神社"
     ],
     "price": [
-      300,
-      700
+      2000,
+      3000
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2199,8 +2199,8 @@
       "月之都"
     ],
     "price": [
-      400,
-      700
+      800,
+      1000
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2243,8 +2243,8 @@
       "魔法森林"
     ],
     "price": [
-      400,
-      800
+      4000,
+      6000
     ],
     "enduranceLimit": 1.0,
     "positiveTags": [
@@ -2284,7 +2284,7 @@
     ],
     "price": [
       300,
-      600
+      500
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2326,8 +2326,8 @@
       "红魔馆"
     ],
     "price": [
-      400,
-      700
+      2500,
+      3200
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2371,8 +2371,8 @@
       "迷途竹林"
     ],
     "price": [
-      400,
-      800
+      2000,
+      2400
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2420,8 +2420,8 @@
       "魔界"
     ],
     "price": [
-      500,
-      1000
+      3000,
+      5000
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2469,7 +2469,7 @@
     ],
     "price": [
       200,
-      400
+      500
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2510,8 +2510,8 @@
       "魔法森林"
     ],
     "price": [
-      400,
-      800
+      600,
+      1200
     ],
     "enduranceLimit": 1.4,
     "positiveTags": [
@@ -2561,7 +2561,7 @@
       "魔界"
     ],
     "price": [
-      300,
+      500,
       600
     ],
     "enduranceLimit": 1.4,

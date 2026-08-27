@@ -242,13 +242,14 @@ public static class CustomerPatch
                     state.CompletedOrderVersion = -1;
                     state.LastFoodTag = "";
                     state.LastBevTag = "";
+                    state.LastBudget = -1;
                     Plugin.Instance?.Log?.LogInfo($"[MystiaRec] 新订单对象: version={state.OrderVersion} ptr={pointer}");
                 }
                 state.LastOrder = orderData;
             }
-            int orderBudget = TryReadBudgetFromObject(state.LastOrder);
-            if (orderBudget > 0)
-                state.LastBudget = orderBudget;
+            int remainingBudget = TryReadRemainingBudget(sgc);
+            if (remainingBudget >= 0)
+                state.LastBudget = remainingBudget;
 
             string name = state.Name;
             if (string.IsNullOrEmpty(name))
@@ -365,16 +366,31 @@ public static class CustomerPatch
                 var servedFood = order.ServFood;
                 var servedBeverage = order.ServBeverage;
 
+                // 预先做好的料理不会经过本订单的“厨具开始制作”事件。料理先上桌、酒水
+                // 尚未上桌时，直接利用明确的桌号把它反向匹配到该桌方案并切换紧凑卡片。
+                if (servedFood != null && servedBeverage == null)
+                {
+                    var activeCard = Plugin.ActiveRecommendations.FirstOrDefault(kv =>
+                        kv.Value != null && kv.Value.DeskCode == state.DeskCode);
+                    if (activeCard.Value != null)
+                        RuntimeOrderTracker.TryBindServedDish(activeCard.Key, activeCard.Value, servedFood);
+                }
+
                 // 料理一旦真正上桌，就不应再把座位数字留在原托盘槽位。
                 if (servedFood != null)
                     RuntimeOrderTracker.RemoveForDesk(state.DeskCode);
+
+                // 蓝勾（酒水已上桌）出现后，游戏库存已经真实扣除；同步释放内部预留，
+                // 避免在“酒已上、菜未上”的短暂阶段重复占用一瓶。
+                if (servedBeverage != null)
+                    Plugin.ReleaseBeverageReservationForDesk(state.DeskCode);
 
                 if (servedFood == null || servedBeverage == null) continue;
 
                 state.CompletedOrderVersion = state.OrderVersion;
                 state.TextFoodTag = "";
                 state.TextBevTag = "";
-                Plugin.OnOrderFulfilled(state.DeskCode);
+                Plugin.OnOrderFulfilled(state.DeskCode, servedFood, servedBeverage);
             }
             catch (System.Exception e)
             {
@@ -504,57 +520,48 @@ public static class CustomerPatch
             else
                 state.TextFoodTag = tag;
 
-            if (!string.IsNullOrEmpty(state.TextFoodTag) && !string.IsNullOrEmpty(state.TextBevTag))
-                TryTriggerRecommend(sgc, source, state.LastOrder);
+            // 游戏通常会依次请求料理和酒水文本，但在多人同时到场或快速切换对话时，
+            // 偶尔只触发其中一个文本回调。只要已通过真实对话捕获到任意一侧，便立即
+            // 重新读取同一订单对象；TryTriggerRecommend 会补读另一侧，避免卡片永久停在
+            // “正在获取需求”。完全没有发生对话文本回调时，本分支不会执行。
+            TryTriggerRecommend(sgc, source, state.LastOrder);
         }
         catch { }
     }
 
-    private static int TryReadBudgetFromObject(object source)
+    /// <summary>
+    /// GuestGroupController.GetFund 是游戏维护的当前实际剩余预算，已经包含符卡、
+    /// 店铺状态、免费订单和预算恢复等运行时效果。只读取明确的余额成员，避免把
+    /// SpecialOrder.Price 等“本单价格”误判为顾客余额。
+    /// </summary>
+    private static int TryReadRemainingBudget(SpecialGuestsController guest)
     {
-        if (source == null) return -1;
-        var seen = new HashSet<object>();
-        return TryReadBudgetFromObject(source, seen, 0);
-    }
-
-    private static int TryReadBudgetFromObject(object source, HashSet<object> seen, int depth)
-    {
-        if (source == null || depth > 2 || seen.Contains(source)) return -1;
-        seen.Add(source);
-
-        var type = source.GetType();
-        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-
-        foreach (var prop in type.GetProperties(flags))
+        if (guest == null) return -1;
+        try
         {
-            if (prop.GetIndexParameters().Length > 0) continue;
-            var value = SafeGet(() => prop.GetValue(source));
-            int budget = TryReadBudgetValue(prop.Name, value, seen, depth);
-            if (budget > 0) return budget;
+            // 当前游戏互操作程序集公开的强类型属性。
+            return System.Math.Max(0, guest.GetFund);
         }
+        catch { }
 
-        foreach (var field in type.GetFields(flags))
+        // 兼容可能改名的旧版互操作程序集；不递归扫描，也不读取 Price/Max。
+        try
         {
-            var value = SafeGet(() => field.GetValue(source));
-            int budget = TryReadBudgetValue(field.Name, value, seen, depth);
-            if (budget > 0) return budget;
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            foreach (string memberName in new[]
+            {
+                "GetFund", "CurrentFund", "RemainingFund", "RemainingMoney", "RemainMoney"
+            })
+            {
+                object value = guest.GetType().GetProperty(memberName, flags)?.GetValue(guest)
+                    ?? guest.GetType().GetField(memberName, flags)?.GetValue(guest);
+                if (value != null
+                    && int.TryParse(value.ToString(), out int budget)
+                    && budget >= 0)
+                    return budget;
+            }
         }
-
-        return -1;
-    }
-
-    private static int TryReadBudgetValue(string name, object value, HashSet<object> seen, int depth)
-    {
-        if (value == null) return -1;
-
-        var lower = name.ToLowerInvariant();
-        bool looksLikeBudget = lower.Contains("money") || lower.Contains("budget") || lower.Contains("remain") || lower.Contains("price") || lower.Contains("max");
-        if (looksLikeBudget && int.TryParse(value.ToString(), out int number) && number > 0 && number < 100000)
-            return number;
-
-        if (!value.GetType().IsPrimitive && value is not string)
-            return TryReadBudgetFromObject(value, seen, depth + 1);
-
+        catch { }
         return -1;
     }
 
