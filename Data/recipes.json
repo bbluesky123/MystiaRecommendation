@@ -1,7 +1,6 @@
 [
   {
     "id": 0,
-    "recipeId": 0,
     "name": "海鲜味噌汤",
     "ingredients": [
       "海苔"
@@ -18,14 +17,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 1,
-    "price": 8,
-    "unlock": {
-      "type": "self"
-    }
+    "price": 8
   },
   {
     "id": 1,
-    "recipeId": 1,
     "name": "豆腐味噌",
     "ingredients": [
       "豆腐"
@@ -44,16 +39,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 21,
-    "unlock": {
-      "type": "bond",
-      "bondName": "稗田阿求",
-      "bondLevel": 2
-    }
+    "price": 21
   },
   {
     "id": 2,
-    "recipeId": 2,
     "name": "力量汤",
     "ingredients": [
       "海苔",
@@ -74,16 +63,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 3,
-    "price": 34,
-    "unlock": {
-      "type": "bond",
-      "bondName": "橙",
-      "bondLevel": 4
-    }
+    "price": 34
   },
   {
     "id": 3,
-    "recipeId": 3,
     "name": "猪肉鳟鱼熏",
     "ingredients": [
       "鳟鱼",
@@ -100,16 +83,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 26,
-    "unlock": {
-      "type": "bond",
-      "bondName": "橙",
-      "bondLevel": 3
-    }
+    "price": 26
   },
   {
     "id": 4,
-    "recipeId": 4,
     "name": "烤八目鳗",
     "ingredients": [
       "八目鳗"
@@ -127,14 +104,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 22,
-    "unlock": {
-      "type": "self"
-    }
+    "price": 22
   },
   {
     "id": 5,
-    "recipeId": 5,
     "name": "能量串",
     "ingredients": [
       "牛肉",
@@ -151,16 +124,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 3,
-    "price": 50,
-    "unlock": {
-      "type": "bond",
-      "bondName": "伊吹萃香",
-      "bondLevel": 3
-    }
+    "price": 50
   },
   {
     "id": 6,
-    "recipeId": 6,
     "name": "二天一流",
     "ingredients": [
       "黑毛猪肉",
@@ -181,16 +148,10 @@
     "baseCookTime": 18,
     "dlc": 0,
     "level": 4,
-    "price": 90,
-    "unlock": {
-      "type": "bond",
-      "bondName": "伊吹萃香",
-      "bondLevel": 4
-    }
+    "price": 90
   },
   {
     "id": 7,
-    "recipeId": 35,
     "name": "饭团",
     "ingredients": [
       "海苔"
@@ -206,16 +167,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 1,
-    "price": 6,
-    "unlock": {
-      "type": "levelup",
-      "level": 2,
-      "area": null
-    }
+    "price": 6
   },
   {
     "id": 8,
-    "recipeId": 7,
     "name": "炙猪肉饭团",
     "ingredients": [
       "猪肉"
@@ -231,15 +186,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 2,
-    "price": 14,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【人间之里】支线任务"
-    }
+    "price": 14
   },
   {
     "id": 9,
-    "recipeId": 8,
     "name": "温暖饭团",
     "ingredients": [
       "洋葱",
@@ -258,16 +208,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "博丽灵梦",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 10,
-    "recipeId": 9,
     "name": "樱落雪",
     "ingredients": [
       "极上金枪鱼"
@@ -288,16 +232,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 4,
-    "price": 50,
-    "unlock": {
-      "type": "bond",
-      "bondName": "稗田阿求",
-      "bondLevel": 4
-    }
+    "price": 50
   },
   {
     "id": 11,
-    "recipeId": 10,
     "name": "炒肉丝",
     "ingredients": [
       "猪肉"
@@ -314,15 +252,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 1,
-    "price": 15,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【博丽神社】支线任务"
-    }
+    "price": 15
   },
   {
     "id": 12,
-    "recipeId": 11,
     "name": "冷豆腐",
     "ingredients": [
       "萝卜",
@@ -340,14 +273,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 2,
-    "price": 21,
-    "unlock": {
-      "type": "self"
-    }
+    "price": 21
   },
   {
     "id": 13,
-    "recipeId": 12,
     "name": "红烧鳗鱼",
     "ingredients": [
       "洋葱",
@@ -365,16 +294,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 42,
-    "unlock": {
-      "type": "bond",
-      "bondName": "红美铃",
-      "bondLevel": 2
-    }
+    "price": 42
   },
   {
     "id": 14,
-    "recipeId": 13,
     "name": "土豆可乐饼",
     "ingredients": [
       "土豆"
@@ -391,16 +314,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 1,
-    "price": 22,
-    "unlock": {
-      "type": "levelup",
-      "level": 11,
-      "area": null
-    }
+    "price": 22
   },
   {
     "id": 15,
-    "recipeId": 14,
     "name": "野味加农",
     "ingredients": [
       "土豆",
@@ -419,16 +336,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 4,
-    "price": 66,
-    "unlock": {
-      "type": "bond",
-      "bondName": "茨木华扇",
-      "bondLevel": 4
-    }
+    "price": 66
   },
   {
     "id": 16,
-    "recipeId": 15,
     "name": "猪肉盖浇饭",
     "ingredients": [
       "猪肉"
@@ -443,16 +354,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 20,
-    "unlock": {
-      "type": "levelup",
-      "level": 8,
-      "area": null
-    }
+    "price": 20
   },
   {
     "id": 17,
-    "recipeId": 16,
     "name": "牛肉盖浇饭",
     "ingredients": [
       "牛肉"
@@ -467,16 +372,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 20,
-    "unlock": {
-      "type": "bond",
-      "bondName": "茨木华扇",
-      "bondLevel": 3
-    }
+    "price": 20
   },
   {
     "id": 18,
-    "recipeId": 17,
     "name": "炸八目鳗",
     "ingredients": [
       "八目鳗"
@@ -493,16 +392,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 27,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露米娅",
-      "bondLevel": 3
-    }
+    "price": 27
   },
   {
     "id": 19,
-    "recipeId": 18,
     "name": "蔬菜专辑",
     "ingredients": [
       "土豆",
@@ -524,16 +417,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 3,
-    "price": 56,
-    "unlock": {
-      "type": "bond",
-      "bondName": "稗田阿求",
-      "bondLevel": 3
-    }
+    "price": 56
   },
   {
     "id": 20,
-    "recipeId": 19,
     "name": "白雪",
     "ingredients": [
       "河豚",
@@ -552,16 +439,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 4,
-    "price": 98,
-    "unlock": {
-      "type": "bond",
-      "bondName": "上白泽慧音",
-      "bondLevel": 4
-    }
+    "price": 98
   },
   {
     "id": 21,
-    "recipeId": 20,
     "name": "豆腐锅",
     "ingredients": [
       "豆腐"
@@ -577,16 +458,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 1,
-    "price": 19,
-    "unlock": {
-      "type": "bond",
-      "bondName": "茨木华扇",
-      "bondLevel": 2
-    }
+    "price": 19
   },
   {
     "id": 22,
-    "recipeId": 21,
     "name": "杂炊",
     "ingredients": [
       "海苔",
@@ -604,16 +479,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 2,
-    "price": 40,
-    "unlock": {
-      "type": "bond",
-      "bondName": "博丽灵梦",
-      "bondLevel": 3
-    }
+    "price": 40
   },
   {
     "id": 23,
-    "recipeId": 22,
     "name": "刺身拼盘",
     "ingredients": [
       "三文鱼",
@@ -633,16 +502,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 3,
-    "price": 88,
-    "unlock": {
-      "type": "bond",
-      "bondName": "琪露诺",
-      "bondLevel": 3
-    }
+    "price": 88
   },
   {
     "id": 24,
-    "recipeId": 36,
     "name": "大奢宴",
     "ingredients": [
       "黑毛猪肉",
@@ -663,16 +526,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 3,
-    "price": 105,
-    "unlock": {
-      "type": "bond",
-      "bondName": "博丽灵梦",
-      "bondLevel": 4
-    }
+    "price": 105
   },
   {
     "id": 25,
-    "recipeId": 23,
     "name": "豚骨拉面",
     "ingredients": [
       "猪肉",
@@ -690,16 +547,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "levelup",
-      "level": 14,
-      "area": null
-    }
+    "price": 60
   },
   {
     "id": 26,
-    "recipeId": 37,
     "name": "岩浆",
     "ingredients": [
       "牛肉",
@@ -723,16 +574,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 125,
-    "unlock": {
-      "type": "bond",
-      "bondName": "藤原妹红",
-      "bondLevel": 4
-    }
+    "price": 125
   },
   {
     "id": 27,
-    "recipeId": 24,
     "name": "香炸蝉蜕",
     "ingredients": [
       "蝉蜕"
@@ -746,16 +591,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 1,
-    "price": 19,
-    "unlock": {
-      "type": "bond",
-      "bondName": "莉格露",
-      "bondLevel": 3
-    }
+    "price": 19
   },
   {
     "id": 28,
-    "recipeId": 25,
     "name": "露水煮蛋",
     "ingredients": [
       "露水",
@@ -774,16 +613,10 @@
     "baseCookTime": 3,
     "dlc": 0,
     "level": 2,
-    "price": 18,
-    "unlock": {
-      "type": "bond",
-      "bondName": "莉格露",
-      "bondLevel": 2
-    }
+    "price": 18
   },
   {
     "id": 29,
-    "recipeId": 38,
     "name": "幻昙花糕",
     "ingredients": [
       "幻昙华",
@@ -805,16 +638,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 3,
-    "price": 78,
-    "unlock": {
-      "type": "bond",
-      "bondName": "莉格露",
-      "bondLevel": 4
-    }
+    "price": 78
   },
   {
     "id": 30,
-    "recipeId": 26,
     "name": "赛熊掌",
     "ingredients": [
       "黑毛猪肉",
@@ -835,16 +662,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 3,
-    "price": 70,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露米娅",
-      "bondLevel": 4
-    }
+    "price": 70
   },
   {
     "id": 31,
-    "recipeId": 27,
     "name": "秘制小鱼干",
     "ingredients": [
       "鳟鱼"
@@ -860,16 +681,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 2,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "橙",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 32,
-    "recipeId": 28,
     "name": "凉菜雕花",
     "ingredients": [
       "萝卜"
@@ -888,16 +703,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 1,
-    "price": 20,
-    "unlock": {
-      "type": "bond",
-      "bondName": "比那名居天子",
-      "bondLevel": 2
-    }
+    "price": 20
   },
   {
     "id": 33,
-    "recipeId": 39,
     "name": "桃花羹",
     "ingredients": [
       "桃子",
@@ -917,16 +726,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "bond",
-      "bondName": "比那名居天子",
-      "bondLevel": 3
-    }
+    "price": 55
   },
   {
     "id": 34,
-    "recipeId": 40,
     "name": "北极甜虾蜜桃色拉",
     "ingredients": [
       "桃子",
@@ -950,16 +753,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 2,
-    "price": 25,
-    "unlock": {
-      "type": "bond",
-      "bondName": "比那名居天子",
-      "bondLevel": 4
-    }
+    "price": 25
   },
   {
     "id": 35,
-    "recipeId": 29,
     "name": "油豆腐",
     "ingredients": [
       "豆腐"
@@ -976,16 +773,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 1,
-    "price": 16,
-    "unlock": {
-      "type": "bond",
-      "bondName": "上白泽慧音",
-      "bondLevel": 2
-    }
+    "price": 16
   },
   {
     "id": 36,
-    "recipeId": 30,
     "name": "诗礼银杏",
     "ingredients": [
       "白果",
@@ -1004,16 +795,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "上白泽慧音",
-      "bondLevel": 3
-    }
+    "price": 60
   },
   {
     "id": 37,
-    "recipeId": 31,
     "name": "真·海鲜味噌汤",
     "ingredients": [
       "三文鱼",
@@ -1030,16 +815,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "bond",
-      "bondName": "琪露诺",
-      "bondLevel": 2
-    }
+    "price": 55
   },
   {
     "id": 38,
-    "recipeId": 32,
     "name": "烤蘑菇",
     "ingredients": [
       "蘑菇"
@@ -1056,15 +835,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 1,
-    "price": 18,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【妖怪兽道】支线任务"
-    }
+    "price": 18
   },
   {
     "id": 39,
-    "recipeId": 33,
     "name": "煮豆腐",
     "ingredients": [
       "豆腐"
@@ -1079,16 +853,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 1,
-    "price": 22,
-    "unlock": {
-      "type": "levelup",
-      "level": 4,
-      "area": null
-    }
+    "price": 22
   },
   {
     "id": 40,
-    "recipeId": 34,
     "name": "炸猪肉排",
     "ingredients": [
       "猪肉"
@@ -1104,16 +872,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 25,
-    "unlock": {
-      "type": "bond",
-      "bondName": "伊吹萃香",
-      "bondLevel": 2
-    }
+    "price": 25
   },
   {
     "id": 41,
-    "recipeId": 60,
     "name": "黄油牛排",
     "ingredients": [
       "和牛",
@@ -1133,15 +895,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 60,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【红魔馆】主线任务"
-    }
+    "price": 60
   },
   {
     "id": 42,
-    "recipeId": 57,
     "name": "意式烩饭",
     "ingredients": [
       "洋葱",
@@ -1162,16 +919,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 2,
-    "price": 70,
-    "unlock": {
-      "type": "bond",
-      "bondName": "帕秋莉",
-      "bondLevel": 3
-    }
+    "price": 70
   },
   {
     "id": 43,
-    "recipeId": 58,
     "name": "惠灵顿牛排",
     "ingredients": [
       "和牛",
@@ -1195,16 +946,10 @@
     "baseCookTime": 14,
     "dlc": 0,
     "level": 4,
-    "price": 150,
-    "unlock": {
-      "type": "bond",
-      "bondName": "帕秋莉",
-      "bondLevel": 4
-    }
+    "price": 150
   },
   {
     "id": 44,
-    "recipeId": 56,
     "name": "班尼迪克蛋",
     "ingredients": [
       "鸡蛋",
@@ -1226,16 +971,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 35,
-    "unlock": {
-      "type": "bond",
-      "bondName": "帕秋莉",
-      "bondLevel": 2
-    }
+    "price": 35
   },
   {
     "id": 45,
-    "recipeId": 65,
     "name": "热松饼",
     "ingredients": [
       "蜂蜜",
@@ -1252,16 +991,10 @@
     "baseCookTime": 9,
     "dlc": 0,
     "level": 2,
-    "price": 22,
-    "unlock": {
-      "type": "levelup",
-      "level": 27,
-      "area": "红魔馆"
-    }
+    "price": 22
   },
   {
     "id": 46,
-    "recipeId": 62,
     "name": "司康饼",
     "ingredients": [
       "黄油",
@@ -1276,16 +1009,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 1,
-    "price": 8,
-    "unlock": {
-      "type": "levelup",
-      "level": 18,
-      "area": "红魔馆"
-    }
+    "price": 8
   },
   {
     "id": 47,
-    "recipeId": 63,
     "name": "香煎三文鱼",
     "ingredients": [
       "三文鱼",
@@ -1301,16 +1028,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 3,
-    "price": 58,
-    "unlock": {
-      "type": "levelup",
-      "level": 21,
-      "area": "红魔馆"
-    }
+    "price": 58
   },
   {
     "id": 48,
-    "recipeId": 64,
     "name": "奶油炖菜",
     "ingredients": [
       "蘑菇",
@@ -1328,16 +1049,10 @@
     "baseCookTime": 9,
     "dlc": 0,
     "level": 2,
-    "price": 20,
-    "unlock": {
-      "type": "levelup",
-      "level": 24,
-      "area": "迷途竹林"
-    }
+    "price": 20
   },
   {
     "id": 49,
-    "recipeId": 61,
     "name": "蜜汁叉烧",
     "ingredients": [
       "猪肉",
@@ -1355,15 +1070,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 3,
-    "price": 70,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【红魔馆】支线任务"
-    }
+    "price": 70
   },
   {
     "id": 50,
-    "recipeId": 54,
     "name": "白果萝卜排骨汤",
     "ingredients": [
       "白果",
@@ -1381,16 +1091,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 2,
-    "price": 65,
-    "unlock": {
-      "type": "bond",
-      "bondName": "红美铃",
-      "bondLevel": 3
-    }
+    "price": 65
   },
   {
     "id": 51,
-    "recipeId": 43,
     "name": "竹取姬",
     "ingredients": [
       "竹子",
@@ -1413,15 +1117,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 4,
-    "price": 65,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【迷途竹林】主线任务（藤原妹红）"
-    }
+    "price": 65
   },
   {
     "id": 52,
-    "recipeId": 44,
     "name": "不死鸟",
     "ingredients": [
       "面粉",
@@ -1443,15 +1142,10 @@
     "baseCookTime": 12,
     "dlc": 0,
     "level": 4,
-    "price": 65,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【迷途竹林】主线任务（蓬莱山辉夜）"
-    }
+    "price": 65
   },
   {
     "id": 53,
-    "recipeId": 48,
     "name": "月光团子",
     "ingredients": [
       "月光草",
@@ -1473,16 +1167,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 80,
-    "unlock": {
-      "type": "bond",
-      "bondName": "因幡帝",
-      "bondLevel": 4
-    }
+    "price": 80
   },
   {
     "id": 54,
-    "recipeId": 46,
     "name": "麻薯",
     "ingredients": [
       "糯米"
@@ -1502,16 +1190,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 2,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "因幡帝",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 55,
-    "recipeId": 47,
     "name": "白桃生八桥",
     "ingredients": [
       "糯米",
@@ -1532,16 +1214,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "bond",
-      "bondName": "因幡帝",
-      "bondLevel": 3
-    }
+    "price": 55
   },
   {
     "id": 56,
-    "recipeId": 52,
     "name": "月之恋人",
     "ingredients": [
       "黄油",
@@ -1564,16 +1240,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 3,
-    "price": 66,
-    "unlock": {
-      "type": "bond",
-      "bondName": "蓬莱山辉夜",
-      "bondLevel": 3
-    }
+    "price": 66
   },
   {
     "id": 57,
-    "recipeId": 59,
     "name": "猪鹿蝶",
     "ingredients": [
       "野猪肉",
@@ -1591,16 +1261,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 78,
-    "unlock": {
-      "type": "bond",
-      "bondName": "琪露诺",
-      "bondLevel": 4
-    }
+    "price": 78
   },
   {
     "id": 58,
-    "recipeId": 45,
     "name": "流水素面",
     "ingredients": [
       "面粉",
@@ -1619,15 +1283,10 @@
     "baseCookTime": 7,
     "dlc": 0,
     "level": 3,
-    "price": 40,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "地区【迷途竹林】支线任务"
-    }
+    "price": 40
   },
   {
     "id": 59,
-    "recipeId": 66,
     "name": "竹笋炒肉",
     "ingredients": [
       "竹笋",
@@ -1643,16 +1302,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 2,
-    "price": 25,
-    "unlock": {
-      "type": "levelup",
-      "level": 33,
-      "area": "迷途竹林"
-    }
+    "price": 25
   },
   {
     "id": 60,
-    "recipeId": 51,
     "name": "竹筒蒸蛋",
     "ingredients": [
       "竹子",
@@ -1670,16 +1323,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 2,
-    "price": 40,
-    "unlock": {
-      "type": "bond",
-      "bondName": "蓬莱山辉夜",
-      "bondLevel": 2
-    }
+    "price": 40
   },
   {
     "id": 61,
-    "recipeId": 53,
     "name": "蓬莱玉枝",
     "ingredients": [
       "竹子",
@@ -1700,16 +1347,10 @@
     "baseCookTime": 13,
     "dlc": 0,
     "level": 5,
-    "price": 125,
-    "unlock": {
-      "type": "bond",
-      "bondName": "蓬莱山辉夜",
-      "bondLevel": 4
-    }
+    "price": 125
   },
   {
     "id": 62,
-    "recipeId": 41,
     "name": "臭豆腐",
     "ingredients": [
       "豆腐",
@@ -1729,16 +1370,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 1,
-    "price": 24,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露米娅",
-      "bondLevel": 2
-    }
+    "price": 24
   },
   {
     "id": 63,
-    "recipeId": 55,
     "name": "华光玉煎包",
     "ingredients": [
       "蘑菇",
@@ -1757,16 +1392,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 4,
-    "price": 128,
-    "unlock": {
-      "type": "bond",
-      "bondName": "红美铃",
-      "bondLevel": 4
-    }
+    "price": 128
   },
   {
     "id": 64,
-    "recipeId": 49,
     "name": "麻婆豆腐",
     "ingredients": [
       "豆腐",
@@ -1788,16 +1417,10 @@
     "baseCookTime": 6,
     "dlc": 0,
     "level": 2,
-    "price": 32,
-    "unlock": {
-      "type": "bond",
-      "bondName": "藤原妹红",
-      "bondLevel": 2
-    }
+    "price": 32
   },
   {
     "id": 65,
-    "recipeId": 50,
     "name": "水煮鱼",
     "ingredients": [
       "鳟鱼",
@@ -1820,16 +1443,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 68,
-    "unlock": {
-      "type": "bond",
-      "bondName": "藤原妹红",
-      "bondLevel": 3
-    }
+    "price": 68
   },
   {
     "id": 66,
-    "recipeId": 42,
     "name": "月饼",
     "ingredients": [
       "月光草",
@@ -1848,19 +1465,10 @@
     "baseCookTime": 10,
     "dlc": 0,
     "level": 5,
-    "price": 35,
-    "unlock": {
-      "type": "shop",
-      "shopName": "【人间之里】香霖堂",
-      "price": {
-        "currency": "银色的青蛙硬币",
-        "amount": 5
-      }
-    }
+    "price": 35
   },
   {
     "id": 67,
-    "recipeId": 67,
     "name": "毛玉三色冰激凌",
     "ingredients": [
       "露水",
@@ -1880,15 +1488,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 75,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "【妖怪兽道“MC幻想乡”联动】萌澄果（PC）、【妖怪兽道】杂货商人（Switch）"
-    }
+    "price": 75
   },
   {
     "id": 68,
-    "recipeId": 68,
     "name": "毛玉熔岩豆腐",
     "ingredients": [
       "豆腐",
@@ -1908,15 +1511,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 85,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "【妖怪兽道“MC幻想乡”联动】萌澄果（PC）、【妖怪兽道】杂货商人（Switch）"
-    }
+    "price": 85
   },
   {
     "id": 69,
-    "recipeId": 69,
     "name": "猩红恶魔蛋糕",
     "ingredients": [
       "露水",
@@ -1936,15 +1534,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "【妖怪兽道“三妖精的蹦蹦跳跳讨伐大作战”联动】蹦蹦跳跳的三妖精（PC）、【人间之里】香霖堂（Switch）"
-    }
+    "price": 60
   },
   {
     "id": 70,
-    "recipeId": 70,
     "name": "无意识妖怪慕斯",
     "ingredients": [
       "豆腐",
@@ -1964,15 +1557,10 @@
     "baseCookTime": 8,
     "dlc": 0,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "quest_or_event",
-      "description": "【妖怪兽道“三妖精的蹦蹦跳跳讨伐大作战”联动】蹦蹦跳跳的三妖精（PC）、【人间之里】香霖堂（Switch）"
-    }
+    "price": 60
   },
   {
     "id": 71,
-    "recipeId": 71,
     "name": "水饺",
     "ingredients": [
       "面粉"
@@ -1988,19 +1576,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 2,
-    "price": 35,
-    "unlock": {
-      "type": "shop",
-      "shopName": "【人间之里】香霖堂",
-      "price": {
-        "currency": "银色的青蛙硬币",
-        "amount": 5
-      }
-    }
+    "price": 35
   },
   {
     "id": 72,
-    "recipeId": 72,
     "name": "汤圆",
     "ingredients": [
       "糯米"
@@ -2016,19 +1595,10 @@
     "baseCookTime": 5,
     "dlc": 0,
     "level": 2,
-    "price": 35,
-    "unlock": {
-      "type": "shop",
-      "shopName": "【人间之里】香霖堂",
-      "price": {
-        "currency": "银色的青蛙硬币",
-        "amount": 5
-      }
-    }
+    "price": 35
   },
   {
     "id": 1000,
-    "recipeId": 1000,
     "name": "炸虾天妇罗",
     "ingredients": [
       "虾",
@@ -2045,16 +1615,10 @@
     "baseCookTime": 6,
     "dlc": 1,
     "level": 1,
-    "price": 22,
-    "unlock": {
-      "type": "bond",
-      "bondName": "犬走椛",
-      "bondLevel": 2
-    }
+    "price": 22
   },
   {
     "id": 1001,
-    "recipeId": 1001,
     "name": "黄金酥鱼饼",
     "ingredients": [
       "鳟鱼",
@@ -2072,16 +1636,10 @@
     "baseCookTime": 9,
     "dlc": 1,
     "level": 2,
-    "price": 40,
-    "unlock": {
-      "type": "bond",
-      "bondName": "犬走椛",
-      "bondLevel": 3
-    }
+    "price": 40
   },
   {
     "id": 1002,
-    "recipeId": 1002,
     "name": "全肉盛宴",
     "ingredients": [
       "野猪肉",
@@ -2104,16 +1662,10 @@
     "baseCookTime": 14,
     "dlc": 1,
     "level": 4,
-    "price": 115,
-    "unlock": {
-      "type": "bond",
-      "bondName": "犬走椛",
-      "bondLevel": 4
-    }
+    "price": 115
   },
   {
     "id": 1003,
-    "recipeId": 1003,
     "name": "腌黄瓜",
     "ingredients": [
       "黄瓜",
@@ -2130,16 +1682,10 @@
     "baseCookTime": 6,
     "dlc": 1,
     "level": 1,
-    "price": 16,
-    "unlock": {
-      "type": "bond",
-      "bondName": "河城荷取",
-      "bondLevel": 2
-    }
+    "price": 16
   },
   {
     "id": 1004,
-    "recipeId": 1004,
     "name": "奶油焗蟹",
     "ingredients": [
       "奶油",
@@ -2158,16 +1704,10 @@
     "baseCookTime": 12,
     "dlc": 1,
     "level": 3,
-    "price": 88,
-    "unlock": {
-      "type": "bond",
-      "bondName": "河城荷取",
-      "bondLevel": 3
-    }
+    "price": 88
   },
   {
     "id": 1005,
-    "recipeId": 1005,
     "name": "拟尻子玉",
     "ingredients": [
       "鹿肉",
@@ -2187,16 +1727,10 @@
     "baseCookTime": 12,
     "dlc": 1,
     "level": 4,
-    "price": 120,
-    "unlock": {
-      "type": "bond",
-      "bondName": "河城荷取",
-      "bondLevel": 4
-    }
+    "price": 120
   },
   {
     "id": 1006,
-    "recipeId": 1006,
     "name": "大阪烧",
     "ingredients": [
       "面粉",
@@ -2214,16 +1748,10 @@
     "baseCookTime": 6,
     "dlc": 1,
     "level": 2,
-    "price": 24,
-    "unlock": {
-      "type": "bond",
-      "bondName": "东风谷早苗",
-      "bondLevel": 2
-    }
+    "price": 24
   },
   {
     "id": 1007,
-    "recipeId": 1007,
     "name": "章鱼烧",
     "ingredients": [
       "面粉",
@@ -2242,16 +1770,10 @@
     "baseCookTime": 8,
     "dlc": 1,
     "level": 2,
-    "price": 36,
-    "unlock": {
-      "type": "bond",
-      "bondName": "东风谷早苗",
-      "bondLevel": 3
-    }
+    "price": 36
   },
   {
     "id": 1008,
-    "recipeId": 1008,
     "name": "海胆刺身",
     "ingredients": [
       "海胆",
@@ -2271,16 +1793,10 @@
     "baseCookTime": 8,
     "dlc": 1,
     "level": 4,
-    "price": 108,
-    "unlock": {
-      "type": "bond",
-      "bondName": "东风谷早苗",
-      "bondLevel": 4
-    }
+    "price": 108
   },
   {
     "id": 1009,
-    "recipeId": 1009,
     "name": "蘑菇肉片",
     "ingredients": [
       "蘑菇",
@@ -2297,16 +1813,10 @@
     "baseCookTime": 6,
     "dlc": 1,
     "level": 1,
-    "price": 20,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雾雨魔理沙",
-      "bondLevel": 2
-    }
+    "price": 20
   },
   {
     "id": 1010,
-    "recipeId": 1010,
     "name": "秘制鲜菌煲",
     "ingredients": [
       "松露",
@@ -2324,16 +1834,10 @@
     "baseCookTime": 9,
     "dlc": 1,
     "level": 3,
-    "price": 62,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雾雨魔理沙",
-      "bondLevel": 3
-    }
+    "price": 62
   },
   {
     "id": 1011,
-    "recipeId": 1011,
     "name": "蘑女的舞踏烩",
     "ingredients": [
       "蘑菇",
@@ -2356,16 +1860,10 @@
     "baseCookTime": 14,
     "dlc": 1,
     "level": 4,
-    "price": 112,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雾雨魔理沙",
-      "bondLevel": 4
-    }
+    "price": 112
   },
   {
     "id": 1012,
-    "recipeId": 1012,
     "name": "奶香蘑菇汤",
     "ingredients": [
       "蘑菇",
@@ -2382,16 +1880,10 @@
     "baseCookTime": 8,
     "dlc": 1,
     "level": 1,
-    "price": 28,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱丽丝",
-      "bondLevel": 2
-    }
+    "price": 28
   },
   {
     "id": 1013,
-    "recipeId": 1013,
     "name": "普通小蛋糕",
     "ingredients": [
       "鸡蛋",
@@ -2410,16 +1902,10 @@
     "baseCookTime": 8,
     "dlc": 1,
     "level": 2,
-    "price": 56,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱丽丝",
-      "bondLevel": 3
-    }
+    "price": 56
   },
   {
     "id": 1014,
-    "recipeId": 1014,
     "name": "七色羊羹",
     "ingredients": [
       "海苔",
@@ -2441,16 +1927,10 @@
     "baseCookTime": 8,
     "dlc": 1,
     "level": 4,
-    "price": 92,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱丽丝",
-      "bondLevel": 4
-    }
+    "price": 92
   },
   {
     "id": 1015,
-    "recipeId": 1015,
     "name": "手握寿司",
     "ingredients": [
       "三文鱼",
@@ -2469,16 +1949,10 @@
     "baseCookTime": 6,
     "dlc": 1,
     "level": 1,
-    "price": 28,
-    "unlock": {
-      "type": "bond",
-      "bondName": "矢田寺成美",
-      "bondLevel": 2
-    }
+    "price": 28
   },
   {
     "id": 1016,
-    "recipeId": 1016,
     "name": "南瓜虾盅",
     "ingredients": [
       "南瓜",
@@ -2499,16 +1973,10 @@
     "baseCookTime": 9,
     "dlc": 1,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "bond",
-      "bondName": "矢田寺成美",
-      "bondLevel": 3
-    }
+    "price": 55
   },
   {
     "id": 1017,
-    "recipeId": 1017,
     "name": "幻想佛跳墙",
     "ingredients": [
       "和牛",
@@ -2535,16 +2003,10 @@
     "baseCookTime": 18,
     "dlc": 1,
     "level": 4,
-    "price": 160,
-    "unlock": {
-      "type": "bond",
-      "bondName": "矢田寺成美",
-      "bondLevel": 4
-    }
+    "price": 160
   },
   {
     "id": 2000,
-    "recipeId": 2000,
     "name": "丧气芝士条",
     "ingredients": [
       "芝士",
@@ -2562,16 +2024,10 @@
     "baseCookTime": 6,
     "dlc": 2,
     "level": 1,
-    "price": 25,
-    "unlock": {
-      "type": "bond",
-      "bondName": "水桥帕露西",
-      "bondLevel": 2
-    }
+    "price": 25
   },
   {
     "id": 2001,
-    "recipeId": 2001,
     "name": "阴郁水果派",
     "ingredients": [
       "柠檬",
@@ -2590,16 +2046,10 @@
     "baseCookTime": 8,
     "dlc": 2,
     "level": 2,
-    "price": 36,
-    "unlock": {
-      "type": "bond",
-      "bondName": "水桥帕露西",
-      "bondLevel": 3
-    }
+    "price": 36
   },
   {
     "id": 2002,
-    "recipeId": 2002,
     "name": "绝叫关东煮",
     "ingredients": [
       "辣椒",
@@ -2624,16 +2074,10 @@
     "baseCookTime": 12,
     "dlc": 2,
     "level": 4,
-    "price": 92,
-    "unlock": {
-      "type": "bond",
-      "bondName": "水桥帕露西",
-      "bondLevel": 4
-    }
+    "price": 92
   },
   {
     "id": 2003,
-    "recipeId": 2003,
     "name": "脆旋风",
     "ingredients": [
       "面粉",
@@ -2653,16 +2097,10 @@
     "baseCookTime": 5,
     "dlc": 2,
     "level": 1,
-    "price": 42,
-    "unlock": {
-      "type": "bond",
-      "bondName": "黑谷山女",
-      "bondLevel": 2
-    }
+    "price": 42
   },
   {
     "id": 2004,
-    "recipeId": 2004,
     "name": "仰望天花板派",
     "ingredients": [
       "鳟鱼",
@@ -2684,16 +2122,10 @@
     "baseCookTime": 9,
     "dlc": 2,
     "level": 2,
-    "price": 66,
-    "unlock": {
-      "type": "bond",
-      "bondName": "黑谷山女",
-      "bondLevel": 3
-    }
+    "price": 66
   },
   {
     "id": 2005,
-    "recipeId": 2005,
     "name": "兜甲蒸糕",
     "ingredients": [
       "面粉",
@@ -2717,16 +2149,10 @@
     "baseCookTime": 12,
     "dlc": 2,
     "level": 3,
-    "price": 105,
-    "unlock": {
-      "type": "bond",
-      "bondName": "黑谷山女",
-      "bondLevel": 4
-    }
+    "price": 105
   },
   {
     "id": 2006,
-    "recipeId": 2006,
     "name": "狮子头",
     "ingredients": [
       "牛肉"
@@ -2746,16 +2172,10 @@
     "baseCookTime": 7,
     "dlc": 2,
     "level": 1,
-    "price": 28,
-    "unlock": {
-      "type": "bond",
-      "bondName": "星熊勇仪",
-      "bondLevel": 2
-    }
+    "price": 28
   },
   {
     "id": 2007,
-    "recipeId": 2007,
     "name": "巨人玉子烧",
     "ingredients": [
       "面粉",
@@ -2777,16 +2197,10 @@
     "baseCookTime": 12,
     "dlc": 2,
     "level": 2,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "星熊勇仪",
-      "bondLevel": 3
-    }
+    "price": 60
   },
   {
     "id": 2008,
-    "recipeId": 2008,
     "name": "大江户船祭",
     "ingredients": [
       "三文鱼",
@@ -2813,16 +2227,10 @@
     "baseCookTime": 24,
     "dlc": 2,
     "level": 4,
-    "price": 206,
-    "unlock": {
-      "type": "bond",
-      "bondName": "星熊勇仪",
-      "bondLevel": 4
-    }
+    "price": 206
   },
   {
     "id": 2009,
-    "recipeId": 2009,
     "name": "樱花布丁",
     "ingredients": [
       "蜂蜜",
@@ -2844,16 +2252,10 @@
     "baseCookTime": 6,
     "dlc": 2,
     "level": 2,
-    "price": 32,
-    "unlock": {
-      "type": "bond",
-      "bondName": "古明地觉",
-      "bondLevel": 2
-    }
+    "price": 32
   },
   {
     "id": 2010,
-    "recipeId": 2010,
     "name": "提神布丁",
     "ingredients": [
       "葡萄",
@@ -2876,16 +2278,10 @@
     "baseCookTime": 8,
     "dlc": 2,
     "level": 2,
-    "price": 42,
-    "unlock": {
-      "type": "bond",
-      "bondName": "古明地觉",
-      "bondLevel": 3
-    }
+    "price": 42
   },
   {
     "id": 2011,
-    "recipeId": 2011,
     "name": "燃尽布丁",
     "ingredients": [
       "葡萄",
@@ -2911,16 +2307,10 @@
     "baseCookTime": 8,
     "dlc": 2,
     "level": 4,
-    "price": 73,
-    "unlock": {
-      "type": "bond",
-      "bondName": "古明地觉",
-      "bondLevel": 4
-    }
+    "price": 73
   },
   {
     "id": 2012,
-    "recipeId": 2012,
     "name": "猫饭",
     "ingredients": [
       "鳟鱼",
@@ -2939,16 +2329,10 @@
     "baseCookTime": 5,
     "dlc": 2,
     "level": 1,
-    "price": 26,
-    "unlock": {
-      "type": "bond",
-      "bondName": "火焰猫燐",
-      "bondLevel": 2
-    }
+    "price": 26
   },
   {
     "id": 2013,
-    "recipeId": 2013,
     "name": "三文鱼天妇罗",
     "ingredients": [
       "三文鱼",
@@ -2968,16 +2352,10 @@
     "baseCookTime": 8,
     "dlc": 2,
     "level": 2,
-    "price": 44,
-    "unlock": {
-      "type": "bond",
-      "bondName": "火焰猫燐",
-      "bondLevel": 3
-    }
+    "price": 44
   },
   {
     "id": 2014,
-    "recipeId": 2014,
     "name": "鱼跃龙门",
     "ingredients": [
       "极上金枪鱼",
@@ -3004,16 +2382,10 @@
     "baseCookTime": 12,
     "dlc": 2,
     "level": 4,
-    "price": 142,
-    "unlock": {
-      "type": "bond",
-      "bondName": "火焰猫燐",
-      "bondLevel": 4
-    }
+    "price": 142
   },
   {
     "id": 2015,
-    "recipeId": 2015,
     "name": "芝士蛋",
     "ingredients": [
       "鸡蛋",
@@ -3032,16 +2404,10 @@
     "baseCookTime": 6,
     "dlc": 2,
     "level": 1,
-    "price": 26,
-    "unlock": {
-      "type": "bond",
-      "bondName": "灵乌路空",
-      "bondLevel": 2
-    }
+    "price": 26
   },
   {
     "id": 2016,
-    "recipeId": 2016,
     "name": "一击☆必杀",
     "ingredients": [
       "野猪肉",
@@ -3061,16 +2427,10 @@
     "baseCookTime": 9,
     "dlc": 2,
     "level": 3,
-    "price": 62,
-    "unlock": {
-      "type": "bond",
-      "bondName": "灵乌路空",
-      "bondLevel": 3
-    }
+    "price": 62
   },
   {
     "id": 2017,
-    "recipeId": 2017,
     "name": "地狱激辛警告！",
     "ingredients": [
       "辣椒",
@@ -3097,16 +2457,10 @@
     "baseCookTime": 12,
     "dlc": 2,
     "level": 4,
-    "price": 108,
-    "unlock": {
-      "type": "bond",
-      "bondName": "灵乌路空",
-      "bondLevel": 4
-    }
+    "price": 108
   },
   {
     "id": 3000,
-    "recipeId": 3000,
     "name": "烤地瓜",
     "ingredients": [
       "地瓜"
@@ -3124,16 +2478,10 @@
     "baseCookTime": 6,
     "dlc": 3,
     "level": 1,
-    "price": 25,
-    "unlock": {
-      "type": "bond",
-      "bondName": "多多良小伞",
-      "bondLevel": 2
-    }
+    "price": 25
   },
   {
     "id": 3001,
-    "recipeId": 3001,
     "name": "瘦马团子",
     "ingredients": [
       "糯米",
@@ -3152,16 +2500,10 @@
     "baseCookTime": 9,
     "dlc": 3,
     "level": 2,
-    "price": 45,
-    "unlock": {
-      "type": "bond",
-      "bondName": "多多良小伞",
-      "bondLevel": 3
-    }
+    "price": 45
   },
   {
     "id": 3002,
-    "recipeId": 3002,
     "name": "惊吓！大冒险",
     "ingredients": [
       "蘑菇",
@@ -3184,16 +2526,10 @@
     "baseCookTime": 12,
     "dlc": 3,
     "level": 4,
-    "price": 90,
-    "unlock": {
-      "type": "bond",
-      "bondName": "多多良小伞",
-      "bondLevel": 4
-    }
+    "price": 90
   },
   {
     "id": 3003,
-    "recipeId": 3003,
     "name": "比斯开湾饼干",
     "ingredients": [
       "面粉",
@@ -3211,16 +2547,10 @@
     "baseCookTime": 5,
     "dlc": 3,
     "level": 1,
-    "price": 26,
-    "unlock": {
-      "type": "bond",
-      "bondName": "村纱水蜜",
-      "bondLevel": 2
-    }
+    "price": 26
   },
   {
     "id": 3004,
-    "recipeId": 3004,
     "name": "海盗熏肉",
     "ingredients": [
       "牛肉",
@@ -3242,16 +2572,10 @@
     "baseCookTime": 9,
     "dlc": 3,
     "level": 2,
-    "price": 58,
-    "unlock": {
-      "type": "bond",
-      "bondName": "村纱水蜜",
-      "bondLevel": 3
-    }
+    "price": 58
   },
   {
     "id": 3005,
-    "recipeId": 3005,
     "name": "罗汉上素",
     "ingredients": [
       "幻昙华",
@@ -3278,16 +2602,10 @@
     "baseCookTime": 12,
     "dlc": 3,
     "level": 4,
-    "price": 97,
-    "unlock": {
-      "type": "bond",
-      "bondName": "村纱水蜜",
-      "bondLevel": 4
-    }
+    "price": 97
   },
   {
     "id": 3006,
-    "recipeId": 3006,
     "name": "云山棉花糖",
     "ingredients": [
       "蜂蜜",
@@ -3307,16 +2625,10 @@
     "baseCookTime": 8,
     "dlc": 3,
     "level": 1,
-    "price": 20,
-    "unlock": {
-      "type": "bond",
-      "bondName": "封兽鵺",
-      "bondLevel": 2
-    }
+    "price": 20
   },
   {
     "id": 3007,
-    "recipeId": 3007,
     "name": "圣白莲子糕",
     "ingredients": [
       "白果",
@@ -3338,16 +2650,10 @@
     "baseCookTime": 10,
     "dlc": 3,
     "level": 2,
-    "price": 56,
-    "unlock": {
-      "type": "bond",
-      "bondName": "封兽鵺",
-      "bondLevel": 3
-    }
+    "price": 56
   },
   {
     "id": 3008,
-    "recipeId": 3008,
     "name": "幻想星莲船",
     "ingredients": [
       "南瓜",
@@ -3374,16 +2680,10 @@
     "baseCookTime": 13,
     "dlc": 3,
     "level": 4,
-    "price": 132,
-    "unlock": {
-      "type": "bond",
-      "bondName": "封兽鵺",
-      "bondLevel": 4
-    }
+    "price": 132
   },
   {
     "id": 3009,
-    "recipeId": 3009,
     "name": "松子糕",
     "ingredients": [
       "糯米",
@@ -3398,16 +2698,10 @@
     "baseCookTime": 8,
     "dlc": 3,
     "level": 2,
-    "price": 46,
-    "unlock": {
-      "type": "bond",
-      "bondName": "物部布都",
-      "bondLevel": 2
-    }
+    "price": 46
   },
   {
     "id": 3010,
-    "recipeId": 3010,
     "name": "白鹿贞松",
     "ingredients": [
       "鹿肉",
@@ -3428,16 +2722,10 @@
     "baseCookTime": 12,
     "dlc": 3,
     "level": 3,
-    "price": 72,
-    "unlock": {
-      "type": "bond",
-      "bondName": "物部布都",
-      "bondLevel": 3
-    }
+    "price": 72
   },
   {
     "id": 3011,
-    "recipeId": 3011,
     "name": "太极八卦鱼肚",
     "ingredients": [
       "极上金枪鱼",
@@ -3459,16 +2747,10 @@
     "baseCookTime": 14,
     "dlc": 3,
     "level": 4,
-    "price": 136,
-    "unlock": {
-      "type": "bond",
-      "bondName": "物部布都",
-      "bondLevel": 4
-    }
+    "price": 136
   },
   {
     "id": 3012,
-    "recipeId": 3012,
     "name": "蜜饯栗子",
     "ingredients": [
       "蜂蜜",
@@ -3484,16 +2766,10 @@
     "baseCookTime": 6,
     "dlc": 3,
     "level": 1,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "霍青娥",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 3013,
-    "recipeId": 3013,
     "name": "天师板栗焖菇",
     "ingredients": [
       "板栗",
@@ -3512,16 +2788,10 @@
     "baseCookTime": 8,
     "dlc": 3,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "bond",
-      "bondName": "霍青娥",
-      "bondLevel": 3
-    }
+    "price": 55
   },
   {
     "id": 3014,
-    "recipeId": 3014,
     "name": "荷花鱼米盏",
     "ingredients": [
       "极上金枪鱼",
@@ -3543,16 +2813,10 @@
     "baseCookTime": 11,
     "dlc": 3,
     "level": 4,
-    "price": 94,
-    "unlock": {
-      "type": "bond",
-      "bondName": "霍青娥",
-      "bondLevel": 4
-    }
+    "price": 94
   },
   {
     "id": 3015,
-    "recipeId": 3015,
     "name": "拔丝地瓜",
     "ingredients": [
       "地瓜",
@@ -3571,16 +2835,10 @@
     "baseCookTime": 6,
     "dlc": 3,
     "level": 1,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "苏我屠自古",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 3016,
-    "recipeId": 3016,
     "name": "香煎双菇肉卷",
     "ingredients": [
       "猪肉",
@@ -3603,16 +2861,10 @@
     "baseCookTime": 9,
     "dlc": 3,
     "level": 3,
-    "price": 63,
-    "unlock": {
-      "type": "bond",
-      "bondName": "苏我屠自古",
-      "bondLevel": 3
-    }
+    "price": 63
   },
   {
     "id": 3017,
-    "recipeId": 3017,
     "name": "什锦天妇罗",
     "ingredients": [
       "黑毛猪肉",
@@ -3635,16 +2887,10 @@
     "baseCookTime": 7,
     "dlc": 3,
     "level": 3,
-    "price": 72,
-    "unlock": {
-      "type": "bond",
-      "bondName": "苏我屠自古",
-      "bondLevel": 4
-    }
+    "price": 72
   },
   {
     "id": 4000,
-    "recipeId": 4000,
     "name": "炸番茄条",
     "ingredients": [
       "西红柿",
@@ -3662,16 +2908,10 @@
     "baseCookTime": 6,
     "dlc": 4,
     "level": 1,
-    "price": 26,
-    "unlock": {
-      "type": "bond",
-      "bondName": "鬼人正邪",
-      "bondLevel": 2
-    }
+    "price": 26
   },
   {
     "id": 4001,
-    "recipeId": 4001,
     "name": "蜜桃红烧肉",
     "ingredients": [
       "蜂蜜",
@@ -3689,16 +2929,10 @@
     "baseCookTime": 8,
     "dlc": 4,
     "level": 2,
-    "price": 42,
-    "unlock": {
-      "type": "bond",
-      "bondName": "鬼人正邪",
-      "bondLevel": 3
-    }
+    "price": 42
   },
   {
     "id": 4002,
-    "recipeId": 4002,
     "name": "逆转天地！",
     "ingredients": [
       "竹子",
@@ -3721,16 +2955,10 @@
     "baseCookTime": 12,
     "dlc": 4,
     "level": 4,
-    "price": 124,
-    "unlock": {
-      "type": "bond",
-      "bondName": "鬼人正邪",
-      "bondLevel": 4
-    }
+    "price": 124
   },
   {
     "id": 4003,
-    "recipeId": 4003,
     "name": "红豆大福",
     "ingredients": [
       "红豆",
@@ -3746,16 +2974,10 @@
     "baseCookTime": 7,
     "dlc": 4,
     "level": 2,
-    "price": 28,
-    "unlock": {
-      "type": "bond",
-      "bondName": "少名针妙丸",
-      "bondLevel": 2
-    }
+    "price": 28
   },
   {
     "id": 4004,
-    "recipeId": 4004,
     "name": "铜锣烧",
     "ingredients": [
       "红豆",
@@ -3775,16 +2997,10 @@
     "baseCookTime": 6,
     "dlc": 4,
     "level": 2,
-    "price": 40,
-    "unlock": {
-      "type": "bond",
-      "bondName": "少名针妙丸",
-      "bondLevel": 3
-    }
+    "price": 40
   },
   {
     "id": 4005,
-    "recipeId": 4005,
     "name": "汉宫藏娇",
     "ingredients": [
       "八目鳗",
@@ -3809,16 +3025,10 @@
     "baseCookTime": 12,
     "dlc": 4,
     "level": 4,
-    "price": 115,
-    "unlock": {
-      "type": "bond",
-      "bondName": "少名针妙丸",
-      "bondLevel": 4
-    }
+    "price": 115
   },
   {
     "id": 4006,
-    "recipeId": 4006,
     "name": "石锅竹笋炖肉",
     "ingredients": [
       "竹子",
@@ -3835,16 +3045,10 @@
     "baseCookTime": 7,
     "dlc": 4,
     "level": 3,
-    "price": 42,
-    "unlock": {
-      "type": "bond",
-      "bondName": "今泉影狼",
-      "bondLevel": 2
-    }
+    "price": 42
   },
   {
     "id": 4007,
-    "recipeId": 4007,
     "name": "竹筒粉蒸肉",
     "ingredients": [
       "竹子",
@@ -3863,16 +3067,10 @@
     "baseCookTime": 9,
     "dlc": 4,
     "level": 3,
-    "price": 72,
-    "unlock": {
-      "type": "bond",
-      "bondName": "今泉影狼",
-      "bondLevel": 3
-    }
+    "price": 72
   },
   {
     "id": 4008,
-    "recipeId": 4008,
     "name": "翠竹迎春",
     "ingredients": [
       "黄瓜",
@@ -3896,16 +3094,10 @@
     "baseCookTime": 14,
     "dlc": 4,
     "level": 4,
-    "price": 99,
-    "unlock": {
-      "type": "bond",
-      "bondName": "今泉影狼",
-      "bondLevel": 4
-    }
+    "price": 99
   },
   {
     "id": 4009,
-    "recipeId": 4009,
     "name": "梅子茶泡饭",
     "ingredients": [
       "梅子",
@@ -3920,16 +3112,10 @@
     "baseCookTime": 4,
     "dlc": 4,
     "level": 1,
-    "price": 32,
-    "unlock": {
-      "type": "bond",
-      "bondName": "射命丸文",
-      "bondLevel": 2
-    }
+    "price": 32
   },
   {
     "id": 4010,
-    "recipeId": 4010,
     "name": "海胆蒸蛋",
     "ingredients": [
       "海胆",
@@ -3947,16 +3133,10 @@
     "baseCookTime": 7,
     "dlc": 4,
     "level": 3,
-    "price": 112,
-    "unlock": {
-      "type": "bond",
-      "bondName": "射命丸文",
-      "bondLevel": 3
-    }
+    "price": 112
   },
   {
     "id": 4011,
-    "recipeId": 4011,
     "name": "幻想风靡",
     "ingredients": [
       "洋葱",
@@ -3982,16 +3162,10 @@
     "baseCookTime": 18,
     "dlc": 4,
     "level": 5,
-    "price": 185,
-    "unlock": {
-      "type": "bond",
-      "bondName": "射命丸文",
-      "bondLevel": 4
-    }
+    "price": 185
   },
   {
     "id": 4012,
-    "recipeId": 4012,
     "name": "绿野仙菇",
     "ingredients": [
       "香椿",
@@ -4008,16 +3182,10 @@
     "baseCookTime": 6,
     "dlc": 4,
     "level": 1,
-    "price": 24,
-    "unlock": {
-      "type": "bond",
-      "bondName": "风见幽香",
-      "bondLevel": 2
-    }
+    "price": 24
   },
   {
     "id": 4013,
-    "recipeId": 4013,
     "name": "花鸟风月",
     "ingredients": [
       "鲜花",
@@ -4038,16 +3206,10 @@
     "baseCookTime": 9,
     "dlc": 4,
     "level": 3,
-    "price": 78,
-    "unlock": {
-      "type": "bond",
-      "bondName": "风见幽香",
-      "bondLevel": 3
-    }
+    "price": 78
   },
   {
     "id": 4014,
-    "recipeId": 4014,
     "name": "幽梦",
     "ingredients": [
       "鲜花",
@@ -4074,16 +3236,10 @@
     "baseCookTime": 12,
     "dlc": 4,
     "level": 4,
-    "price": 133,
-    "unlock": {
-      "type": "bond",
-      "bondName": "风见幽香",
-      "bondLevel": 4
-    }
+    "price": 133
   },
   {
     "id": 4015,
-    "recipeId": 4015,
     "name": "香椿煎饼",
     "ingredients": [
       "香椿",
@@ -4098,16 +3254,10 @@
     "baseCookTime": 6,
     "dlc": 4,
     "level": 1,
-    "price": 30,
-    "unlock": {
-      "type": "bond",
-      "bondName": "梅蒂欣",
-      "bondLevel": 2
-    }
+    "price": 30
   },
   {
     "id": 4016,
-    "recipeId": 4016,
     "name": "毒瘴花园",
     "ingredients": [
       "河豚",
@@ -4126,16 +3276,10 @@
     "baseCookTime": 8,
     "dlc": 4,
     "level": 3,
-    "price": 58,
-    "unlock": {
-      "type": "bond",
-      "bondName": "梅蒂欣",
-      "bondLevel": 3
-    }
+    "price": 58
   },
   {
     "id": 4017,
-    "recipeId": 4017,
     "name": "小小的甜蜜「毒药」",
     "ingredients": [
       "幻昙华",
@@ -4157,16 +3301,10 @@
     "baseCookTime": 10,
     "dlc": 4,
     "level": 3,
-    "price": 87,
-    "unlock": {
-      "type": "bond",
-      "bondName": "梅蒂欣",
-      "bondLevel": 4
-    }
+    "price": 87
   },
   {
     "id": 5000,
-    "recipeId": 5000,
     "name": "鳗鱼嫩蛋丼",
     "ingredients": [
       "八目鳗",
@@ -4182,16 +3320,10 @@
     "baseCookTime": 5,
     "dlc": 5,
     "level": 2,
-    "price": 45,
-    "unlock": {
-      "type": "bond",
-      "bondName": "魅魔",
-      "bondLevel": 2
-    }
+    "price": 45
   },
   {
     "id": 5001,
-    "recipeId": 5001,
     "name": "竹筒烧醉虾",
     "ingredients": [
       "竹子",
@@ -4211,16 +3343,10 @@
     "baseCookTime": 5,
     "dlc": 5,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "魅魔",
-      "bondLevel": 3
-    }
+    "price": 60
   },
   {
     "id": 5002,
-    "recipeId": 5002,
     "name": "牛肉鸳鸯火锅",
     "ingredients": [
       "辣椒",
@@ -4247,16 +3373,10 @@
     "baseCookTime": 5,
     "dlc": 5,
     "level": 4,
-    "price": 188,
-    "unlock": {
-      "type": "bond",
-      "bondName": "魅魔",
-      "bondLevel": 4
-    }
+    "price": 188
   },
   {
     "id": 5003,
-    "recipeId": 5003,
     "name": "猫咪可露丽",
     "ingredients": [
       "可可豆",
@@ -4275,16 +3395,10 @@
     "baseCookTime": 7,
     "dlc": 5,
     "level": 2,
-    "price": 45,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱莲",
-      "bondLevel": 2
-    }
+    "price": 45
   },
   {
     "id": 5004,
-    "recipeId": 5004,
     "name": "猫咪披萨",
     "ingredients": [
       "蘑菇",
@@ -4305,16 +3419,10 @@
     "baseCookTime": 10,
     "dlc": 5,
     "level": 3,
-    "price": 75,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱莲",
-      "bondLevel": 3
-    }
+    "price": 75
   },
   {
     "id": 5005,
-    "recipeId": 5005,
     "name": "猫咪戏水",
     "ingredients": [
       "桃子",
@@ -4339,16 +3447,10 @@
     "baseCookTime": 12,
     "dlc": 5,
     "level": 4,
-    "price": 120,
-    "unlock": {
-      "type": "bond",
-      "bondName": "爱莲",
-      "bondLevel": 4
-    }
+    "price": 120
   },
   {
     "id": 5006,
-    "recipeId": 5006,
     "name": "长发公主",
     "ingredients": [
       "南瓜",
@@ -4366,16 +3468,10 @@
     "baseCookTime": 5,
     "dlc": 5,
     "level": 2,
-    "price": 36,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露易兹",
-      "bondLevel": 2
-    }
+    "price": 36
   },
   {
     "id": 5007,
-    "recipeId": 5007,
     "name": "海胆信玄饼",
     "ingredients": [
       "海胆",
@@ -4397,16 +3493,10 @@
     "baseCookTime": 12,
     "dlc": 5,
     "level": 4,
-    "price": 128,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露易兹",
-      "bondLevel": 3
-    }
+    "price": 128
   },
   {
     "id": 5008,
-    "recipeId": 5008,
     "name": "疯帽子茶会",
     "ingredients": [
       "可可豆",
@@ -4431,16 +3521,10 @@
     "baseCookTime": 15,
     "dlc": 5,
     "level": 5,
-    "price": 188,
-    "unlock": {
-      "type": "bond",
-      "bondName": "露易兹",
-      "bondLevel": 4
-    }
+    "price": 188
   },
   {
     "id": 5009,
-    "recipeId": 5009,
     "name": "桃花琉璃卷",
     "ingredients": [
       "桃子",
@@ -4466,16 +3550,10 @@
     "baseCookTime": 8,
     "dlc": 5,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月丰姬",
-      "bondLevel": 2
-    }
+    "price": 60
   },
   {
     "id": 5010,
-    "recipeId": 5010,
     "name": "荷塘月色",
     "ingredients": [
       "葡萄",
@@ -4502,16 +3580,10 @@
     "baseCookTime": 12,
     "dlc": 5,
     "level": 4,
-    "price": 128,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月丰姬",
-      "bondLevel": 3
-    }
+    "price": 128
   },
   {
     "id": 5011,
-    "recipeId": 5011,
     "name": "龙吟桃子",
     "ingredients": [
       "可可豆",
@@ -4541,16 +3613,10 @@
     "baseCookTime": 18,
     "dlc": 5,
     "level": 5,
-    "price": 199,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月丰姬",
-      "bondLevel": 4
-    }
+    "price": 199
   },
   {
     "id": 5012,
-    "recipeId": 5012,
     "name": "分子蛋",
     "ingredients": [
       "可可豆",
@@ -4572,16 +3638,10 @@
     "baseCookTime": 7,
     "dlc": 5,
     "level": 3,
-    "price": 80,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月依姬",
-      "bondLevel": 2
-    }
+    "price": 80
   },
   {
     "id": 5013,
-    "recipeId": 5013,
     "name": "生命之源",
     "ingredients": [
       "可可豆",
@@ -4605,16 +3665,10 @@
     "baseCookTime": 13,
     "dlc": 5,
     "level": 4,
-    "price": 124,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月依姬",
-      "bondLevel": 3
-    }
+    "price": 124
   },
   {
     "id": 5014,
-    "recipeId": 5014,
     "name": "火星",
     "ingredients": [
       "薜茘",
@@ -4639,16 +3693,10 @@
     "baseCookTime": 24,
     "dlc": 5,
     "level": 5,
-    "price": 198,
-    "unlock": {
-      "type": "bond",
-      "bondName": "绵月依姬",
-      "bondLevel": 4
-    }
+    "price": 198
   },
   {
     "id": 5015,
-    "recipeId": 5015,
     "name": "养心粥",
     "ingredients": [
       "银耳",
@@ -4664,16 +3712,10 @@
     "baseCookTime": 5,
     "dlc": 5,
     "level": 1,
-    "price": 35,
-    "unlock": {
-      "type": "bond",
-      "bondName": "铃仙",
-      "bondLevel": 2
-    }
+    "price": 35
   },
   {
     "id": 5016,
-    "recipeId": 5016,
     "name": "胡辣汤",
     "ingredients": [
       "辣椒",
@@ -4693,16 +3735,10 @@
     "baseCookTime": 8,
     "dlc": 5,
     "level": 2,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "铃仙",
-      "bondLevel": 3
-    }
+    "price": 60
   },
   {
     "id": 5017,
-    "recipeId": 5017,
     "name": "至尊海鲜面",
     "ingredients": [
       "极上金枪鱼",
@@ -4724,16 +3760,10 @@
     "baseCookTime": 10,
     "dlc": 5,
     "level": 4,
-    "price": 135,
-    "unlock": {
-      "type": "bond",
-      "bondName": "铃仙",
-      "bondLevel": 4
-    }
+    "price": 135
   },
   {
     "id": 11000,
-    "recipeId": 11000,
     "name": "山泉双色果盘",
     "ingredients": [
       "桃子",
@@ -4757,16 +3787,10 @@
     "baseCookTime": 3,
     "dlc": 9,
     "level": 2,
-    "price": 45,
-    "unlock": {
-      "type": "bond",
-      "bondName": "大妖精",
-      "bondLevel": 2
-    }
+    "price": 45
   },
   {
     "id": 11001,
-    "recipeId": 11001,
     "name": "鱼饼",
     "ingredients": [
       "鳟鱼",
@@ -4785,16 +3809,10 @@
     "baseCookTime": 4,
     "dlc": 9,
     "level": 3,
-    "price": 52,
-    "unlock": {
-      "type": "bond",
-      "bondName": "大妖精",
-      "bondLevel": 3
-    }
+    "price": 52
   },
   {
     "id": 11002,
-    "recipeId": 11002,
     "name": "白果灵盅",
     "ingredients": [
       "鸡蛋",
@@ -4819,16 +3837,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 4,
-    "price": 98,
-    "unlock": {
-      "type": "bond",
-      "bondName": "大妖精",
-      "bondLevel": 4
-    }
+    "price": 98
   },
   {
     "id": 11003,
-    "recipeId": 11003,
     "name": "恶魔的甜甜圈",
     "ingredients": [
       "面粉",
@@ -4846,16 +3858,10 @@
     "baseCookTime": 4,
     "dlc": 9,
     "level": 2,
-    "price": 48,
-    "unlock": {
-      "type": "bond",
-      "bondName": "小恶魔",
-      "bondLevel": 2
-    }
+    "price": 48
   },
   {
     "id": 11004,
-    "recipeId": 11004,
     "name": "正义执行雕塑",
     "ingredients": [
       "可可豆",
@@ -4874,16 +3880,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 3,
-    "price": 92,
-    "unlock": {
-      "type": "bond",
-      "bondName": "小恶魔",
-      "bondLevel": 3
-    }
+    "price": 92
   },
   {
     "id": 11005,
-    "recipeId": 11005,
     "name": "超位·业火烧烤宴",
     "ingredients": [
       "牛肉",
@@ -4907,16 +3907,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 4,
-    "price": 136,
-    "unlock": {
-      "type": "bond",
-      "bondName": "小恶魔",
-      "bondLevel": 4
-    }
+    "price": 136
   },
   {
     "id": 11006,
-    "recipeId": 11006,
     "name": "甜心三明治",
     "ingredients": [
       "金枪鱼",
@@ -4934,14 +3928,10 @@
     "baseCookTime": 3,
     "dlc": 9,
     "level": 1,
-    "price": 35,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 35
   },
   {
     "id": 11007,
-    "recipeId": 11007,
     "name": "毛茸茸蘑菇汤",
     "ingredients": [
       "棉花糖",
@@ -4961,14 +3951,10 @@
     "baseCookTime": 6,
     "dlc": 9,
     "level": 3,
-    "price": 68,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 68
   },
   {
     "id": 11008,
-    "recipeId": 11008,
     "name": "血色下午茶",
     "ingredients": [
       "和牛",
@@ -4990,14 +3976,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 4,
-    "price": 105,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 105
   },
   {
     "id": 11009,
-    "recipeId": 11009,
     "name": "月见饼",
     "ingredients": [
       "月光草",
@@ -5017,14 +3999,10 @@
     "baseCookTime": 4,
     "dlc": 9,
     "level": 1,
-    "price": 35,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 35
   },
   {
     "id": 11010,
-    "recipeId": 11010,
     "name": "玉色良汤",
     "ingredients": [
       "蜂蜜",
@@ -5045,14 +4023,10 @@
     "baseCookTime": 7,
     "dlc": 9,
     "level": 2,
-    "price": 55,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 55
   },
   {
     "id": 11011,
-    "recipeId": 11011,
     "name": "星月桃子糕",
     "ingredients": [
       "桃子",
@@ -5073,14 +4047,10 @@
     "baseCookTime": 4,
     "dlc": 9,
     "level": 3,
-    "price": 118,
-    "unlock": {
-      "type": "special"
-    }
+    "price": 118
   },
   {
     "id": 11012,
-    "recipeId": 11012,
     "name": "樱绯星屑缀玉烩",
     "ingredients": [
       "辣椒",
@@ -5110,16 +4080,10 @@
     "baseCookTime": 20,
     "dlc": 9,
     "level": 5,
-    "price": 180,
-    "unlock": {
-      "type": "bond",
-      "bondName": "神绮",
-      "bondLevel": 4
-    }
+    "price": 180
   },
   {
     "id": 11013,
-    "recipeId": 11013,
     "name": "黯月魔境慕斯",
     "ingredients": [
       "鸡蛋",
@@ -5140,16 +4104,10 @@
     "baseCookTime": 8,
     "dlc": 9,
     "level": 2,
-    "price": 28,
-    "unlock": {
-      "type": "bond",
-      "bondName": "神绮",
-      "bondLevel": 2
-    }
+    "price": 28
   },
   {
     "id": 11014,
-    "recipeId": 11014,
     "name": "烬色魔纹千层酥",
     "ingredients": [
       "面粉",
@@ -5173,16 +4131,10 @@
     "baseCookTime": 8,
     "dlc": 9,
     "level": 3,
-    "price": 65,
-    "unlock": {
-      "type": "bond",
-      "bondName": "神绮",
-      "bondLevel": 3
-    }
+    "price": 65
   },
   {
     "id": 11015,
-    "recipeId": 11015,
     "name": "肉汁奶酪薯条",
     "ingredients": [
       "土豆",
@@ -5206,16 +4158,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 3,
-    "price": 58,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雪",
-      "bondLevel": 2
-    }
+    "price": 58
   },
   {
     "id": 11016,
-    "recipeId": 11016,
     "name": "俄罗斯酸辣汤",
     "ingredients": [
       "洋葱",
@@ -5243,16 +4189,10 @@
     "baseCookTime": 10,
     "dlc": 9,
     "level": 4,
-    "price": 83,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雪",
-      "bondLevel": 3
-    }
+    "price": 83
   },
   {
     "id": 11017,
-    "recipeId": 11017,
     "name": "奶油甜煎饼卷",
     "ingredients": [
       "面粉",
@@ -5276,16 +4216,10 @@
     "baseCookTime": 13,
     "dlc": 9,
     "level": 5,
-    "price": 185,
-    "unlock": {
-      "type": "bond",
-      "bondName": "雪",
-      "bondLevel": 4
-    }
+    "price": 185
   },
   {
     "id": 11018,
-    "recipeId": 11018,
     "name": "烤玉米",
     "ingredients": [
       "玉米",
@@ -5304,16 +4238,10 @@
     "baseCookTime": 6,
     "dlc": 9,
     "level": 1,
-    "price": 32,
-    "unlock": {
-      "type": "bond",
-      "bondName": "舞",
-      "bondLevel": 2
-    }
+    "price": 32
   },
   {
     "id": 11019,
-    "recipeId": 11019,
     "name": "俄罗斯冻汤",
     "ingredients": [
       "大葱",
@@ -5338,16 +4266,10 @@
     "baseCookTime": 10,
     "dlc": 9,
     "level": 3,
-    "price": 82,
-    "unlock": {
-      "type": "bond",
-      "bondName": "舞",
-      "bondLevel": 3
-    }
+    "price": 82
   },
   {
     "id": 11020,
-    "recipeId": 11020,
     "name": "西班牙冷汤",
     "ingredients": [
       "大蒜",
@@ -5374,16 +4296,10 @@
     "baseCookTime": 13,
     "dlc": 9,
     "level": 4,
-    "price": 130,
-    "unlock": {
-      "type": "bond",
-      "bondName": "舞",
-      "bondLevel": 4
-    }
+    "price": 130
   },
   {
     "id": 11021,
-    "recipeId": 11021,
     "name": "板栗饼",
     "ingredients": [
       "黄油",
@@ -5401,16 +4317,10 @@
     "baseCookTime": 6,
     "dlc": 9,
     "level": 1,
-    "price": 24,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋静叶",
-      "bondLevel": 2
-    }
+    "price": 24
   },
   {
     "id": 11022,
-    "recipeId": 11022,
     "name": "胜春朝",
     "ingredients": [
       "葡萄",
@@ -5432,16 +4342,10 @@
     "baseCookTime": 10,
     "dlc": 9,
     "level": 3,
-    "price": 68,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋静叶",
-      "bondLevel": 3
-    }
+    "price": 68
   },
   {
     "id": 11023,
-    "recipeId": 11023,
     "name": "秋神的工作",
     "ingredients": [
       "蜂蜜",
@@ -5461,16 +4365,10 @@
     "baseCookTime": 16,
     "dlc": 9,
     "level": 4,
-    "price": 118,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋静叶",
-      "bondLevel": 4
-    }
+    "price": 118
   },
   {
     "id": 11024,
-    "recipeId": 11024,
     "name": "南瓜派",
     "ingredients": [
       "南瓜",
@@ -5488,16 +4386,10 @@
     "baseCookTime": 5,
     "dlc": 9,
     "level": 2,
-    "price": 36,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋穰子",
-      "bondLevel": 2
-    }
+    "price": 36
   },
   {
     "id": 11025,
-    "recipeId": 11025,
     "name": "芝士玉米焗红薯",
     "ingredients": [
       "玉米",
@@ -5517,16 +4409,10 @@
     "baseCookTime": 7,
     "dlc": 9,
     "level": 3,
-    "price": 60,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋穰子",
-      "bondLevel": 3
-    }
+    "price": 60
   },
   {
     "id": 11026,
-    "recipeId": 11026,
     "name": "惊吓万圣夜",
     "ingredients": [
       "南瓜",
@@ -5548,11 +4434,6 @@
     "baseCookTime": 12,
     "dlc": 9,
     "level": 4,
-    "price": 177,
-    "unlock": {
-      "type": "bond",
-      "bondName": "秋穰子",
-      "bondLevel": 4
-    }
+    "price": 177
   }
 ]

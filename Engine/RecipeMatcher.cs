@@ -14,6 +14,104 @@ public class RecipeMatcher
         _dataEngine = dataEngine;
     }
 
+    /// <summary>
+    /// 返回任务固定料理当前缺少的基础食材。优先按库存数量判断；运行时没有数量快照时，
+    /// 才退回到“是否拥有该食材”的集合判断。
+    /// </summary>
+    public List<string> GetMissingFixedRecipeIngredients(
+        int fixedRecipeId,
+        HashSet<string> availableIngredients,
+        Dictionary<string, int> ingredientStocks)
+    {
+        var recipe = RecipeDatabase.GetRecipeByFoodId(fixedRecipeId);
+        if (recipe == null) return new();
+
+        bool hasStockSnapshot = ingredientStocks != null && ingredientStocks.Count > 0;
+        return recipe.Ingredients
+            .GroupBy(name => name)
+            .Where(group =>
+            {
+                if (hasStockSnapshot)
+                    return !ingredientStocks.TryGetValue(group.Key, out int stock) || stock < group.Count();
+                return availableIngredients == null || !availableIngredients.Contains(group.Key);
+            })
+            .Select(group => group.Count() > 1 ? $"{group.Key}×{group.Count()}" : group.Key)
+            .ToList();
+    }
+
+    /// <summary>
+    /// 保持料理、基础食材、额外食材和厨具不变，只在当前可分配酒水中寻找平替。
+    /// 最高/最低消费方案分别沿用原来的价格方向；正常方案仍须维持至少 4 分。
+    /// </summary>
+    public Recommendation FindBeverageReplacement(
+        Recommendation source,
+        string customerName,
+        string reqFoodTag,
+        string reqBevTag,
+        int maxBudget,
+        IEnumerable<string> availableBeverages,
+        PopularTrendState popularTrend)
+    {
+        if (source == null || availableBeverages == null) return null;
+        var recipe = RecipeDatabase.GetRecipe(source.RecipeName);
+        var customer = _dataEngine.GetCustomer(customerName);
+        if (recipe == null || customer == null) return null;
+
+        var positiveTags = new HashSet<string>(customer.positiveTags ?? new List<string>());
+        foreach (var tag in customer.beverageTags ?? new List<string>())
+            positiveTags.Add(tag);
+        var negativeTags = new HashSet<string>(customer.negativeTags ?? new List<string>());
+        var extraTags = (source.ExtraIngredients ?? new List<string>())
+            .Where(name => RecipeDatabase.GetIngredientTagIndex().ContainsKey(name))
+            .SelectMany(name => RecipeDatabase.GetIngredientTagIndex()[name])
+            .ToList();
+
+        int requiredScore = source.FallbackBelowFour || source.MissingRequiredFoodTag
+            ? int.MinValue
+            : 4;
+        var candidates = availableBeverages
+            .Distinct()
+            .Select(RecipeDatabase.GetBeverage)
+            .Where(beverage => beverage != null)
+            .Where(beverage => !string.Equals(beverage.Name, source.BeverageName, System.StringComparison.Ordinal))
+            .Where(beverage => maxBudget <= 0 || recipe.Price + beverage.Price <= maxBudget)
+            .Where(beverage => source.NeedNightingale
+                || string.IsNullOrEmpty(reqBevTag)
+                || beverage.Tags.Contains(reqBevTag))
+            .Select(beverage =>
+            {
+                var tags = MergeTags(recipe, beverage, extraTags,
+                    source.ExtraIngredients?.Count ?? 0, popularTrend);
+                ResolveTagOverrides(tags);
+                return new MatchCandidate
+                {
+                    Recipe = recipe,
+                    Beverage = beverage,
+                    Tags = tags,
+                    ExtraIngredients = new List<string>(source.ExtraIngredients ?? new List<string>()),
+                    Score = ScoreTags(tags, positiveTags, negativeTags),
+                    NeedNightingale = source.NeedNightingale,
+                    MissingRequiredFoodTag = source.MissingRequiredFoodTag,
+                    FallbackBelowFour = source.FallbackBelowFour
+                };
+            })
+            .Where(candidate => candidate.Score >= requiredScore)
+            .ToList();
+
+        if (candidates.Count == 0) return null;
+        bool preferCheap = (source.PriceStrategy ?? "").Contains("最低");
+        var selected = preferCheap
+            ? candidates.OrderBy(c => c.Beverage.Price).ThenByDescending(c => c.Score).First()
+            : candidates.OrderByDescending(c => c.Beverage.Price).ThenByDescending(c => c.Score).First();
+
+        var replacement = ToRecommendation(selected, source.TotalExtraIngredientCost);
+        replacement.RequiredCooker = source.RequiredCooker;
+        replacement.PriceStrategy = source.PriceStrategy;
+        replacement.IsFixedRecipeTask = source.IsFixedRecipeTask;
+        replacement.FallbackReason = source.FallbackReason;
+        return replacement;
+    }
+
     public List<Recommendation> CalculateByRequestTags(
         string customerName, string reqFoodTag, string reqBevTag, int maxBudget,
         HashSet<string> unlockedRecipes, HashSet<string> unlockedBeverages,
@@ -54,7 +152,7 @@ public class RecipeMatcher
         }
 
         // 诊断：输出当前收到的订单标签
-        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 算法入参: customer={customerName} reqFoodTag={reqFoodTag} reqBevTag={reqBevTag} budget={maxBudget} unlockedRecipes={unlockedRecipes.Count} unlockedBevs={unlockedBeverages.Count} cookers=[{string.Join(",", availableCookers ?? new HashSet<string>())}]");
+        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 算法入参: customer={customerName} reqFoodTag={reqFoodTag} reqBevTag={reqBevTag} budgetCap=applied unlockedRecipes={unlockedRecipes.Count} unlockedBevs={unlockedBeverages.Count} cookers=[{string.Join(",", availableCookers ?? new HashSet<string>())}]");
 
         // Step 1: 判断分支 — 食物Tag是否有匹配料理？酒水Tag是否有匹配酒水？
         var matchingRecipes = unlockedRecipes
@@ -246,15 +344,14 @@ public class RecipeMatcher
             return new();
         }
 
-        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D固定料理: {recipe.Name}(foodId={recipe.FoodId}, recipeId={recipe.RecipeId})");
+        Plugin.Instance?.Log.LogInfo($"[MystiaRec] 方案D固定料理: {recipe.Name}(foodId={recipe.FoodId})");
 
         bool ownsRecipe = unlockedRecipes != null && unlockedRecipes.Contains(recipe.Name);
         if (!ownsRecipe)
             Plugin.Instance?.Log.LogWarning($"[MystiaRec] 当前存档未持有固定料理 {recipe.Name}，仍显示任务料理制作信息");
 
-        var missingBaseIngredients = recipe.Ingredients
-            .Where(i => availableIngredients == null || !availableIngredients.Contains(i))
-            .ToList();
+        var missingBaseIngredients = GetMissingFixedRecipeIngredients(
+            fixedRecipeId, availableIngredients, ingredientStocks);
         if (missingBaseIngredients.Count > 0)
         {
             Plugin.Instance?.Log.LogWarning(
@@ -1074,47 +1171,10 @@ internal class MatchCandidate
     }
 }
 
-public enum UnlockType
-{
-    Self,           // 初始自带
-    Bond,           // 羁绊等级解锁
-    LevelUp,        // 角色等级解锁
-    QuestOrEvent,   // 任务/联动活动
-    Shop,           // 商店购买
-    Special,        // 特殊（惩罚符卡/制作失败等）
-    Unknown         // 无法确定，回退到 HaveRecipe
-}
-
-public class UnlockCondition
-{
-    public UnlockType Type { get; set; }
-    public string BondName { get; set; }    // Bond: 稀客名称
-    public int BondLevel { get; set; }      // Bond: 所需羁绊等级
-    public int RequiredLevel { get; set; }  // LevelUp: 所需角色等级
-    public string Area { get; set; }        // LevelUp: 所需地区（null=不限）
-    public string Description { get; set; } // Quest/Shop: 描述文本
-    public string ShopName { get; set; }    // Shop: 商店名称
-
-    /// <summary>
-    /// 是否可以通过运行时数据精确判断（Bond/LevelUp/Self）
-    /// </summary>
-    public bool CanDetect =>
-        Type == UnlockType.Self ||
-        Type == UnlockType.Bond ||
-        Type == UnlockType.LevelUp;
-
-    /// <summary>
-    /// 是否为始终解锁
-    /// </summary>
-    public bool IsAlwaysUnlocked => Type == UnlockType.Self;
-}
-
 public class RecipeInfo
 {
     /// <summary>成品料理的 Food ID；源 JSON 字段名为 id。</summary>
     public int FoodId { get; set; }
-    /// <summary>RunTimeStorage Recipes / HaveRecipe 使用的料理 ID；源 JSON 字段名为 recipeId。</summary>
-    public int RecipeId { get; set; }
     public string Name { get; set; }
     public List<string> Ingredients { get; set; } = new();
     public List<string> PositiveTags { get; set; } = new();
@@ -1124,7 +1184,6 @@ public class RecipeInfo
     public int Dlc { get; set; }
     public int Level { get; set; }
     public int BaseCookTime { get; set; }
-    public UnlockCondition Unlock { get; set; }
 }
 
 public class BeverageInfo
@@ -1141,7 +1200,6 @@ public static class RecipeDatabase
     private static Dictionary<string, RecipeInfo> _recipes = new();
     private static Dictionary<string, BeverageInfo> _beverages = new();
     private static Dictionary<int, RecipeInfo> _recipesByFoodId = new();
-    private static Dictionary<int, RecipeInfo> _recipesByRecipeId = new();
     private static Dictionary<int, BeverageInfo> _beveragesById = new();
     private static Dictionary<string, HashSet<string>> _ingredientTagIndex = new();
     private static Dictionary<string, int> _ingredientPrices = new();
@@ -1164,7 +1222,6 @@ public static class RecipeDatabase
                 {
                     var r = new RecipeInfo();
                     r.FoodId = t.ContainsKey("id") ? SimpleJson.ToInt(t["id"]) : 0;
-                    r.RecipeId = t.ContainsKey("recipeId") ? SimpleJson.ToInt(t["recipeId"]) : 0;
                     r.Name = t.ContainsKey("name") ? SimpleJson.ToString(t["name"]) : "";
                     r.Cooker = t.ContainsKey("cooker") ? SimpleJson.ToString(t["cooker"]) : "";
                     r.Price = t.ContainsKey("price") ? SimpleJson.ToInt(t["price"]) : 0;
@@ -1180,12 +1237,10 @@ public static class RecipeDatabase
                         r.PositiveTags.Add("实惠");
                     else if (r.Price > 60 && !r.PositiveTags.Contains("昂贵"))
                         r.PositiveTags.Add("昂贵");
-                    r.Unlock = ParseUnlockCondition(t);
                     if (!string.IsNullOrEmpty(r.Name))
                     {
                         _recipes[r.Name] = r;
                         _recipesByFoodId[r.FoodId] = r;
-                        _recipesByRecipeId[r.RecipeId] = r;
                         IndexIngredients(r);
                     }
                 }
@@ -1236,7 +1291,8 @@ public static class RecipeDatabase
                         if (t.ContainsKey("id"))
                         {
                             int ingId = SimpleJson.ToInt(t["id"]);
-                            if (ingId > 0 && !_ingredientNamesByGameId.ContainsKey(ingId))
+                            // 食材 ID 0 是合法值（鸡蛋），只有负数才表示无效。
+                            if (ingId >= 0 && !_ingredientNamesByGameId.ContainsKey(ingId))
                                 _ingredientNamesByGameId[ingId] = name;
                         }
                     }
@@ -1256,8 +1312,6 @@ public static class RecipeDatabase
     public static BeverageInfo GetBeverage(string name) => _beverages.TryGetValue(name, out var b) ? b : null;
     /// <summary>按成品 Food ID 查询，供营业任务等返回 foodId 的接口使用。</summary>
     public static RecipeInfo GetRecipeByFoodId(int foodId) => _recipesByFoodId.TryGetValue(foodId, out var r) ? r : null;
-    /// <summary>按存档所有权使用的 Recipe ID 查询。</summary>
-    public static RecipeInfo GetRecipeByRecipeId(int recipeId) => _recipesByRecipeId.TryGetValue(recipeId, out var r) ? r : null;
     public static BeverageInfo GetBeverageById(int id) => _beveragesById.TryGetValue(id, out var b) ? b : null;
     public static IEnumerable<RecipeInfo> GetAllRecipes() => _recipes.Values;
     public static IEnumerable<BeverageInfo> GetAllBeverages() => _beverages.Values;
@@ -1269,7 +1323,8 @@ public static class RecipeDatabase
     public static IEnumerable<KeyValuePair<int, string>> GetKnownIngredientIds() => _ingredientNamesByGameId;
     public static bool RegisterIngredientId(int id, string ingredient)
     {
-        if (id <= 0 || string.IsNullOrEmpty(ingredient) || !IsKnownIngredient(ingredient)) return false;
+        // 游戏以 0 标识鸡蛋；不能把 0 当作“未赋值”。
+        if (id < 0 || string.IsNullOrEmpty(ingredient) || !IsKnownIngredient(ingredient)) return false;
         if (_ingredientNamesByGameId.TryGetValue(id, out var existing) && existing == ingredient) return false;
         _ingredientNamesByGameId[id] = ingredient;
         return true;
@@ -1283,53 +1338,6 @@ public static class RecipeDatabase
         var match = _ingredientTagIndex.Keys
             .FirstOrDefault(k => value.Contains(k) || k.Contains(value));
         return match ?? "";
-    }
-
-    /// <summary>
-    /// 从 recipes.json 的 unlock 字段解析解锁条件
-    /// </summary>
-    private static UnlockCondition ParseUnlockCondition(Dictionary<string, object> recipeDict)
-    {
-        var result = new UnlockCondition { Type = UnlockType.Unknown };
-        if (!recipeDict.TryGetValue("unlock", out var unlockObj) || unlockObj == null)
-            return result;
-
-        if (!(unlockObj is Dictionary<string, object> unlockDict))
-            return result;
-
-        var typeStr = unlockDict.TryGetValue("type", out var t) ? SimpleJson.ToString(t) : "";
-        switch (typeStr)
-        {
-            case "self":
-                result.Type = UnlockType.Self;
-                break;
-            case "bond":
-                result.Type = UnlockType.Bond;
-                result.BondName = unlockDict.TryGetValue("bondName", out var bn) ? SimpleJson.ToString(bn) : "";
-                result.BondLevel = unlockDict.TryGetValue("bondLevel", out var bl) ? SimpleJson.ToInt(bl) : 0;
-                break;
-            case "levelup":
-                result.Type = UnlockType.LevelUp;
-                result.RequiredLevel = unlockDict.TryGetValue("level", out var lv) ? SimpleJson.ToInt(lv) : 0;
-                result.Area = unlockDict.TryGetValue("area", out var ar) ? SimpleJson.ToString(ar) : null;
-                break;
-            case "quest_or_event":
-                result.Type = UnlockType.QuestOrEvent;
-                result.Description = unlockDict.TryGetValue("description", out var desc) ? SimpleJson.ToString(desc) : "";
-                break;
-            case "shop":
-                result.Type = UnlockType.Shop;
-                result.ShopName = unlockDict.TryGetValue("shopName", out var sn) ? SimpleJson.ToString(sn) : "";
-                result.Description = unlockDict.TryGetValue("description", out var sd) ? SimpleJson.ToString(sd) : "";
-                break;
-            case "special":
-                result.Type = UnlockType.Special;
-                break;
-            default:
-                result.Type = UnlockType.Unknown;
-                break;
-        }
-        return result;
     }
 
     private static void IndexIngredients(RecipeInfo recipe)

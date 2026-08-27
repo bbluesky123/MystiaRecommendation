@@ -104,6 +104,8 @@ public sealed class RecommendationGameStateSnapshot
 {
     public HashSet<string> UnlockedRecipes { get; init; } = new();
     public HashSet<string> OwnedBeverages { get; init; } = new();
+    /// <summary>扣除已锁定稀客订单预留量后的可分配酒水库存。</summary>
+    public Dictionary<string, int> BeverageStocks { get; init; } = new();
     /// <summary>由本次营业厨具解析出的可用类型与夜雀能力标记。</summary>
     public HashSet<string> OwnedCookers { get; init; } = new();
     /// <summary>本次营业场景中非空、实际携带的厨具数量；不同于总槽位和算法能力名称数量。</summary>
@@ -111,6 +113,4 @@ public sealed class RecommendationGameStateSnapshot
     public HashSet<string> AvailableIngredients { get; init; } = new();
     public Dictionary<string, int> IngredientStocks { get; init; } = new();
     public PopularTrendState PopularTrend { get; init; } = new();
-    public int PlayerLevel { get; init; }
-    public int AbsoluteDay { get; init; }
 }

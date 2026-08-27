@@ -58,6 +58,10 @@
       <HintPath>$(BepInExDir)/interop/UnityEngine.UIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BepInExDir)/interop/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(BepInExDir)/interop/UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>false</Private>
@@ -84,6 +88,10 @@
     </Reference>
     <Reference Include="DEYU.Singletons">
       <HintPath>$(BepInExDir)/interop/DEYU.Singletons.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="DEYU.AdaptiveUISystem">
+      <HintPath>$(BepInExDir)/interop/DEYU.AdaptiveUISystem.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
