@@ -99,7 +99,7 @@
   <!-- JSON 解析已内置于 SimpleJson.cs，无需外部依赖 -->
 
   <PropertyGroup>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <Description>东方夜雀食堂稀客推荐插件</Description>
   </PropertyGroup>
 
