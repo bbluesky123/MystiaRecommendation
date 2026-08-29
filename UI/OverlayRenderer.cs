@@ -194,7 +194,8 @@ public class OverlayRenderer
     }
 
     /// <summary>
-    /// 所有桌边提示按桌号固定分栏：5-8 号桌统一放左侧，1-4 号桌统一放右侧。
+    /// 桌边提示按当前场地的桌号布局分栏。六座场地为 4-6 左、1-3 右；
+    /// 四座和八座场地继续使用既有的 5-8 左、1-4 右规则。
     /// “请对话/正在获取需求/等待下一轮”和已确认订单使用同一规则，只认桌号牌，
     /// 人物位置不参与桌边卡片定位。
     /// </summary>
@@ -214,10 +215,12 @@ public class OverlayRenderer
 
         if (anchored.Count == 0) return;
 
+        bool isSixSeatLayout = deskPoints.Count == 6
+            && Enumerable.Range(0, 6).All(deskPoints.ContainsKey);
         var positioned = anchored
             .Select(x =>
             {
-                bool placeRight = IsRightDeskGroup(x.Card.Value.DeskCode);
+                bool placeRight = IsRightDeskGroup(x.Card.Value.DeskCode, isSixSeatLayout);
                 return (x.Card, x.Point, PlaceRight: placeRight);
             })
             .ToList();
@@ -248,10 +251,11 @@ public class OverlayRenderer
 
     }
 
-    private static bool IsRightDeskGroup(int deskCode)
+    private static bool IsRightDeskGroup(int deskCode, bool isSixSeatLayout)
     {
-        // DeskCode 为零基：0-3 对应 1-4 号右侧桌，4-7 对应 5-8 号左侧桌。
-        return deskCode >= 0 && deskCode < 4;
+        if (deskCode < 0) return false;
+        // DeskCode 为零基。六座只有右侧 1-3；其他布局保持原来的右侧 1-4。
+        return deskCode < (isSixSeatLayout ? 3 : 4);
     }
 
     private static Dictionary<int, Vector2> GetDeskScreenPoints()
