@@ -565,6 +565,40 @@ public static class CustomerPatch
         return -1;
     }
 
+    /// <summary>
+    /// F5 等主动刷新路径按当前座位重新读取游戏维护的真实剩余预算。
+    /// 只返回是否读取成功，不把具体数值写入 UI 或普通日志。
+    /// </summary>
+    internal static bool TryGetCurrentRemainingBudget(
+        int deskCode,
+        string customerName,
+        out int remainingBudget)
+    {
+        remainingBudget = -1;
+        foreach (var pair in _guestStates.ToList())
+        {
+            var guest = pair.Key;
+            var state = pair.Value;
+            if (guest == null || state == null) continue;
+
+            int currentDesk = ReadDeskCode(guest);
+            if (currentDesk != deskCode && state.DeskCode != deskCode) continue;
+            if (!string.IsNullOrEmpty(customerName)
+                && !string.IsNullOrEmpty(state.Name)
+                && state.Name != customerName)
+                continue;
+
+            int runtimeBudget = TryReadRemainingBudget(guest);
+            if (runtimeBudget < 0) continue;
+
+            state.DeskCode = currentDesk >= 0 ? currentDesk : state.DeskCode;
+            state.LastBudget = runtimeBudget;
+            remainingBudget = runtimeBudget;
+            return true;
+        }
+        return false;
+    }
+
     private static string TryGetOrderText(SpecialGuestsController sgc, object orderData, string methodName)
     {
         if (sgc == null || orderData == null) return "";

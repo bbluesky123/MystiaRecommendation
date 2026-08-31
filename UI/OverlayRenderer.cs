@@ -189,19 +189,14 @@ public class OverlayRenderer
 
     private void DrawLocalCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
-        var occupied = new List<Rect>();
-        DrawLocalSeatColumns(cards, occupied);
+        DrawDeskAnchoredCards(cards);
     }
 
     /// <summary>
-    /// 桌边提示按当前场地的桌号布局分栏。六座场地为 4-6 左、1-3 右；
-    /// 四座和八座场地继续使用既有的 5-8 左、1-4 右规则。
-    /// “请对话/正在获取需求/等待下一轮”和已确认订单使用同一规则，只认桌号牌，
-    /// 人物位置不参与桌边卡片定位。
+    /// 每张桌边卡片只跟随自己的桌号牌，不再推断四座、六座或八座布局。
+    /// 卡片左上角锚定在对应桌号牌的右下角；人物位置和其他卡片均不参与定位。
     /// </summary>
-    private void DrawLocalSeatColumns(
-        List<KeyValuePair<int, CustomerRecommendation>> cards,
-        List<Rect> occupied)
+    private void DrawDeskAnchoredCards(List<KeyValuePair<int, CustomerRecommendation>> cards)
     {
         var deskPoints = GetDeskScreenPoints();
         var anchored = cards
@@ -215,47 +210,17 @@ public class OverlayRenderer
 
         if (anchored.Count == 0) return;
 
-        bool isSixSeatLayout = deskPoints.Count == 6
-            && Enumerable.Range(0, 6).All(deskPoints.ContainsKey);
-        var positioned = anchored
-            .Select(x =>
-            {
-                bool placeRight = IsRightDeskGroup(x.Card.Value.DeskCode, isSixSeatLayout);
-                return (x.Card, x.Point, PlaceRight: placeRight);
-            })
-            .ToList();
-
-        const float seatGap = 34f;
-        float leftColumnX = positioned.Any(x => !x.PlaceRight)
-            ? positioned.Where(x => !x.PlaceRight).Average(x => x.Point.x)
-                - COMPACT_CARD_WIDTH - seatGap
-            : SCREEN_MARGIN;
-        float rightColumnX = positioned.Any(x => x.PlaceRight)
-            ? positioned.Where(x => x.PlaceRight).Average(x => x.Point.x) + seatGap
-            : Screen.width - SCREEN_MARGIN - COMPACT_CARD_WIDTH;
-
-        foreach (var entry in positioned.OrderBy(x => x.Point.y).ThenBy(x => x.Card.Value.DeskCode))
+        foreach (var entry in anchored.OrderBy(x => x.Point.y).ThenBy(x => x.Card.Value.DeskCode))
         {
             float height = CalcCardHeight(entry.Card.Value);
-            float x = entry.PlaceRight ? rightColumnX : leftColumnX;
-            float y = entry.Point.y - height * 0.5f;
             var rect = new Rect(
-                ClampCardX(x, COMPACT_CARD_WIDTH),
-                ClampCardY(y, height),
+                ClampCardX(entry.Point.x, COMPACT_CARD_WIDTH),
+                ClampCardY(entry.Point.y, height),
                 COMPACT_CARD_WIDTH,
                 height);
 
-            occupied.Add(rect);
             DrawCard(rect.x, rect.y, entry.Card.Value, height, entry.Card.Key);
         }
-
-    }
-
-    private static bool IsRightDeskGroup(int deskCode, bool isSixSeatLayout)
-    {
-        if (deskCode < 0) return false;
-        // DeskCode 为零基。六座只有右侧 1-3；其他布局保持原来的右侧 1-4。
-        return deskCode < (isSixSeatLayout ? 3 : 4);
     }
 
     private static Dictionary<int, Vector2> GetDeskScreenPoints()
@@ -268,7 +233,6 @@ public class OverlayRenderer
         var result = new Dictionary<int, Vector2>();
         try
         {
-            if (Camera.main == null) return result;
             var displayers = UnityEngine.Object.FindObjectsOfType<
                 NightScene.GuestManagementUtility.GuestTableDisplayer>();
             if (displayers == null) return result;
@@ -279,9 +243,10 @@ public class OverlayRenderer
                 int deskNumber = ReadDisplayedDeskNumber(displayer);
                 if (deskNumber < 1 || deskNumber > 8) continue;
 
-                Vector3 screen = Camera.main.WorldToScreenPoint(displayer.transform.position);
-                if (screen.z <= 0f) continue;
-                result[deskNumber - 1] = new Vector2(screen.x, Screen.height - screen.y);
+                var deskLabel = displayer.GetType().GetProperty("deskCode")?.GetValue(displayer);
+                var deskTransform = (deskLabel as Component)?.transform ?? displayer.transform;
+                if (TryGetUiScreenBottomRight(deskTransform, out var point))
+                    result[deskNumber - 1] = point;
             }
         }
         catch (System.Exception e)
@@ -307,39 +272,6 @@ public class OverlayRenderer
         {
             return -1;
         }
-    }
-
-    private static bool TryGetGuestScreenPoint(CustomerRecommendation card, out Vector2 point)
-    {
-        point = default;
-        try
-        {
-            if (!card.HasCustomerWorldPosition || Camera.main == null) return false;
-            Vector3 screen = Camera.main.WorldToScreenPoint(card.CustomerWorldPosition);
-            if (screen.z <= 0f) return false;
-            point = new Vector2(screen.x, Screen.height - screen.y);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static Rect ResolveLocalCollision(Rect rect, List<Rect> occupied)
-    {
-        for (int attempt = 0; attempt < occupied.Count + 2; attempt++)
-        {
-            var overlap = occupied.FirstOrDefault(other => other.Overlaps(rect));
-            if (overlap.width <= 0f) break;
-
-            float below = overlap.yMax + 6f;
-            if (below + rect.height <= Screen.height - SCREEN_MARGIN)
-                rect.y = below;
-            else
-                rect.y = Mathf.Max(SCREEN_MARGIN, overlap.yMin - rect.height - 6f);
-        }
-        return rect;
     }
 
     private static float ClampCardX(float x, float cardWidth)
@@ -616,6 +548,8 @@ public class OverlayRenderer
         string fallback = rec.FallbackBelowFour && !string.IsNullOrWhiteSpace(rec.FallbackReason)
             ? $"（{rec.FallbackReason}）"
             : "";
+        if (rec.ScoreCappedAtThree)
+            return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star} ＋ {rec.BeverageName}　3　￥{rec.TotalPrice}";
         return $"方案 {planName}{nightingale}{fallback}　{rec.RecipeName}{star}（{recipeScore}）＋ {rec.BeverageName}（{beverageScore}）　{recipeScore + beverageScore}　￥{rec.TotalPrice}";
     }
 
@@ -800,6 +734,33 @@ public class OverlayRenderer
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
             uiCamera = canvas.worldCamera;
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCamera, worldCenter);
+        position = new Vector2(screen.x, Screen.height - screen.y);
+        return true;
+    }
+
+    private static bool TryGetUiScreenBottomRight(Transform transform, out Vector2 position)
+    {
+        position = default;
+        if (transform == null) return false;
+
+        Vector3 worldPoint = transform.position;
+        if (transform is RectTransform rectTransform)
+        {
+            var corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+            worldPoint = corners[3]; // bottom-right
+        }
+
+        Camera uiCamera = null;
+        var canvas = transform.GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            uiCamera = canvas.worldCamera ?? Camera.main;
+        else if (canvas == null)
+            uiCamera = Camera.main;
+
+        if (canvas == null && uiCamera == null) return false;
+
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCamera, worldPoint);
         position = new Vector2(screen.x, Screen.height - screen.y);
         return true;
     }
