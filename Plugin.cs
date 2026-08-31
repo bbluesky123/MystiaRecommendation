@@ -129,10 +129,15 @@ public class Plugin : BasePlugin
         string status = "";
         if (cannotCookFixedRecipe)
             status = "缺失料理，无法完成任务";
+        else if (recommendations.Any(recommendation => recommendation.ScoreCappedAtThree))
+            status = "缺少夜雀厨具，无法满足订单Tag；以下方案均按3分计算";
         else if (!hasCustomer)
             status = recommendations.Count == 0 ? "稀客数据未收录，无可用订单方案" : "稀客数据未收录，仅按订单匹配";
         else if (recommendations.Count == 0 && fixedRecipeId >= 0)
             status = "任务固定料理暂无可达到4分的方案";
+        else if (recommendations.Count == 0
+            && Matcher.LastFailureReason == RecommendationFailureReason.MissingNightingaleCooker)
+            status = "缺少夜雀厨具，无法满足当前订单";
         else if (recommendations.Count == 0)
             status = "预算不足，无可用方案";
 
@@ -515,9 +520,24 @@ public class Plugin : BasePlugin
             if (string.IsNullOrEmpty(card.ReqFoodTag) || string.IsNullOrEmpty(card.ReqBevTag))
                 continue;
 
+            int refreshedBudget = card.OrderBudget;
+            bool refreshedFromRuntime = Patches.CustomerPatch.TryGetCurrentRemainingBudget(
+                card.DeskCode, card.CustomerName, out int runtimeBudget);
+            if (refreshedFromRuntime)
+            {
+                refreshedBudget = runtimeBudget;
+                Instance?.Log?.LogInfo(
+                    $"[MystiaRec] F5刷新已重新读取游戏预算: {card.CustomerName} 座位{card.DeskCode + 1}");
+            }
+            else
+            {
+                Instance?.Log?.LogWarning(
+                    $"[MystiaRec] F5刷新无法读取游戏预算，沿用内部快照: {card.CustomerName} 座位{card.DeskCode + 1}");
+            }
+
             Instance?.Log?.LogInfo($"[MystiaRec] 刷新推荐: {card.CustomerName} 座位{card.DeskCode}");
             OnCustomerArrived(card.CustomerName, card.ReqFoodTag ?? "", card.ReqBevTag ?? "",
-                card.DeskCode, card.OrderBudget, card.FixedRecipeId,
+                card.DeskCode, refreshedBudget, card.FixedRecipeId,
                 card.HasCustomerWorldPosition ? card.CustomerWorldPosition : null,
                 card.OrderKey);
         }

@@ -9,6 +9,8 @@ public class RecipeMatcher
 {
     private readonly CustomerDataEngine _dataEngine;
 
+    public RecommendationFailureReason LastFailureReason { get; private set; }
+
     public RecipeMatcher(CustomerDataEngine dataEngine)
     {
         _dataEngine = dataEngine;
@@ -66,9 +68,11 @@ public class RecipeMatcher
             .SelectMany(name => RecipeDatabase.GetIngredientTagIndex()[name])
             .ToList();
 
-        int requiredScore = source.FallbackBelowFour || source.MissingRequiredFoodTag
-            ? int.MinValue
-            : 4;
+        int requiredScore = source.ScoreCappedAtThree
+            ? 3
+            : source.FallbackBelowFour || source.MissingRequiredFoodTag
+                ? int.MinValue
+                : 4;
         var candidates = availableBeverages
             .Distinct()
             .Select(RecipeDatabase.GetBeverage)
@@ -83,19 +87,26 @@ public class RecipeMatcher
                 var tags = MergeTags(recipe, beverage, extraTags,
                     source.ExtraIngredients?.Count ?? 0, popularTrend);
                 ResolveTagOverrides(tags);
+                bool missingFoodTag = !HasRequiredFoodTag(tags, reqFoodTag);
+                bool missingBeverageTag = !string.IsNullOrEmpty(reqBevTag)
+                    && beverage.Tags?.Contains(reqBevTag) != true;
+                bool scoreCappedAtThree = source.ScoreCappedAtThree
+                    && (missingFoodTag || missingBeverageTag);
+                int score = ScoreTags(tags, positiveTags, negativeTags);
                 return new MatchCandidate
                 {
                     Recipe = recipe,
                     Beverage = beverage,
                     Tags = tags,
                     ExtraIngredients = new List<string>(source.ExtraIngredients ?? new List<string>()),
-                    Score = ScoreTags(tags, positiveTags, negativeTags),
+                    Score = scoreCappedAtThree ? System.Math.Min(3, score) : score,
                     NeedNightingale = source.NeedNightingale,
-                    MissingRequiredFoodTag = source.MissingRequiredFoodTag,
-                    FallbackBelowFour = source.FallbackBelowFour
+                    MissingRequiredFoodTag = missingFoodTag,
+                    FallbackBelowFour = source.FallbackBelowFour,
+                    ScoreCappedAtThree = scoreCappedAtThree
                 };
             })
-            .Where(candidate => candidate.Score >= requiredScore)
+            .Where(candidate => candidate.Score >= (candidate.ScoreCappedAtThree ? 3 : requiredScore))
             .ToList();
 
         if (candidates.Count == 0) return null;
@@ -121,6 +132,7 @@ public class RecipeMatcher
         PopularTrendState popularTrend,
         int fixedRecipeId = -1)
     {
+        LastFailureReason = RecommendationFailureReason.None;
         var customer = _dataEngine.GetCustomer(customerName);
         if (customer == null) return new();
 
@@ -190,6 +202,7 @@ public class RecipeMatcher
         List<MatchCandidate> candidates;
         bool needNightingale;
         string branchReqFoodTag;
+        bool loggedMissingIngredients = false;
 
         // 优先级: A(正常匹配) = C(食材扩展) > B(夜雀兜底)
         if (hasMatchingRecipe && hasMatchingBeverage)
@@ -245,13 +258,31 @@ public class RecipeMatcher
         }
         else
         {
-            // 无可用方案：既没有A/C条件，也没有夜雀厨具
+            // 普通匹配无法满足订单 Tag 且没有夜雀厨具时，游戏会把实际评价封顶为3分。
+            // 只保留能达到实际最高档的候选，再按价格极值选择，不比较理论4/5/6分。
+            var cappedSources = BuildCandidates(
+                unlockedRecipes, unlockedBeverages, maxBudget,
+                positiveTags, negativeTags, popularTrend,
+                r => normalCookerFilter(r) && stockFilter(r)
+                    && (!hasMatchingRecipe || r.PositiveTags.Contains(reqFoodTag)),
+                b => !hasMatchingBeverage || beverageFilter(b));
+            var cappedCandidates = CollectThreeStarCappedCandidates(
+                cappedSources, positiveTags, negativeTags, availableIngredients,
+                ingredientStocks, reqFoodTag, reqBevTag, ref loggedMissingIngredients);
+            if (cappedCandidates.Count > 0)
+            {
+                Plugin.Instance?.Log.LogInfo(
+                    $"[MystiaRec] 无夜雀Tag封顶兜底: {cappedCandidates.Count}个实际3分候选");
+                return PickPriceExtremes(cappedCandidates);
+            }
+
+            // 无可用方案：既没有A/C条件，也没有达到3分的封顶候选。
+            LastFailureReason = RecommendationFailureReason.MissingNightingaleCooker;
             Plugin.Instance?.Log.LogInfo($"[MystiaRec] 无可用方案: 料理匹配={hasMatchingRecipe}, 酒水匹配={hasMatchingBeverage}, 食材扩展={canExpandFoodTag}, 夜雀={hasNightingaleCooker}");
             return new();
         }
 
         // Step 2: 按分数阈值降级尝试（4 → 3 → 2 → 1）
-        bool loggedMissingIngredients = false;
         int bestPossibleScore = candidates.Count > 0 ? candidates.Max(c => c.Score) : 0;
         Plugin.Instance?.Log.LogInfo($"[MystiaRec] 候选总数={candidates.Count}, 最高基础分={bestPossibleScore}, 分支={(needNightingale ? "B(需夜雀)" : "A")}");
 
@@ -300,6 +331,10 @@ public class RecipeMatcher
             .ToList();
 
         var fallbackResult = PickPriceExtremes(fallback);
+        if (fallbackResult.Count == 0)
+            LastFailureReason = candidates.Count == 0
+                ? RecommendationFailureReason.BudgetTooLow
+                : RecommendationFailureReason.NoValidCombination;
         foreach (var rec in fallbackResult)
         {
             rec.NeedNightingale = needNightingale;
@@ -420,7 +455,30 @@ public class RecipeMatcher
         else if (!matchingNightingaleAvailable)
             Plugin.Instance?.Log.LogWarning($"[MystiaRec] 方案D无4分方案，且未配置 夜雀{recipe.Cooker}，改取当前最高分");
 
-        // D4：达不到4分时不再按价格拆成两套，只返回当前分数最高的一套。
+        // D4a：固定料理因订单 Tag 无法满足且没有对应夜雀厨具时，实际评价封顶为3分。
+        // 收集所有净分至少3分的可执行组合，统一按3分处理，并恢复最高/最低消费双方案。
+        if (!matchingNightingaleAvailable
+            && ownsRecipe
+            && missingBaseIngredients.Count == 0
+            && normalCookerAvailable)
+        {
+            var cappedSources = BuildCandidates(
+                fixedRecipeSet, unlockedBeverages, maxBudget,
+                positiveTags, negativeTags, popularTrend,
+                fixedRecipeFilter, fallbackBeverageFilter);
+            var cappedCandidates = CollectThreeStarCappedCandidates(
+                cappedSources, positiveTags, negativeTags, availableIngredients,
+                ingredientStocks, reqFoodTag, reqBevTag, ref loggedMissingIngredients);
+            if (cappedCandidates.Count > 0)
+            {
+                Plugin.Instance?.Log.LogInfo(
+                    $"[MystiaRec] 方案D无夜雀Tag封顶兜底: {cappedCandidates.Count}个实际3分候选");
+                return MarkFixedTaskRecommendations(
+                    PickPriceExtremes(cappedCandidates), recipe, false, availableCookers);
+            }
+        }
+
+        // D4b：不存在实际3分封顶候选时，保留旧的信息兜底，只返回当前最高的一套。
         // 即使固定料理已经占满5个食材，也会比较所有可用酒水并算出唯一最高分。
         var fallbackSources = new List<MatchCandidate>();
 
@@ -658,6 +716,46 @@ public class RecipeMatcher
         return result;
     }
 
+    private List<MatchCandidate> CollectThreeStarCappedCandidates(
+        List<MatchCandidate> sourceCandidates,
+        HashSet<string> positiveTags,
+        HashSet<string> negativeTags,
+        HashSet<string> availableIngredients,
+        Dictionary<string, int> ingredientStocks,
+        string requiredFoodTag,
+        string requiredBeverageTag,
+        ref bool loggedMissingIngredients)
+    {
+        var candidates = CollectCandidatesAtThreshold(
+            sourceCandidates, positiveTags, negativeTags, availableIngredients,
+            ingredientStocks, "", 3, ref loggedMissingIngredients)
+            .Where(candidate => IsMissingRequiredOrderTag(
+                candidate, requiredFoodTag, requiredBeverageTag))
+            .ToList();
+
+        foreach (var candidate in candidates)
+        {
+            candidate.MissingRequiredFoodTag = !HasRequiredFoodTag(
+                candidate.Tags, requiredFoodTag);
+            candidate.FallbackBelowFour = true;
+            candidate.ScoreCappedAtThree = true;
+            candidate.Score = 3;
+        }
+        return candidates;
+    }
+
+    private static bool IsMissingRequiredOrderTag(
+        MatchCandidate candidate,
+        string requiredFoodTag,
+        string requiredBeverageTag)
+    {
+        if (candidate == null) return true;
+        bool missingFoodTag = !HasRequiredFoodTag(candidate.Tags, requiredFoodTag);
+        bool missingBeverageTag = !string.IsNullOrEmpty(requiredBeverageTag)
+            && candidate.Beverage?.Tags?.Contains(requiredBeverageTag) != true;
+        return missingFoodTag || missingBeverageTag;
+    }
+
     public List<Recommendation> CalculateUnknownByRequestTags(
         string reqFoodTag, string reqBevTag, int maxBudget,
         HashSet<string> unlockedRecipes, HashSet<string> unlockedBeverages,
@@ -865,9 +963,13 @@ public class RecipeMatcher
         var recipe = candidate.Recipe;
         var bev = candidate.Beverage;
         int netScore = candidate.Score;
+        int displayedScore = candidate.ScoreCappedAtThree
+            ? System.Math.Min(3, System.Math.Max(0, netScore))
+            : netScore;
 
         string rating;
-        if (candidate.FallbackBelowFour) rating = "无法满足4分";
+        if (candidate.ScoreCappedAtThree) rating = "3分";
+        else if (candidate.FallbackBelowFour) rating = "无法满足4分";
         else if (candidate.MissingRequiredFoodTag) rating = "缺订单Tag";
         else if (netScore >= 6) rating = "完美";
         else if (netScore >= 4) rating = "优秀";
@@ -892,12 +994,13 @@ public class RecipeMatcher
             BeverageTags = bev.Tags ?? new(),
             TotalPrice = recipe.Price + bev.Price,
             TotalExtraIngredientCost = extraIngredientCost,
-            Score = netScore,
+            Score = displayedScore,
             ExpectedRating = rating,
             OverBudget = false,
             NeedNightingale = candidate.NeedNightingale,
             MissingRequiredFoodTag = candidate.MissingRequiredFoodTag,
-            FallbackBelowFour = candidate.FallbackBelowFour
+            FallbackBelowFour = candidate.FallbackBelowFour,
+            ScoreCappedAtThree = candidate.ScoreCappedAtThree
         };
     }
 
@@ -1135,6 +1238,7 @@ public class Recommendation
     public bool NeedNightingale { get; set; }
     public bool MissingRequiredFoodTag { get; set; }
     public bool FallbackBelowFour { get; set; }
+    public bool ScoreCappedAtThree { get; set; }
     public bool IsFixedRecipeTask { get; set; }
     public string PriceStrategy { get; set; } = "";
     public string FallbackReason { get; set; } = "";
@@ -1151,6 +1255,7 @@ internal class MatchCandidate
     public bool NeedNightingale { get; set; }
     public bool MissingRequiredFoodTag { get; set; }
     public bool FallbackBelowFour { get; set; }
+    public bool ScoreCappedAtThree { get; set; }
     public int TotalPrice => Recipe.Price + Beverage.Price;
     public string Identity => Recipe.Name + "\u001f" + Beverage.Name + "\u001f" + string.Join("|", ExtraIngredients);
 
@@ -1166,7 +1271,8 @@ internal class MatchCandidate
             Stage = Stage,
             NeedNightingale = NeedNightingale,
             MissingRequiredFoodTag = MissingRequiredFoodTag,
-            FallbackBelowFour = FallbackBelowFour
+            FallbackBelowFour = FallbackBelowFour,
+            ScoreCappedAtThree = ScoreCappedAtThree
         };
     }
 }
@@ -1184,6 +1290,14 @@ public class RecipeInfo
     public int Dlc { get; set; }
     public int Level { get; set; }
     public int BaseCookTime { get; set; }
+}
+
+public enum RecommendationFailureReason
+{
+    None,
+    MissingNightingaleCooker,
+    BudgetTooLow,
+    NoValidCombination
 }
 
 public class BeverageInfo
