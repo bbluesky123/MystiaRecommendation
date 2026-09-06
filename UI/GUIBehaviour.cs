@@ -70,6 +70,7 @@ public class GUIBehaviour : MonoBehaviour
         {
             CheckSceneChanged();
             Patches.CustomerPatch.PollFulfilledRareOrders();
+            Plugin.ProcessPendingBudgetRefreshes();
             PeriodicHealthCheck();
 
             if (Input.GetKeyDown(Plugin.PluginConfig.ToggleKey.Value))

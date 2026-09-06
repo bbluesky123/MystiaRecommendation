@@ -66,7 +66,7 @@ internal static class RuntimeOrderTracker
     {
         try
         {
-            if (controller == null || recipe == null || result == null) return;
+            if (controller == null || recipe == null || !IsFoodSellable(result)) return;
 
             int foodId = recipe.FoodID;
             var observedExtras = ReadModifierNames(result, out bool extrasReliable);
@@ -180,7 +180,7 @@ internal static class RuntimeOrderTracker
             int darkMatterId = -1;
             try { darkMatterId = RunTimeStorage.DARK_MATTER_ID; } catch { }
 
-            bool failed = finalResult == null
+            bool failed = !IsFoodSellable(finalResult)
                 || finalFoodId < 0
                 || finalFoodId == darkMatterId
                 || finalFoodId != assignment.ExpectedFoodId;
@@ -227,7 +227,7 @@ internal static class RuntimeOrderTracker
                 .Where(a => a.Controller == controller && !a.Completed)
                 .OrderByDescending(a => a.Id)
                 .FirstOrDefault();
-            if (assignment == null || finalResult == null) return;
+            if (assignment == null || !IsFoodSellable(finalResult)) return;
             assignment.Result = finalResult;
             assignment.ResultGuid = ReadRuntimeGuid(finalResult);
             assignment.FinalResultResolved = true;
@@ -253,7 +253,9 @@ internal static class RuntimeOrderTracker
     {
         try
         {
-            if (received == null || trayIndex < 0) return;
+            // IzakayaTray.Receive 同时接收料理和酒水。二者的数值 Id 可以重叠，
+            // 因此必须先按 Sellable 类型截断，不能让酒水进入后面的 foodId 兼容匹配。
+            if (!IsFoodSellable(received) || trayIndex < 0) return;
 
             var completed = _assignments.Values
                 .Where(a => a.Completed)
@@ -273,18 +275,21 @@ internal static class RuntimeOrderTracker
             if (assignment == null)
             {
                 int receivedFoodId = SafeReadFoodId(received);
+                SeatMarkerItemKind receivedItemKind = ReadSeatMarkerItemKind(received);
 
                 // 仅用于厨具首次出锅时游戏重建 Sellable 的兼容路径；已经在托盘或
                 // 储藏区的同名料理不参与，绝不会跨储藏条目按时间分配。
                 assignment = completed
                     .Where(a => !a.InTray && !a.InStorage && a.TrayIndex < 0)
-                    .FirstOrDefault(a => a.ExpectedFoodId == receivedFoodId);
+                    .FirstOrDefault(a => SeatMarkerPolicy.CanBindByNumericId(
+                        receivedItemKind, a.ExpectedFoodId, receivedFoodId));
             }
             if (assignment == null) return;
 
             // Receive/RecieveInternal 的参数可能不是 FixedList 最终保存的同一个 IL2CPP 包装对象。
             // 以游戏托盘对应格子内的实际对象为准，避免后续引用一致性检查失败。
-            assignment.Result = ReadTrayElement(trayIndex) ?? received;
+            var trayElement = ReadTrayElement(trayIndex);
+            assignment.Result = IsFoodSellable(trayElement) ? trayElement : received;
             assignment.ResultGuid = ReadRuntimeGuid(assignment.Result);
             assignment.TrayIndex = trayIndex;
             assignment.Extracted = true;
@@ -305,7 +310,7 @@ internal static class RuntimeOrderTracker
 
     internal static long OnDishReturnStarted(Sellable stored)
     {
-        if (stored == null) return 0;
+        if (!IsFoodSellable(stored)) return 0;
         try
         {
             return _assignments.Values
@@ -319,7 +324,7 @@ internal static class RuntimeOrderTracker
     {
         try
         {
-            if (stored == null || assignmentId <= 0
+            if (!IsFoodSellable(stored) || assignmentId <= 0
                 || !_assignments.TryGetValue(assignmentId, out var assignment))
                 return;
 
@@ -344,7 +349,7 @@ internal static class RuntimeOrderTracker
     internal static void OnStorageExtractStarted(Sellable selected)
     {
         _storageExtractionAssignmentId = 0;
-        if (selected == null) return;
+        if (!IsFoodSellable(selected)) return;
         try
         {
             // 主路径只认玩家点中的具体储藏对象。若游戏把完全相同的料理合成一个
@@ -394,7 +399,7 @@ internal static class RuntimeOrderTracker
         {
             if (!_storagePanelOpen || args == null || args.Length < 2) return;
             Sellable dish = ReadStorageEntryDish(args[0]);
-            if (dish == null) return;
+            if (!IsFoodSellable(dish)) return;
 
             Transform transform = null;
             for (int i = 1; i < args.Length && transform == null; i++)
@@ -452,6 +457,7 @@ internal static class RuntimeOrderTracker
             if (elements == null) return false;
 
             if (assignment.TrayIndex >= 0 && assignment.TrayIndex < elements.Length
+                && IsFoodSellable(elements[assignment.TrayIndex])
                 && IsSameSellable(assignment.Result, elements[assignment.TrayIndex]))
             {
                 trayIndex = assignment.TrayIndex;
@@ -460,7 +466,8 @@ internal static class RuntimeOrderTracker
 
             for (int i = 0; i < elements.Length; i++)
             {
-                if (!IsSameSellable(assignment.Result, elements[i])) continue;
+                if (!IsFoodSellable(elements[i])
+                    || !IsSameSellable(assignment.Result, elements[i])) continue;
                 assignment.TrayIndex = i;
                 trayIndex = i;
                 return true;
@@ -486,7 +493,7 @@ internal static class RuntimeOrderTracker
     {
         try
         {
-            if (card == null || servedFood == null
+            if (card == null || !IsFoodSellable(servedFood)
                 || card.TrackingState != RecommendationTrackingState.AwaitingCook)
                 return false;
 
@@ -721,6 +728,30 @@ internal static class RuntimeOrderTracker
             && string.Equals(leftGuid, rightGuid, StringComparison.Ordinal);
     }
 
+    internal static bool IsFoodSellable(Sellable sellable)
+    {
+        return SeatMarkerPolicy.CanCarrySeatMarker(ReadSeatMarkerItemKind(sellable));
+    }
+
+    private static SeatMarkerItemKind ReadSeatMarkerItemKind(Sellable sellable)
+    {
+        if (sellable == null) return SeatMarkerItemKind.Unknown;
+        try
+        {
+            return sellable.Type switch
+            {
+                Sellable.SellableType.Food => SeatMarkerItemKind.Food,
+                Sellable.SellableType.Beverage => SeatMarkerItemKind.Beverage,
+                _ => SeatMarkerItemKind.Unknown
+            };
+        }
+        catch
+        {
+            // 无法确认类型时宁可不显示数字，也不能把酒水误认成料理。
+            return SeatMarkerItemKind.Unknown;
+        }
+    }
+
     private static string BuildStorageSignature(Sellable sellable)
     {
         if (sellable == null) return "";
@@ -776,7 +807,7 @@ internal static class RuntimeOrderTracker
     {
         try
         {
-            return visual?.Dish != null && visual.Transform != null
+            return visual?.Dish != null && IsFoodSellable(visual.Dish) && visual.Transform != null
                 && visual.Transform.gameObject.activeInHierarchy;
         }
         catch { return false; }

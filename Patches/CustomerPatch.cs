@@ -25,7 +25,7 @@ public static class CustomerPatch
         public string TextFoodTag;
         public string TextBevTag;
         public object LastOrder;
-        public int LastBudget = -1;
+        public OrderBudgetContext LastBudgetContext;
         public int LastFixedRecipeId = -1;
         public int DeskCode = -1;
         public System.IntPtr LastOrderPointer = System.IntPtr.Zero;
@@ -102,7 +102,7 @@ public static class CustomerPatch
         state.TextFoodTag = "";
         state.TextBevTag = "";
         state.LastOrder = null;
-        state.LastBudget = -1;
+        state.LastBudgetContext = null;
         state.LastFixedRecipeId = -1;
         state.LastOrderPointer = System.IntPtr.Zero;
         state.OrderVersion = 0;
@@ -159,7 +159,7 @@ public static class CustomerPatch
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] Detected rare guest: " + __result);
                 int currentDesk = ReadDeskCode(__instance);
                 if (currentDesk >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "请对话获取需求",
+                    Plugin.OnCustomerPending(__result, "", "", currentDesk, "等待稀客确认需求",
                         ReadGuestWorldPosition(__instance));
                 return;
             }
@@ -175,7 +175,7 @@ public static class CustomerPatch
                 int deskIdx = -1;
                 try { deskIdx = __instance.DeskCode; } catch { }
                 if (deskIdx >= 0)
-                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "请对话获取需求",
+                    Plugin.OnCustomerPending(__result, "", "", deskIdx, "等待稀客确认需求",
                         ReadGuestWorldPosition(__instance));
             }
         }
@@ -242,14 +242,14 @@ public static class CustomerPatch
                     state.CompletedOrderVersion = -1;
                     state.LastFoodTag = "";
                     state.LastBevTag = "";
-                    state.LastBudget = -1;
+                    state.LastBudgetContext = null;
                     Plugin.Instance?.Log?.LogInfo($"[MystiaRec] 新订单对象: version={state.OrderVersion} ptr={pointer}");
                 }
                 state.LastOrder = orderData;
             }
-            int remainingBudget = TryReadRemainingBudget(sgc);
-            if (remainingBudget >= 0)
-                state.LastBudget = remainingBudget;
+            var budgetContext = TryReadBudgetContext(sgc, state.LastOrder);
+            if (budgetContext != null)
+                state.LastBudgetContext = budgetContext;
 
             string name = state.Name;
             if (string.IsNullOrEmpty(name))
@@ -323,7 +323,7 @@ public static class CustomerPatch
             if (fixedRecipeId >= 0)
                 Plugin.Instance?.Log.LogInfo("[MystiaRec] 检测到任务固定料理: foodId=" + fixedRecipeId);
 
-            Plugin.OnCustomerArrived(name, reqFoodTag, reqBevTag, deskIdx, state.LastBudget, fixedRecipeId,
+            Plugin.OnCustomerArrived(name, reqFoodTag, reqBevTag, deskIdx, state.LastBudgetContext, fixedRecipeId,
                 ReadGuestWorldPosition(sgc), state.OrderVersion);
         }
         catch (System.Exception e)
@@ -530,9 +530,62 @@ public static class CustomerPatch
     }
 
     /// <summary>
-    /// GuestGroupController.GetFund 是游戏维护的当前实际剩余预算，已经包含符卡、
-    /// 店铺状态、免费订单和预算恢复等运行时效果。只读取明确的余额成员，避免把
-    /// SpecialOrder.Price 等“本单价格”误判为顾客余额。
+    /// 读取当前订单的完整预算状态。GetFund 已经包含店铺、装饰、符卡、退款和
+    /// 预算恢复等数值变化；EnduranceLimit 与免费订单标记必须作为独立规则保存。
+    /// </summary>
+    private static OrderBudgetContext TryReadBudgetContext(
+        SpecialGuestsController guest,
+        object orderData)
+    {
+        int remainingBudget = TryReadRemainingBudget(guest);
+        if (remainingBudget < 0) return null;
+
+        float enduranceLimit = 1f;
+        bool guestCurrentOrderFree = false;
+        bool orderPropertyFree = false;
+        bool orderObjectFree = false;
+        try
+        {
+            if (guest.EnduranceLimit > 0)
+                enduranceLimit = guest.EnduranceLimit;
+        }
+        catch { }
+
+        try
+        {
+            guestCurrentOrderFree = guest.IsThisOrderFree;
+        }
+        catch { }
+
+        try
+        {
+            if (guest.CurrentOrderPropertySource != null
+                && guest.CurrentOrderPropertySource.IsFree)
+                orderPropertyFree = true;
+        }
+        catch { }
+
+        try
+        {
+            if (orderData is GuestsManager.OrderBase order && order.FreeOrder)
+                orderObjectFree = true;
+        }
+        catch { }
+
+        bool isFreeOrder = OrderBudgetContext.ResolveFreeOrder(
+            guestCurrentOrderFree, orderPropertyFree, orderObjectFree);
+
+        return new OrderBudgetContext
+        {
+            RemainingFund = remainingBudget,
+            EnduranceLimit = enduranceLimit,
+            HasRuntimeBudget = true,
+            IsFreeOrder = isFreeOrder
+        };
+    }
+
+    /// <summary>
+    /// 只读取游戏明确维护的当前余额，避免把 SpecialOrder.Price 等本单价格误判为余额。
     /// </summary>
     private static int TryReadRemainingBudget(SpecialGuestsController guest)
     {
@@ -566,15 +619,15 @@ public static class CustomerPatch
     }
 
     /// <summary>
-    /// F5 等主动刷新路径按当前座位重新读取游戏维护的真实剩余预算。
-    /// 只返回是否读取成功，不把具体数值写入 UI 或普通日志。
+    /// F5、酒水平替等主动刷新路径按当前座位重新读取完整预算状态。
+    /// 只返回是否读取成功，不把具体余额写入 UI 或普通日志。
     /// </summary>
-    internal static bool TryGetCurrentRemainingBudget(
+    internal static bool TryGetCurrentBudgetContext(
         int deskCode,
         string customerName,
-        out int remainingBudget)
+        out OrderBudgetContext budgetContext)
     {
-        remainingBudget = -1;
+        budgetContext = null;
         foreach (var pair in _guestStates.ToList())
         {
             var guest = pair.Key;
@@ -588,15 +641,53 @@ public static class CustomerPatch
                 && state.Name != customerName)
                 continue;
 
-            int runtimeBudget = TryReadRemainingBudget(guest);
-            if (runtimeBudget < 0) continue;
+            var runtimeContext = TryReadBudgetContext(guest, state.LastOrder);
+            if (runtimeContext == null) continue;
 
             state.DeskCode = currentDesk >= 0 ? currentDesk : state.DeskCode;
-            state.LastBudget = runtimeBudget;
-            remainingBudget = runtimeBudget;
+            state.LastBudgetContext = runtimeContext;
+            budgetContext = runtimeContext;
             return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// 游戏改变稀客余额后同步插件内部快照。只排队刷新尚未开始制作的当前订单，
+    /// 实际重算在下一帧进行，避免在游戏结算调用栈中递归生成推荐。
+    /// </summary>
+    [HarmonyPatch(typeof(GuestGroupController), "set_GetFund")]
+    [HarmonyPostfix]
+    public static void OnRuntimeFundChanged(GuestGroupController __instance)
+    {
+        SyncRuntimeBudget(__instance);
+    }
+
+    /// <summary>
+    /// 某些装饰或符卡先修改额外预算，再由游戏统一刷新余额；补丁刷新入口可覆盖
+    /// 没有直接经过托管属性 setter 的 IL2CPP 调用路径。
+    /// </summary>
+    [HarmonyPatch(typeof(GuestGroupController), "RefreshCurrentFundAndOrder")]
+    [HarmonyPostfix]
+    public static void OnRuntimeFundAndOrderRefreshed(GuestGroupController __instance)
+    {
+        SyncRuntimeBudget(__instance);
+    }
+
+    private static void SyncRuntimeBudget(GuestGroupController instance)
+    {
+        try
+        {
+            if (instance is not SpecialGuestsController guest) return;
+            if (!_guestStates.TryGetValue(guest, out var state) || state == null) return;
+
+            var runtimeContext = TryReadBudgetContext(guest, state.LastOrder);
+            if (runtimeContext == null) return;
+
+            state.LastBudgetContext = runtimeContext;
+            Plugin.OnRuntimeBudgetChanged(state.DeskCode, state.Name, runtimeContext);
+        }
+        catch { }
     }
 
     private static string TryGetOrderText(SpecialGuestsController sgc, object orderData, string methodName)

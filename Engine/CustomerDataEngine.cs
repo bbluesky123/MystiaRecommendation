@@ -105,7 +105,7 @@ public class CustomerData
 
     /// <summary>
     /// 夜雀小助手 price 区间的上界，表示这位稀客本次到店可消费总额的估计上限。
-    /// enduranceLimit 是另一项顾客属性，不能用于放大预算上界。
+    /// 运行时预算读取失败时，enduranceLimit 作为这位稀客允许的小幅超预算系数。
     /// </summary>
     public int BudgetUpperBound => price.Count >= 2
         ? System.Math.Max(price[0], price[1])
