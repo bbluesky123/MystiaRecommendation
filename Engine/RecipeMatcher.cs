@@ -50,7 +50,7 @@ public class RecipeMatcher
         string customerName,
         string reqFoodTag,
         string reqBevTag,
-        int maxBudget,
+        OrderBudgetContext budgetContext,
         IEnumerable<string> availableBeverages,
         PopularTrendState popularTrend)
     {
@@ -78,7 +78,7 @@ public class RecipeMatcher
             .Select(RecipeDatabase.GetBeverage)
             .Where(beverage => beverage != null)
             .Where(beverage => !string.Equals(beverage.Name, source.BeverageName, System.StringComparison.Ordinal))
-            .Where(beverage => maxBudget <= 0 || recipe.Price + beverage.Price <= maxBudget)
+            .Where(beverage => budgetContext.Allows(recipe.Price + beverage.Price))
             .Where(beverage => source.NeedNightingale
                 || string.IsNullOrEmpty(reqBevTag)
                 || beverage.Tags.Contains(reqBevTag))
@@ -124,7 +124,7 @@ public class RecipeMatcher
     }
 
     public List<Recommendation> CalculateByRequestTags(
-        string customerName, string reqFoodTag, string reqBevTag, int maxBudget,
+        string customerName, string reqFoodTag, string reqBevTag, OrderBudgetContext budgetContext,
         HashSet<string> unlockedRecipes, HashSet<string> unlockedBeverages,
         HashSet<string> availableIngredients,
         HashSet<string> availableCookers,
@@ -158,7 +158,7 @@ public class RecipeMatcher
         if (fixedRecipeId >= 0)
         {
             return CalculateFixedRecipeTask(
-                fixedRecipeId, reqFoodTag, reqBevTag, maxBudget,
+                fixedRecipeId, reqFoodTag, reqBevTag, budgetContext,
                 positiveTags, negativeTags, unlockedRecipes, unlockedBeverages,
                 availableIngredients, availableCookers, ingredientStocks, popularTrend);
         }
@@ -209,7 +209,7 @@ public class RecipeMatcher
         {
             // 分支A：料理和酒水都有匹配Tag → 正常流程 + 食材扩展补充
             candidates = BuildCandidates(
-                unlockedRecipes, unlockedBeverages, maxBudget,
+                unlockedRecipes, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 r => normalCookerFilter(r) && stockFilter(r) && !string.IsNullOrEmpty(reqFoodTag) && r.PositiveTags.Contains(reqFoodTag),
                 beverageFilter);
@@ -222,7 +222,7 @@ public class RecipeMatcher
             if (canExpandFoodTag)
             {
                 var expandedCandidates = BuildIngredientExpandedCandidates(
-                    unlockedRecipes, unlockedBeverages, maxBudget,
+                    unlockedRecipes, unlockedBeverages, budgetContext,
                     positiveTags, negativeTags, availableIngredients,
                     ingredientStocks, popularTrend,
                     normalCookerFilter, beverageFilter,
@@ -235,7 +235,7 @@ public class RecipeMatcher
         {
             // 分支C：酒水匹配、料理不匹配，但有食材可补足reqFoodTag（优先级高于夜雀）
             candidates = BuildIngredientExpandedCandidates(
-                unlockedRecipes, unlockedBeverages, maxBudget,
+                unlockedRecipes, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, availableIngredients,
                 ingredientStocks, popularTrend,
                 normalCookerFilter, beverageFilter,
@@ -248,7 +248,7 @@ public class RecipeMatcher
         {
             // 分支B：A和C都无法满足，夜雀厨具兜底 → 绕过两边Tag限制
             candidates = BuildCandidates(
-                unlockedRecipes, unlockedBeverages, maxBudget,
+                unlockedRecipes, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 r => stockFilter(r) && availableCookers.Contains("夜雀" + r.Cooker),
                 b => true);
@@ -261,7 +261,7 @@ public class RecipeMatcher
             // 普通匹配无法满足订单 Tag 且没有夜雀厨具时，游戏会把实际评价封顶为3分。
             // 只保留能达到实际最高档的候选，再按价格极值选择，不比较理论4/5/6分。
             var cappedSources = BuildCandidates(
-                unlockedRecipes, unlockedBeverages, maxBudget,
+                unlockedRecipes, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 r => normalCookerFilter(r) && stockFilter(r)
                     && (!hasMatchingRecipe || r.PositiveTags.Contains(reqFoodTag)),
@@ -361,7 +361,7 @@ public class RecipeMatcher
         int fixedRecipeId,
         string reqFoodTag,
         string reqBevTag,
-        int maxBudget,
+        OrderBudgetContext budgetContext,
         HashSet<string> positiveTags,
         HashSet<string> negativeTags,
         HashSet<string> unlockedRecipes,
@@ -416,7 +416,7 @@ public class RecipeMatcher
         // D1/D2：料理自身命中，或通过额外食材补足订单标签。
         // 同时遵守配置的最大额外食材数，以及游戏底层总食材数不超过 5 的限制。
         var normalCandidates = BuildCandidates(
-            fixedRecipeSet, unlockedBeverages, maxBudget,
+            fixedRecipeSet, unlockedBeverages, budgetContext,
             positiveTags, negativeTags, popularTrend,
             fixedRecipeFilter, matchingBeverageFilter);
         bool loggedMissingIngredients = false;
@@ -436,7 +436,7 @@ public class RecipeMatcher
         if (matchingNightingaleAvailable && ownsRecipe && missingBaseIngredients.Count == 0)
         {
             nightingaleCandidates = BuildCandidates(
-                fixedRecipeSet, unlockedBeverages, maxBudget,
+                fixedRecipeSet, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 r => r.Name == recipe.Name,
                 matchingBeverageFilter);
@@ -463,7 +463,7 @@ public class RecipeMatcher
             && normalCookerAvailable)
         {
             var cappedSources = BuildCandidates(
-                fixedRecipeSet, unlockedBeverages, maxBudget,
+                fixedRecipeSet, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 fixedRecipeFilter, fallbackBeverageFilter);
             var cappedCandidates = CollectThreeStarCappedCandidates(
@@ -483,7 +483,7 @@ public class RecipeMatcher
         var fallbackSources = new List<MatchCandidate>();
 
         var normalFallbackCandidates = BuildCandidates(
-            fixedRecipeSet, unlockedBeverages, maxBudget,
+            fixedRecipeSet, unlockedBeverages, budgetContext,
             positiveTags, negativeTags, popularTrend,
             r => r.Name == recipe.Name
                 && ownsRecipe
@@ -507,7 +507,7 @@ public class RecipeMatcher
         if (matchingNightingaleAvailable && ownsRecipe && missingBaseIngredients.Count == 0)
         {
             var nightingaleFallbackCandidates = BuildCandidates(
-                fixedRecipeSet, unlockedBeverages, maxBudget,
+                fixedRecipeSet, unlockedBeverages, budgetContext,
                 positiveTags, negativeTags, popularTrend,
                 r => r.Name == recipe.Name,
                 fallbackBeverageFilter);
@@ -529,7 +529,8 @@ public class RecipeMatcher
             // 即使当前缺料理、基础食材、厨具或可用酒水，也至少把任务固定料理的制作方法显示出来。
             fallback = BuildFixedRecipeInformationFallback(
                 recipe, unlockedBeverages, positiveTags, negativeTags,
-                reqFoodTag, missingBaseIngredients, ownsRecipe, cookerAvailable);
+                reqFoodTag, missingBaseIngredients, ownsRecipe, cookerAvailable,
+                budgetContext);
         }
 
         if (fallback == null)
@@ -621,11 +622,16 @@ public class RecipeMatcher
         string requiredFoodTag,
         List<string> missingBaseIngredients,
         bool ownsRecipe,
-        bool cookerAvailable)
+        bool cookerAvailable,
+        OrderBudgetContext budgetContext)
     {
+        if (!budgetContext.Allows(recipe.Price))
+            return null;
+
         var beverage = unlockedBeverages?
             .Select(RecipeDatabase.GetBeverage)
             .Where(b => b != null)
+            .Where(b => budgetContext.Allows(recipe.Price + b.Price))
             .OrderByDescending(b => b.Tags.Count(positiveTags.Contains) - b.Tags.Count(negativeTags.Contains))
             .ThenBy(b => b.Name)
             .FirstOrDefault();
@@ -757,7 +763,7 @@ public class RecipeMatcher
     }
 
     public List<Recommendation> CalculateUnknownByRequestTags(
-        string reqFoodTag, string reqBevTag, int maxBudget,
+        string reqFoodTag, string reqBevTag, OrderBudgetContext budgetContext,
         HashSet<string> unlockedRecipes, HashSet<string> unlockedBeverages,
         HashSet<string> availableIngredients,
         PopularTrendState popularTrend)
@@ -783,7 +789,7 @@ public class RecipeMatcher
         {
             foreach (var bev in beverages)
             {
-                if (recipe.Price + bev.Price > maxBudget) continue;
+                if (!budgetContext.Allows(recipe.Price + bev.Price)) continue;
 
                 var tags = MergeTags(recipe, bev, null, 0, popularTrend);
                 ResolveTagOverrides(tags);
@@ -805,7 +811,7 @@ public class RecipeMatcher
     private List<MatchCandidate> BuildCandidates(
         HashSet<string> unlockedRecipes,
         HashSet<string> unlockedBeverages,
-        int maxBudget,
+        OrderBudgetContext budgetContext,
         HashSet<string> positiveTags,
         HashSet<string> negativeTags,
         PopularTrendState popularTrend,
@@ -836,7 +842,7 @@ public class RecipeMatcher
         {
             foreach (var bev in beverages)
             {
-                if (recipe.Price + bev.Price > maxBudget) continue;
+                if (!budgetContext.Allows(recipe.Price + bev.Price)) continue;
 
                 var tags = MergeTags(recipe, bev, null, 0, popularTrend);
                 ResolveTagOverrides(tags);
@@ -863,7 +869,7 @@ public class RecipeMatcher
     private List<MatchCandidate> BuildIngredientExpandedCandidates(
         HashSet<string> unlockedRecipes,
         HashSet<string> unlockedBeverages,
-        int maxBudget,
+        OrderBudgetContext budgetContext,
         HashSet<string> positiveTags,
         HashSet<string> negativeTags,
         HashSet<string> availableIngredients,
@@ -926,7 +932,7 @@ public class RecipeMatcher
             foreach (var bev in beverages)
             {
                 int totalPrice = recipe.Price + bev.Price;
-                if (totalPrice > maxBudget) continue;
+                if (!budgetContext.Allows(totalPrice)) continue;
 
                 // 合并Tag：料理 + 酒水 + 食材
                 var mergedTags = new HashSet<string>(recipe.PositiveTags);

@@ -402,7 +402,7 @@ public class OverlayRenderer
             GUI.Label(new Rect(x + CARD_PADDING + 44, cy, contentW - 44, LINE_HEIGHT), cr.CustomerName, _titleStyle);
             cy += LINE_HEIGHT + 4;
             string status = string.IsNullOrWhiteSpace(cr.StatusMessage)
-                ? (cr.PendingState == PendingRecommendationState.WaitingNextRound ? "等待下一轮" : "请对话获取需求")
+                ? (cr.PendingState == PendingRecommendationState.WaitingNextRound ? "等待下一轮" : "等待稀客确认需求")
                 : cr.StatusMessage;
             GUI.Label(new Rect(x + CARD_PADDING + 4, cy, contentW - 4, LINE_HEIGHT),
                 status, GetPendingStyle(cr));

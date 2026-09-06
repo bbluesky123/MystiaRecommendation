@@ -27,6 +27,8 @@ public class Plugin : BasePlugin
     private static long _nextOrderSequence = 0;
     // 只有已经由实际料理锁定到左侧的稀客订单才预留酒水；右侧方案不占库存。
     private static readonly Dictionary<int, string> _beverageReservations = new();
+    // 游戏预算回调只排队；推荐在下一帧统一重算，避免进入游戏结算调用栈。
+    private static readonly HashSet<int> _pendingBudgetRefreshDesks = new();
     internal static int GetNextRecommendId() => _nextRecommendId++;
 
     public override void Load()
@@ -66,12 +68,14 @@ public class Plugin : BasePlugin
     /// 稀客到店时调用，支持多个稀客同时到店
     /// </summary>
     internal static void OnCustomerArrived(string customerName, string reqFoodTag, string reqBevTag, int deskCode,
-        int orderBudget = -1, int fixedRecipeId = -1, UnityEngine.Vector3? customerWorldPosition = null,
+        OrderBudgetContext orderBudgetContext = null, int fixedRecipeId = -1,
+        UnityEngine.Vector3? customerWorldPosition = null,
         long orderKey = 0)
     {
         bool hasCustomer = DataEngine.HasCustomer(customerName);
         var customer = hasCustomer ? DataEngine.GetCustomer(customerName) : null;
-        int maxBudget = GetEffectiveRemainingBudget(customerName, deskCode, customer, orderBudget);
+        var effectiveBudget = GetEffectiveBudgetContext(
+            customerName, deskCode, customer, orderBudgetContext);
 
         Instance?.Log.LogInfo($"[MystiaRec] 开始推荐: {customerName} 座位{deskCode} (已应用内部预算上限)");
         Instance?.Log.LogInfo($"[MystiaRec] 请求: 食物={reqFoodTag}, 酒水={reqBevTag}");
@@ -116,11 +120,11 @@ public class Plugin : BasePlugin
         // 计算推荐
         var recommendations = hasCustomer
             ? Matcher.CalculateByRequestTags(
-                customerName, reqFoodTag, reqBevTag, maxBudget,
+                customerName, reqFoodTag, reqBevTag, effectiveBudget,
                 unlockedRecipes, unlockedBeverages, availableIngredients, availableCookers, ingredientStocks, popularTrend,
                 cannotCookFixedRecipe ? -1 : fixedRecipeId)
             : Matcher.CalculateUnknownByRequestTags(
-                reqFoodTag, reqBevTag, maxBudget,
+                reqFoodTag, reqBevTag, effectiveBudget,
                 unlockedRecipes, unlockedBeverages, availableIngredients, popularTrend);
         // 只保留前2个推荐
         if (recommendations.Count > 2)
@@ -142,7 +146,7 @@ public class Plugin : BasePlugin
             status = "预算不足，无可用方案";
 
         UpsertRecommendationCard(customerName, deskCode, reqFoodTag, reqBevTag, recommendations, status,
-            orderBudget, fixedRecipeId, customerWorldPosition, orderKey);
+            effectiveBudget, fixedRecipeId, customerWorldPosition, orderKey);
 
         Instance?.Log.LogInfo($"[MystiaRec] 推荐完成: {customerName} 座位{deskCode} {recommendations.Count} 个方案");
         foreach (var rec in recommendations)
@@ -188,7 +192,7 @@ public class Plugin : BasePlugin
         string reqBevTag,
         List<Recommendation> recommendations,
         string statusMessage,
-        int orderBudget = -1,
+        OrderBudgetContext budgetContext = null,
         int fixedRecipeId = -1,
         UnityEngine.Vector3? customerWorldPosition = null,
         long orderKey = 0,
@@ -200,7 +204,7 @@ public class Plugin : BasePlugin
         if (existing.Value != null)
         {
             var card = existing.Value;
-            EnsureBudgetState(card, customerName, orderBudget);
+            EnsureBudgetState(card, customerName, budgetContext);
             var previousPendingState = card.PendingState;
             bool isNewOrder = orderKey > 0 && card.OrderKey != orderKey;
             if (isNewOrder)
@@ -221,7 +225,8 @@ public class Plugin : BasePlugin
             }
             card.ReqFoodTag = reqFoodTag;
             card.ReqBevTag = reqBevTag;
-            card.OrderBudget = orderBudget;
+            if (budgetContext != null)
+                card.BudgetContext = budgetContext;
             card.FixedRecipeId = fixedRecipeId;
             card.Recommendations = recommendations;
             card.StatusMessage = statusMessage;
@@ -260,7 +265,7 @@ public class Plugin : BasePlugin
             DeskCode = deskCode,
             ReqFoodTag = reqFoodTag,
             ReqBevTag = reqBevTag,
-            OrderBudget = orderBudget,
+            BudgetContext = budgetContext,
             FixedRecipeId = fixedRecipeId,
             Recommendations = recommendations,
             StatusMessage = statusMessage,
@@ -270,7 +275,7 @@ public class Plugin : BasePlugin
             OrderSequence = ++_nextOrderSequence,
             TrackingState = RecommendationTrackingState.AwaitingCook
         };
-        EnsureBudgetState(newCard, customerName, orderBudget);
+        EnsureBudgetState(newCard, customerName, budgetContext);
         ActiveRecommendations[rid] = newCard;
         if (customerWorldPosition.HasValue)
         {
@@ -284,6 +289,7 @@ public class Plugin : BasePlugin
     /// </summary>
     internal static void OnCustomerLeft(int deskCode)
     {
+        _pendingBudgetRefreshDesks.Remove(deskCode);
         var keys = ActiveRecommendations
             .Where(kv => kv.Value.DeskCode == deskCode)
             .Select(kv => kv.Key)
@@ -303,8 +309,8 @@ public class Plugin : BasePlugin
     }
 
     /// <summary>
-    /// 游戏确认本轮料理和酒水都已上齐后，扣除本轮实际账面价并关闭当前卡片。
-    /// 不校验玩家最终交付的内容是否等于推荐方案。
+    /// 游戏确认本轮料理和酒水都已上齐后，更新内部预算回退状态并关闭当前卡片。
+    /// 免费订单不扣预算；正常订单先做保守扣减，之后由游戏运行时余额重新同步。
     /// </summary>
     internal static void OnOrderFulfilled(int deskCode, object servedFood = null, object servedBeverage = null)
     {
@@ -319,11 +325,23 @@ public class Plugin : BasePlugin
             ReleaseBeverageReservation(key);
             var card = ActiveRecommendations[key];
             int acceptedOrderPrice = ResolveAcceptedOrderPrice(card, servedFood, servedBeverage);
-            if (acceptedOrderPrice > 0)
+            bool isFreeOrder = card.BudgetContext?.IsFreeOrder == true;
+            if (isFreeOrder)
             {
-                card.RemainingBudget = System.Math.Max(0, card.RemainingBudget - acceptedOrderPrice);
                 card.LastAcceptedOrderPrice = acceptedOrderPrice;
                 card.AcceptedOrderCount++;
+                card.BudgetNeedsResync = true;
+                Instance?.Log?.LogInfo(
+                    $"[MystiaRec] 本轮为免费订单，内部预算不扣减: {card.CustomerName} 座位{deskCode + 1}");
+            }
+            else if (acceptedOrderPrice > 0)
+            {
+                card.RemainingBudget = card.BudgetContext != null
+                    ? card.BudgetContext.EstimateRemainingAfterOrder(acceptedOrderPrice)
+                    : System.Math.Max(0, card.RemainingBudget - acceptedOrderPrice);
+                card.LastAcceptedOrderPrice = acceptedOrderPrice;
+                card.AcceptedOrderCount++;
+                card.BudgetNeedsResync = card.BudgetContext?.HasRuntimeBudget == true;
                 Instance?.Log?.LogInfo(
                     $"[MystiaRec] 已按本轮订单更新内部预算状态: {card.CustomerName} 座位{deskCode + 1}");
             }
@@ -334,7 +352,6 @@ public class Plugin : BasePlugin
             }
             card.ReqFoodTag = "";
             card.ReqBevTag = "";
-            card.OrderBudget = -1;
             card.FixedRecipeId = -1;
             card.Recommendations = new List<Recommendation>();
             card.StatusMessage = "等待下一轮";
@@ -353,40 +370,70 @@ public class Plugin : BasePlugin
             Instance?.Log?.LogInfo($"[MystiaRec] 本轮料理和酒水均已上齐，进入等待下一轮: 座位{deskCode + 1}");
     }
 
-    private static int GetEffectiveRemainingBudget(
+    private static OrderBudgetContext GetEffectiveBudgetContext(
         string customerName,
         int deskCode,
         CustomerData customer,
-        int orderBudget)
+        OrderBudgetContext runtimeContext)
     {
-        // 游戏运行时余额已经包含符卡、店铺状态、退款和免费订单等动态效果，
-        // 一旦读取成功就应覆盖静态区间与插件自己的递减估算。
-        if (orderBudget >= 0)
-            return orderBudget;
+        // 游戏运行时余额已经包含符卡、装饰、店铺状态、退款和预算恢复；
+        // 免费订单和耐受系数是独立规则，保留在同一订单上下文中。
+        if (runtimeContext?.HasKnownBudget == true)
+            return runtimeContext;
 
         var card = ActiveRecommendations.Values.FirstOrDefault(value =>
             value != null && value.DeskCode == deskCode && value.CustomerName == customerName);
         int fallback = card?.BudgetInitialized == true
             ? card.RemainingBudget
             : (customer?.BudgetUpperBound ?? 999);
-        return System.Math.Max(0, fallback);
+        float enduranceLimit = customer?.enduranceLimit > 0
+            ? (float)customer.enduranceLimit
+            : 1f;
+        return new OrderBudgetContext
+        {
+            RemainingFund = System.Math.Max(0, fallback),
+            EnduranceLimit = enduranceLimit,
+            HasRuntimeBudget = false,
+            IsFreeOrder = runtimeContext?.IsFreeOrder == true
+        };
     }
 
-    private static void EnsureBudgetState(CustomerRecommendation card, string customerName, int orderBudget)
+    private static void EnsureBudgetState(
+        CustomerRecommendation card,
+        string customerName,
+        OrderBudgetContext budgetContext)
     {
         if (card == null) return;
         if (!card.BudgetInitialized)
         {
             var customer = DataEngine?.GetCustomer(customerName);
-            int upperBound = customer?.BudgetUpperBound ?? (orderBudget >= 0 ? orderBudget : 999);
+            int upperBound = customer?.BudgetUpperBound
+                ?? (budgetContext?.HasKnownBudget == true ? budgetContext.RemainingFund : 999);
             card.BudgetUpperBound = System.Math.Max(0, upperBound);
             card.RemainingBudget = card.BudgetUpperBound;
             card.BudgetInitialized = true;
         }
 
         // 每个新订单都以游戏真实余额重新同步；该值只存于内部状态，不参与 UI。
-        if (orderBudget >= 0)
-            card.RemainingBudget = orderBudget;
+        if (budgetContext?.HasKnownBudget == true)
+        {
+            card.RemainingBudget = budgetContext.RemainingFund;
+            card.BudgetNeedsResync = false;
+            card.BudgetContext = budgetContext;
+        }
+        else if (card.BudgetContext == null)
+        {
+            var customer = DataEngine?.GetCustomer(customerName);
+            card.BudgetContext = new OrderBudgetContext
+            {
+                RemainingFund = card.RemainingBudget,
+                EnduranceLimit = customer?.enduranceLimit > 0
+                    ? (float)customer.enduranceLimit
+                    : 1f,
+                HasRuntimeBudget = false,
+                IsFreeOrder = false
+            };
+        }
     }
 
     private static int ResolveAcceptedOrderPrice(
@@ -480,6 +527,8 @@ public class Plugin : BasePlugin
             ActiveRecommendations.Remove(key);
             Instance?.Log.LogInfo($"[MystiaRec] 座位换客，清理旧卡片: {card.CustomerName} -> {currentCustomerName} 座位{deskCode}");
         }
+        if (keys.Count > 0)
+            _pendingBudgetRefreshDesks.Remove(deskCode);
     }
 
     /// <summary>
@@ -490,6 +539,7 @@ public class Plugin : BasePlugin
         ActiveRecommendations.Clear();
         RuntimeOrderTracker.Reset();
         _beverageReservations.Clear();
+        _pendingBudgetRefreshDesks.Clear();
         _nextOrderSequence = 0;
         _cachedUnlockedRecipes = null;
         _cachedAvailableCookers = null;
@@ -499,6 +549,75 @@ public class Plugin : BasePlugin
     private static HashSet<string> _cachedUnlockedRecipes;
     private static HashSet<string> _cachedAvailableCookers;
     private static int _cachedEquippedCookerCount;
+
+    /// <summary>
+    /// 游戏预算字段变化时更新内部状态，并为尚未开做的完整订单排队重算。
+    /// 这里不输出余额，也不直接递归进入推荐计算。
+    /// </summary>
+    internal static void OnRuntimeBudgetChanged(
+        int deskCode,
+        string customerName,
+        OrderBudgetContext runtimeContext)
+    {
+        if (deskCode < 0 || runtimeContext == null) return;
+
+        foreach (var card in ActiveRecommendations.Values.Where(card =>
+            card != null
+            && card.DeskCode == deskCode
+            && (string.IsNullOrEmpty(customerName) || card.CustomerName == customerName)))
+        {
+            var previous = card.BudgetContext;
+            bool recommendationRuleChanged = previous == null
+                || previous.RemainingFund != runtimeContext.RemainingFund
+                || previous.EnduranceLimit != runtimeContext.EnduranceLimit
+                || previous.IsFreeOrder != runtimeContext.IsFreeOrder;
+
+            card.RemainingBudget = runtimeContext.RemainingFund;
+            card.BudgetContext = runtimeContext;
+            card.BudgetNeedsResync = false;
+
+            if (recommendationRuleChanged
+                && card.PendingState == PendingRecommendationState.None
+                && card.TrackingState == RecommendationTrackingState.AwaitingCook
+                && !string.IsNullOrEmpty(card.ReqFoodTag)
+                && !string.IsNullOrEmpty(card.ReqBevTag))
+                _pendingBudgetRefreshDesks.Add(deskCode);
+        }
+    }
+
+    /// <summary>
+    /// 在 Unity Update 中处理预算变化，确保不会在游戏结算或符卡回调栈内重算推荐。
+    /// </summary>
+    internal static void ProcessPendingBudgetRefreshes()
+    {
+        if (_pendingBudgetRefreshDesks.Count == 0) return;
+
+        var desks = _pendingBudgetRefreshDesks.ToList();
+        _pendingBudgetRefreshDesks.Clear();
+        foreach (int deskCode in desks)
+        {
+            var card = ActiveRecommendations.Values.FirstOrDefault(value =>
+                value != null
+                && value.DeskCode == deskCode
+                && value.PendingState == PendingRecommendationState.None
+                && value.TrackingState == RecommendationTrackingState.AwaitingCook
+                && !string.IsNullOrEmpty(value.ReqFoodTag)
+                && !string.IsNullOrEmpty(value.ReqBevTag));
+            if (card == null) continue;
+
+            Instance?.Log?.LogInfo(
+                $"[MystiaRec] 游戏预算规则变化，重新计算当前订单: {card.CustomerName} 座位{deskCode + 1}");
+            OnCustomerArrived(
+                card.CustomerName,
+                card.ReqFoodTag,
+                card.ReqBevTag,
+                card.DeskCode,
+                card.BudgetContext,
+                card.FixedRecipeId,
+                card.HasCustomerWorldPosition ? card.CustomerWorldPosition : null,
+                card.OrderKey);
+        }
+    }
 
     /// <summary>
     /// 手动刷新所有活跃卡片的推荐（快捷键触发）。
@@ -520,9 +639,9 @@ public class Plugin : BasePlugin
             if (string.IsNullOrEmpty(card.ReqFoodTag) || string.IsNullOrEmpty(card.ReqBevTag))
                 continue;
 
-            int refreshedBudget = card.OrderBudget;
-            bool refreshedFromRuntime = Patches.CustomerPatch.TryGetCurrentRemainingBudget(
-                card.DeskCode, card.CustomerName, out int runtimeBudget);
+            var refreshedBudget = card.BudgetContext;
+            bool refreshedFromRuntime = Patches.CustomerPatch.TryGetCurrentBudgetContext(
+                card.DeskCode, card.CustomerName, out var runtimeBudget);
             if (refreshedFromRuntime)
             {
                 refreshedBudget = runtimeBudget;
@@ -566,12 +685,32 @@ public class Plugin : BasePlugin
 
         ReleaseBeverageReservation(cardId);
         var allocatable = GetAllocatableBeverageStocks();
+        if (Patches.CustomerPatch.TryGetCurrentBudgetContext(
+            card.DeskCode, card.CustomerName, out var runtimeBudget))
+        {
+            card.BudgetContext = runtimeBudget;
+            card.RemainingBudget = runtimeBudget.RemainingFund;
+            card.BudgetNeedsResync = false;
+        }
+        var customer = DataEngine.GetCustomer(card.CustomerName);
+        var effectiveBudget = GetEffectiveBudgetContext(
+            card.CustomerName, card.DeskCode, customer, card.BudgetContext);
+        bool budgetRuleInvalidated = false;
 
         // A/B 料理完全相同时，优先沿用显示顺序中仍有库存的原酒水。
         foreach (int index in indexes)
         {
-            string beverage = card.Recommendations[index]?.BeverageName;
+            var recommendation = card.Recommendations[index];
+            string beverage = recommendation?.BeverageName;
+            if (recommendation != null
+                && !string.IsNullOrEmpty(beverage)
+                && allocatable.TryGetValue(beverage, out int currentCount)
+                && currentCount > 0
+                && !effectiveBudget.Allows(recommendation.TotalPrice))
+                budgetRuleInvalidated = true;
             if (string.IsNullOrEmpty(beverage)
+                || recommendation == null
+                || !effectiveBudget.Allows(recommendation.TotalPrice)
                 || !allocatable.TryGetValue(beverage, out int count)
                 || count <= 0)
                 continue;
@@ -588,9 +727,6 @@ public class Plugin : BasePlugin
             .Where(pair => pair.Value > 0)
             .Select(pair => pair.Key)
             .ToHashSet();
-        var customer = DataEngine.GetCustomer(card.CustomerName);
-        int maxBudget = GetEffectiveRemainingBudget(
-            card.CustomerName, card.DeskCode, customer, card.OrderBudget);
         var popularTrend = GetPopularTrend();
 
         foreach (int index in indexes)
@@ -598,7 +734,7 @@ public class Plugin : BasePlugin
             var source = card.Recommendations[index];
             var replacement = Matcher.FindBeverageReplacement(
                 source, card.CustomerName, card.ReqFoodTag, card.ReqBevTag,
-                maxBudget, availableNames, popularTrend);
+                effectiveBudget, availableNames, popularTrend);
             if (replacement == null) continue;
 
             card.Recommendations[index] = replacement;
@@ -617,7 +753,9 @@ public class Plugin : BasePlugin
         card.ActiveAssignmentId = 0;
         card.DragX = null;
         card.DragY = null;
-        card.StatusMessage = "方案酒水库存不足，请按 F5 刷新方案";
+        card.StatusMessage = budgetRuleInvalidated
+            ? "当前订单条件已变化，请按 F5 刷新方案"
+            : "方案酒水库存不足，请按 F5 刷新方案";
         card.BeverageRefreshRequired = true;
         Instance?.Log?.LogInfo(
             $"[MystiaRec] 酒水无法平替，保留右侧等待 F5: 座位{card.DeskCode + 1} {card.CustomerName}");
@@ -1494,12 +1632,13 @@ public class CustomerRecommendation
     public int DeskCode { get; set; }
     public string ReqFoodTag { get; set; }
     public string ReqBevTag { get; set; }
-    public int OrderBudget { get; set; } = -1;
+    internal OrderBudgetContext BudgetContext { get; set; }
     /// <summary>夜雀小助手 price 区间上界；在本次入座期间保持不变。</summary>
     public int BudgetUpperBound { get; set; } = 999;
     /// <summary>每轮订单被接受后按料理与酒水账面价递减。</summary>
     public int RemainingBudget { get; set; } = 999;
     public bool BudgetInitialized { get; set; }
+    public bool BudgetNeedsResync { get; set; }
     public int LastAcceptedOrderPrice { get; set; }
     public int AcceptedOrderCount { get; set; }
     public int FixedRecipeId { get; set; } = -1;
